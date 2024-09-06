@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/settings"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
+
+        <EditTextPreference
+            android:dialogTitle="输入你的weiXinID"
+            android:icon="@drawable/ic_url_24dp"
+            android:key="@string/course_weixin_id"
+            android:summary="华交教务weiXinID"
+            android:title="weiXinID"/>
+
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="常见问题"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
+        <Preference
+            android:icon="@drawable/ic_tutorial_24dp"
+            android:key="@string/tutorial_key"
+            android:summary="@string/tutorial_message"
+            android:title="@string/tutorial_title" />
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="关于"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
+
+        <Preference
+            android:icon="@drawable/ic_author_24dp"
+            android:key="@string/author_key"
+            android:summary="可燃乌龙茶"
+            android:title="开发者" />
+
+        <Preference
+            android:icon="@drawable/ic_code_24dp"
+            android:key="@string/source_code_key"
+            android:summary="在Github上查看项目源代码"
+            android:title="源代码" />
+
+        </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

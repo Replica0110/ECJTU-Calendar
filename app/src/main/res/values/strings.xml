@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">花椒日历</string>
+    <string name="title_settings">设置</string>
+    <string name="title_calendar">日历</string>
+    <string name="settings">设置</string>
+    <string name="course_weixin_id">weiXinID</string>
+    <string name="author_key">开发者</string>
+    <string name="source_code_key">源代码</string>
+    <string name="licenses_key">许可证</string>
+    <string name="snackbar_intent_failed">操作失败</string>
+    <string name="tutorial_title">使用教程</string>
+    <string name="tutorial_message">(1)关注华交教务微信公众号\n(2)登录绑定个人信息\n(3)点击更多功能->我的日历\n(4)打开公众号发送的链接\n(5)点击右上角三点后选择在浏览器打开\n(6)复制链接中的weiXinID参数，填写到设置中</string>
+    <string name="notification_key">上课通知</string>
+    <string name="tutorial_key">如何获取weiXinID</string>
+
+</resources>

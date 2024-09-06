@@ -3,6 +3,7 @@ package com.lonx.ecjtu.calendar
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -46,14 +47,13 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         try {
             val weiXinID = sharedPreferences.getString("weiXinID", "")
-            if (!weiXinID.isNullOrEmpty()) {
-                val courseViewModel=CourseViewModel(application)
+            // 仅在首次创建 Activity 时自动更新课程信息
+            if (savedInstanceState == null && !weiXinID.isNullOrEmpty()) {
+                val courseViewModel = ViewModelProvider(this)[CourseViewModel::class.java]
                 courseViewModel.updateCourseInfo(weiXinID)
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error initializing CourseViewModel: ${e.message}")
         }
-
-
     }
 }

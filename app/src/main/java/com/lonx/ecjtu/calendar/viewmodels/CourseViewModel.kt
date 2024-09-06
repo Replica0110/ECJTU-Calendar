@@ -17,6 +17,7 @@ class CourseViewModel(application: Application) : AndroidViewModel(application) 
         get() {
             val sharedPreferences = getApplication<Application>().getSharedPreferences("CourseData", Context.MODE_PRIVATE)
             val courseData = sharedPreferences.getString("courseInfo", "")
+            Log.d("SettingsViewModel", "Course data: $courseData")
             return if (courseData.isNullOrBlank()) {
                 emptyList()
             } else {
@@ -35,6 +36,7 @@ class CourseViewModel(application: Application) : AndroidViewModel(application) 
                 // 获取当天的课程信息
                 val api = ECJTUCalendarAPI()
                 val html=api.getCourseInfo(weixinID)
+                Log.d("SettingsViewModel", "HTML: $html")
                 if (html != null) {
                     Toast.makeText(getApplication(), "正在获取课表，请稍后...", Toast.LENGTH_SHORT).show()
                     if (html.isNotBlank()){

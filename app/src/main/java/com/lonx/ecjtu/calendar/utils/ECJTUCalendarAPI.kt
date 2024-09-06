@@ -35,12 +35,21 @@ class ECJTUCalendarAPI {
         val doc: Document = Jsoup.parse(html)
         val courseElements = doc.select("ul.rl_info li")
         val courseList = mutableListOf<CourseInfo>()
+        val gson = GsonBuilder().setPrettyPrinting().create()
         // TODO 支持显示时间
         val dateElement = doc.select("div.center").text()
         dateElement ?: "N/A"
 
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
-            return "N/A"
+            val courseInfo=CourseInfo(
+                courseName = "今日无课",
+                classTime = "N/A",
+                classWeek = "N/A",
+                location = "N/A",
+                teacher = "N/A"
+            )
+            courseList.add(courseInfo)
+            return gson.toJson(courseList.distinct())
         }
 
         for (element in courseElements) {
@@ -71,7 +80,7 @@ class ECJTUCalendarAPI {
             return "N/A"
         }
 
-        val gson = GsonBuilder().setPrettyPrinting().create()
+
         return gson.toJson(courseList.distinct())
     }
     class SSLSocketFactoryCompat : SSLSocketFactory() {

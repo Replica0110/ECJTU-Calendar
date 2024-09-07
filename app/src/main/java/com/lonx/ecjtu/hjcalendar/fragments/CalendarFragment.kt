@@ -1,10 +1,11 @@
 package com.lonx.ecjtu.hjcalendar.fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -18,7 +19,6 @@ import com.lonx.ecjtu.hjcalendar.viewModels.CalendarViewModel
 
 class CalendarFragment : Fragment() {
     private var _binding: FragmentCalendarBinding? = null
-    private val binding get() = _binding!!
     private lateinit var calendarViewModel: CalendarViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,8 +42,6 @@ class CalendarFragment : Fragment() {
             // 从 SharedPreferences 获取 URL 和 weiXinID
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
             val weiXinID = sharedPreferences.getString("weiXinID", "")
-            Toast.makeText(requireContext(), "测试", Toast.LENGTH_SHORT).show()
-            // 仅在没有数据时调用 fetchCourseInfo
             calendarViewModel.fetchCourseInfo(weiXinID ?: "")
         }
 

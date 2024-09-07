@@ -34,10 +34,10 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                             _courseList.postValue(courses)
                             Toast.makeText(getApplication(), "课程获取成功", Toast.LENGTH_SHORT).show()
                         }
-                        }else {
+                    } else {
                             Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
-                        }
                     }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()

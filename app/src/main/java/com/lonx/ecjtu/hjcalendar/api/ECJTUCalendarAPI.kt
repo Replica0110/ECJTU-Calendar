@@ -21,7 +21,7 @@ class ECJTUCalendarAPI {
 
     suspend fun getCourseInfo(weiXinID: String, date: String=getCurrentDate()): String? = withContext(Dispatchers.IO) {
         try {
-            val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=2023-09-07"
+            val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=$date"
             Log.e("getCourseInfo", "URL: $url")
             val doc: Document = Jsoup.connect(url)
                 .sslSocketFactory(SSLSocketFactoryCompat())

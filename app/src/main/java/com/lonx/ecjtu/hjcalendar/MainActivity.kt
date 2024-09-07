@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.hjcalendar
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -11,7 +12,7 @@ class MainActivity : AppCompatActivity() {
 
     private var calendarFragment: CalendarFragment? = null
     private var settingsFragment: SettingsFragment? = null
-
+    private var isDataChanged: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,6 +26,13 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_calendar -> {
+                    // 根据全局变量 isDataChanged 决定如何切换 Fragment
+                    if (isDataChanged) {
+                        // 销毁并重新创建 CalendarFragment
+                        Log.e("MainActivity", "Data changed, recreating CalendarFragment")
+                        calendarFragment = CalendarFragment()
+                        isDataChanged = false // 重置标志位
+                    }
                     switchFragment(calendarFragment!!)
                     true
                 }
@@ -62,5 +70,9 @@ class MainActivity : AppCompatActivity() {
 
         transaction.commit()
         return true
+    }
+    // 提供一个方法供 SettingsFragment 调用，标记数据已更改
+    fun setDataChanged() {
+        isDataChanged = true
     }
 }

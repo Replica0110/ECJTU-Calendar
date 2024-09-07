@@ -32,8 +32,14 @@ class MainActivity : AppCompatActivity() {
                 super.onPageSelected(position)
                 // 根据当前页面同步更新底部导航栏的选中项
                 when (position) {
-                    0 -> bottomNav.selectedItemId = R.id.nav_calendar
-                    1 -> bottomNav.selectedItemId = R.id.nav_settings
+                    0 -> {
+                        bottomNav.selectedItemId = R.id.nav_calendar
+                        updateActionBarTitle("日历")
+                    }
+                    1 -> {
+                        bottomNav.selectedItemId = R.id.nav_settings
+                        updateActionBarTitle("设置")
+                    }
                 }
             }
         })
@@ -43,10 +49,12 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_calendar -> {
                     viewPager.currentItem = 0 // 显示日历页面
+                    updateActionBarTitle("日历")
                     true
                 }
                 R.id.nav_settings -> {
                     viewPager.currentItem = 1 // 显示设置页面
+                    updateActionBarTitle("设置")
                     true
                 }
                 else -> false
@@ -54,6 +62,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateActionBarTitle(title: String) {
+        supportActionBar?.title = title
+    }
 
     class ViewPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
         private val fragments = listOf(
@@ -67,6 +78,4 @@ class MainActivity : AppCompatActivity() {
             return fragments[position]
         }
     }
-
 }
-

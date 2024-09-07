@@ -8,7 +8,7 @@
         app:allowDividerAbove="true"
         app:allowDividerBelow="true">
 
-        <EditTextPreference
+        <Preference
             android:icon="@drawable/ic_id_24dp"
             android:key="@string/weixin_id_key"
             android:title="@string/weixin_id_title"

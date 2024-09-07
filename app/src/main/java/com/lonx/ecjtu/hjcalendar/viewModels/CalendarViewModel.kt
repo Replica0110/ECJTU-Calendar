@@ -18,31 +18,34 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
 
     private val api = ECJTUCalendarAPI()
 
-    fun fetchCourseInfo(weiXinID: String) {
+    // 添加回调参数
+    fun fetchCourseInfo(weiXinID: String, callback: (() -> Unit)? = null) {
         viewModelScope.launch {
             try {
                 val html = api.getCourseInfo(weiXinID)
-                if (html!= null){
-                    Toast.makeText(getApplication(), "正在获取课程信息，请稍后...", Toast.LENGTH_SHORT).show()
-                    if (html.isNotBlank()){
-                        if (html.contains("<title>教务处微信平台绑定</title>")){
+                if (html != null) {
+                    if (html.isNotBlank()) {
+                        if (html.contains("<title>教务处微信平台绑定</title>")) {
                             Toast.makeText(getApplication(), "课程获取失败，请检查weiXinID是否正确", Toast.LENGTH_SHORT).show()
+                            callback?.invoke()
                             return@launch
-                        }else{
+                        } else {
+                            Toast.makeText(getApplication(), "课程获取成功", Toast.LENGTH_SHORT).show()
                             val parsedData = api.parseHtml(html)
                             val courses = Gson().fromJson(parsedData, Array<CourseInfo>::class.java).toList()
                             _courseList.postValue(courses)
-                            Toast.makeText(getApplication(), "课程获取成功", Toast.LENGTH_SHORT).show()
+                            callback?.invoke()
                         }
                     } else {
-                            Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
+                        callback?.invoke()
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
+                callback?.invoke()
             }
         }
     }
 }
-

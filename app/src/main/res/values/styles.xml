@@ -1,13 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Course">
-        <item name="android:gravity">center</item>
-        <item name="android:paddingVertical">12dp</item>
-    </style>
-
-    <style name="CourseCardView">
-        <item name="android:layout_marginTop">12dp</item>
-        <item name="android:layout_marginHorizontal">12dp</item>
-        <item name="android:layout_gravity">center_vertical</item>
-    </style>
 </resources>

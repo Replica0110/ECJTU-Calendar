@@ -6,8 +6,7 @@
     app:cardElevation="4dp"
     android:layout_margin="12dp"
     android:padding="12dp"
-    android:clickable="true"
-    style="@style/CourseCardView">
+    android:clickable="true">
 
     <LinearLayout
         android:orientation="vertical"

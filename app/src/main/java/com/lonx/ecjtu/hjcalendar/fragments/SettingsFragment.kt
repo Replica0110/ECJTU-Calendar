@@ -1,20 +1,19 @@
 package com.lonx.ecjtu.hjcalendar.fragments
 
-import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import androidx.lifecycle.ViewModelProvider
+import android.view.LayoutInflater
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.lonx.ecjtu.hjcalendar.MainActivity
+import com.google.android.material.textfield.TextInputEditText
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.viewModels.CalendarViewModel
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -24,34 +23,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_settings, rootKey)
-
-        // 获取 EditTextPreference
-        val weixinIdPreference: EditTextPreference? = findPreference(getString(R.string.weixin_id_key))
-
-        // 监听输入变化
-        weixinIdPreference?.setOnPreferenceChangeListener { _, newValue ->
-            val newWeixinId = newValue as String
-
-            // 获取旧数据
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            val oldWeixinId = sharedPreferences.getString(getString(R.string.weixin_id_key), "")
-
-            // 判断新旧数据是否一致
-            if (newWeixinId != oldWeixinId) {
-                // 数据不一致，触发更新
-                Log.d(TAG, "New weixinId: $newWeixinId")
-                val viewModel = ViewModelProvider(this)[CalendarViewModel::class.java]
-                viewModel.fetchCourseInfo(newWeixinId)
-
-                // 保存新的 weixinId 到 SharedPreferences
-                sharedPreferences.edit().putString(getString(R.string.weixin_id_key), newWeixinId).apply()
-
-                // 通知 MainActivity 数据已变化
-                (activity as MainActivity).setDataChanged()
-            }
-
-            true
-        }
     }
 
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
@@ -64,11 +35,42 @@ class SettingsFragment : PreferenceFragmentCompat() {
                         .setTitle(preference.title)
                         .setMessage(getString(R.string.tutorial_message))
                         .show()
+                } else if (preference.title == getString(R.string.weixin_id_title)) {
+                    // 调用自定义对话框并处理输入
+                    weiXinidInputDialog(preference)
                 }
             }
         }
         return super.onPreferenceTreeClick(preference)
     }
+
+    private fun weiXinidInputDialog(preference: Preference) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edittext, null)
+        val textInput = dialogView.findViewById<TextInputEditText>(R.id.text_input)
+        val sharedPreferences = requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+        val savedValue = sharedPreferences.getString("weixin_id", "")  // 使用固定键
+        textInput.setText(savedValue)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(preference.title)
+            .setView(dialogView)
+            .setPositiveButton("保存") { dialog, _ ->
+                val inputText = textInput.text.toString()
+
+                with(sharedPreferences.edit()) {
+                    putString("weixin_id", inputText)
+                    apply()
+                }
+
+                Toast.makeText(requireContext(), "weiXinID已保存，在日历页面下拉刷新课表", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton("取消") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
 
     private fun openURL(intent: Intent) {
         try {
@@ -78,6 +80,4 @@ class SettingsFragment : PreferenceFragmentCompat() {
             Snackbar.make(requireView(), getString(R.string.snackbar_intent_failed), Snackbar.LENGTH_SHORT).show()
         }
     }
-
 }
-

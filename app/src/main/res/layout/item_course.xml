@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
     android:layout_margin="12dp"
@@ -10,44 +10,38 @@
     style="@style/CourseCardView">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="start"
-        android:paddingEnd="16dp"
-        style="@style/Course">
+        android:gravity="start">
 
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/course_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:paddingBottom="4dp"
+            android:layout_marginTop="8dp"
+            android:text="课程"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@android:color/black" />
 
-    <TextView
-        android:id="@+id/courseName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="课程"
-        android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:layout_marginStart="16dp"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:textStyle="bold"
-        android:paddingBottom="4dp"
-    />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/course_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="节次"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_marginStart="16dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:paddingBottom="4dp" />
 
-    <TextView
-        android:id="@+id/classTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="节次"
-        android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:layout_marginStart="16dp"
-        android:textSize="14sp"
-        android:textColor="@android:color/darker_gray"
-        android:paddingBottom="4dp"
-        />
-        <TextView
-            android:id="@+id/classWeek"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/course_week"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="上课周"
@@ -57,35 +51,34 @@
             android:layout_marginStart="16dp"
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray"
-            android:paddingBottom="4dp"
-            />
-    <TextView
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="地点"
-        android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:layout_marginStart="16dp"
-        android:textSize="14sp"
-        android:textColor="@android:color/darker_gray"
-        android:paddingBottom="4dp"
-        />
+            android:paddingBottom="4dp"/>
 
-    <TextView
-        android:id="@+id/teacher"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="教师"
-        android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:layout_marginStart="16dp"
-        android:textSize="14sp"
-        android:textColor="@android:color/darker_gray"
-        android:paddingBottom="4dp"
-        />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/course_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="地点"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_marginStart="16dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:paddingBottom="4dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/course_teacher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="教师"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_marginStart="16dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:paddingBottom="4dp"
+            android:layout_marginBottom="8dp"/>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

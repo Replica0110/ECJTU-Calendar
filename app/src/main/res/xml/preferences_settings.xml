@@ -1,0 +1,47 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/item_title_settings"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
+
+        <EditTextPreference
+            android:icon="@drawable/ic_id_24dp"
+            android:key="@string/weixin_id_key"
+            android:title="@string/weixin_id_title"
+            android:summary="@string/weixin_id_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/faq"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
+        <Preference
+            android:icon="@drawable/ic_tutorial_24dp"
+            android:key="@string/tutorial_key"
+            android:title="@string/tutorial_title"
+            android:summary="@string/tutorial_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/about"
+        app:iconSpaceReserved="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
+        <Preference
+            android:icon="@drawable/ic_developer_24dp"
+            android:key="@string/developer_key"
+            android:title="@string/developer"
+            android:summary="@string/developer_summary" />
+        <Preference
+            android:icon="@drawable/ic_github_24dp"
+            android:key="@string/source_code_key"
+            android:title="@string/source_code"
+            android:summary="@string/source_code_summary" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

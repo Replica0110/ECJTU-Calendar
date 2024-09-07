@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.lonx.ecjtu.calendar"
+    namespace = "com.lonx.ecjtu.hjcalendar"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.lonx.ecjtu.calendar"
+        applicationId = "com.lonx.ecjtu.hjcalendar"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -50,8 +50,6 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.preference.ktx)
-    implementation(libs.androidx.preference)
-    implementation(libs.play.services.oss.licenses)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

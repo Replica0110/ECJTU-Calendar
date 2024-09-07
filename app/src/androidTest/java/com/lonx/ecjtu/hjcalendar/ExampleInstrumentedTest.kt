@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar
+package com.lonx.ecjtu.hjcalendar
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.lonx.ecjtu.calendar", appContext.packageName)
+        assertEquals("com.lonx.ecjtu.hjcalendar", appContext.packageName)
     }
 }

@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar
+package com.lonx.ecjtu.hjcalendar
 
 import org.junit.Test
 

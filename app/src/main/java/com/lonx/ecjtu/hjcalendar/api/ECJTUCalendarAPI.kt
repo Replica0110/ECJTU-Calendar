@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.utils
+package com.lonx.ecjtu.hjcalendar.api
 
 import android.util.Log
 import com.google.gson.GsonBuilder
@@ -21,12 +21,14 @@ class ECJTUCalendarAPI {
 
     suspend fun getCourseInfo(weiXinID: String, date: String=getCurrentDate()): String? = withContext(Dispatchers.IO) {
         try {
-            val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=$date"
+            val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=2023-09-07"
+            Log.e("getCourseInfo", "URL: $url")
             val doc: Document = Jsoup.connect(url)
                 .sslSocketFactory(SSLSocketFactoryCompat())
                 .get()
             return@withContext doc.html()
         }catch (e: Exception){
+            Log.e("getCourseInfo", "Error fetching course info: ${e.message}")
             return@withContext ""
         }
 
@@ -39,7 +41,7 @@ class ECJTUCalendarAPI {
         // TODO 支持显示时间
         val dateElement = doc.select("div.center").text()
         dateElement ?: "N/A"
-
+        Log.e("parseHtml", "Date: $dateElement")
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
             val courseInfo=CourseInfo(
                 courseName = "今日无课",

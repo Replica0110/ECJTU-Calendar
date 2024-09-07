@@ -5,15 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.lonx.ecjtu.hjcalendar.R
+import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -61,8 +59,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     putString("weixin_id", inputText)
                     apply()
                 }
-
-                Toast.makeText(requireContext(), "weiXinID已保存，在日历页面下拉刷新课表", Toast.LENGTH_SHORT).show()
+                ToastUtil.showToast(requireContext(), "weiXinID已保存，在日历页面下拉刷新课表")
                 dialog.dismiss()
             }
             .setNegativeButton("取消") { dialog, _ ->

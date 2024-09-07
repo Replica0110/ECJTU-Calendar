@@ -1,14 +1,14 @@
 package com.lonx.ecjtu.hjcalendar.viewModels
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.lonx.ecjtu.hjcalendar.api.CourseInfo
-import com.lonx.ecjtu.hjcalendar.api.ECJTUCalendarAPI
+import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
+import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
+import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import kotlinx.coroutines.launch
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
@@ -26,24 +26,25 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                 if (html != null) {
                     if (html.isNotBlank()) {
                         if (html.contains("<title>教务处微信平台绑定</title>")) {
-                            Toast.makeText(getApplication(), "课程获取失败，请检查weiXinID是否正确", Toast.LENGTH_SHORT).show()
+                            // 使用 ToastUtil 显示 Toast
+                            ToastUtil.showToast(getApplication(), "课程获取失败，请检查weiXinID是否正确")
                             callback?.invoke()
                             return@launch
                         } else {
-                            Toast.makeText(getApplication(), "课程获取成功", Toast.LENGTH_SHORT).show()
+                            ToastUtil.showToast(getApplication(), "课程获取成功")
                             val parsedData = api.parseHtml(html)
                             val courses = Gson().fromJson(parsedData, Array<CourseInfo>::class.java).toList()
                             _courseList.postValue(courses)
                             callback?.invoke()
                         }
                     } else {
-                        Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
+                        ToastUtil.showToast(getApplication(), "课程获取失败，请检查网络连接")
                         callback?.invoke()
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(getApplication(), "课程获取失败，请检查网络连接", Toast.LENGTH_SHORT).show()
+                ToastUtil.showToast(getApplication(), "课程获取失败，请检查网络连接")
                 callback?.invoke()
             }
         }

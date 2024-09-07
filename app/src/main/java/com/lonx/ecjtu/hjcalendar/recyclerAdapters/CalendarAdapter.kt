@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.api.CourseInfo
+import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
 
 class CalendarAdapter(private var courseList: List<CourseInfo>) :
     RecyclerView.Adapter<CalendarAdapter.CourseViewHolder>() {

@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.api
+package com.lonx.ecjtu.hjcalendar.utils
 
 import android.util.Log
 import com.google.gson.GsonBuilder

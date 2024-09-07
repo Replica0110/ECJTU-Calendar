@@ -8,8 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
 
-class CalendarAdapter(private var courseList: List<CourseInfo>) :
-    RecyclerView.Adapter<CalendarAdapter.CourseViewHolder>() {
+class CalendarAdapter(
+    private var courseList: List<CourseInfo>,
+    private var onItemClickListener: OnItemClickListener?
+) : RecyclerView.Adapter<CalendarAdapter.CourseViewHolder>() {
+
+    interface OnItemClickListener {
+        fun onItemClick(course: CourseInfo, position: Int)
+    }
 
     class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val courseName: TextView = itemView.findViewById(R.id.course_name)
@@ -31,6 +37,11 @@ class CalendarAdapter(private var courseList: List<CourseInfo>) :
         holder.classWeek.text = course.classWeek
         holder.location.text = course.location
         holder.teacher.text = course.teacher
+
+        // 绑定点击事件
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.onItemClick(course, position)
+        }
     }
 
     override fun getItemCount() = courseList.size

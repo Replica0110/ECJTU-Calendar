@@ -35,9 +35,6 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                         } else {
                             ToastUtil.showToast(getApplication(), "课程获取成功")
                             val courseResponse = api.parseHtml(html)
-                            // TODO 解析数据得到courseResponse
-                            val courses = courseResponse.courses
-                            val date = courseResponse.date
                             _courseList.postValue(listOf(courseResponse))
 //                            Log.e("fetchCourseInfo", "Date: $date")
                             callback?.invoke()

@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
 
-class CalendarAdapter(
+class CourseItemAdapter(
     private var courseList: List<CourseInfo>,
     private var onItemClickListener: OnItemClickListener?
-) : RecyclerView.Adapter<CalendarAdapter.CourseViewHolder>() {
+) : RecyclerView.Adapter<CourseItemAdapter.CourseViewHolder>() {
 
     interface OnItemClickListener {
         fun onItemClick(course: CourseInfo, position: Int)
@@ -38,7 +38,6 @@ class CalendarAdapter(
         holder.location.text = course.location
         holder.teacher.text = course.teacher
 
-        // 绑定点击事件
         holder.itemView.setOnClickListener {
             onItemClickListener?.onItemClick(course, position)
         }

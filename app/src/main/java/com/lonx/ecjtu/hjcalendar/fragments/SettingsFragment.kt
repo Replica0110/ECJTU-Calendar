@@ -34,7 +34,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
                         .setMessage(getString(R.string.tutorial_message))
                         .show()
                 } else if (preference.title == getString(R.string.weixin_id_title)) {
-                    // 调用自定义对话框并处理输入
                     weiXinidInputDialog(preference)
                 }
             }

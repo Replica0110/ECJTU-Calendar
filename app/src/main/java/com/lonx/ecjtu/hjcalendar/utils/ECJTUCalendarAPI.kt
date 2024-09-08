@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.hjcalendar.utils
 
 import android.util.Log
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,7 +23,7 @@ class ECJTUCalendarAPI {
     suspend fun getCourseInfo(weiXinID: String, date: String=getCurrentDate()): String? = withContext(Dispatchers.IO) {
         try {
             val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=$date"
-            Log.e("getCourseInfo", "URL: $url")
+//            Log.e("getCourseInfo", "URL: $url")
             val doc: Document = Jsoup.connect(url)
                 .sslSocketFactory(SSLSocketFactoryCompat())
                 .get()
@@ -33,30 +34,22 @@ class ECJTUCalendarAPI {
         }
 
     }
-    fun parseHtml(html:String): String {
+    fun parseHtml(html: String): CourseResponse {
         val doc: Document = Jsoup.parse(html)
         val courseElements = doc.select("ul.rl_info li")
         val courseList = mutableListOf<CourseInfo>()
         val gson = GsonBuilder().setPrettyPrinting().create()
-        // TODO 支持显示时间
-        val dateElement = doc.select("div.center").text()
-        dateElement ?: "N/A"
-        Log.e("parseHtml", "Date: $dateElement")
+
+        // 获取日期信息
+        val dateElement = doc.select("div.center").text() ?: "N/A"
+
+        // 如果没有课程信息或者只有图片，返回“今日无课”
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
-            val courseInfo=CourseInfo(
-                courseName = "今日无课",
-                classTime = "N/A",
-                classWeek = "N/A",
-                location = "N/A",
-                teacher = "N/A"
-            )
-            courseList.add(courseInfo)
-            return gson.toJson(courseList.distinct())
+            return CourseResponse(dateElement, listOf(CourseInfo("今日无课", "N/A", "N/A", "N/A", "N/A")))
         }
 
-        for (element in courseElements) {
-
-            // 提取课程信息
+        // 解析课程信息
+        courseElements.forEach { element ->
             try {
                 val classTime = element.toString().substringAfter("时间：").substringBefore("<br>").split(" ")[1].trim()
                 val courseName = element.toString().substringAfter("</span>").substringBefore("<br>").trim()
@@ -64,27 +57,15 @@ class ECJTUCalendarAPI {
                 val location = element.toString().substringAfter("地点：").substringBefore("<br>").trim()
                 val teacher = element.toString().substringAfter("教师：").substringBefore("<br>").trim()
 
-                val courseInfo = CourseInfo(
-                    courseName = courseName,
-                    classTime = "节次：$classTime",
-                    classWeek = "上课周：$classWeek",
-                    location = "地点：$location",
-                    teacher = "教师：$teacher"
-                )
-
-                courseList.add(courseInfo)
+                courseList.add(CourseInfo(courseName, "节次：$classTime", "上课周：$classWeek", "地点：$location", "教师：$teacher"))
             } catch (e: Exception) {
                 Log.e("parseHtml", "Error parsing course element: ${e.message}")
             }
         }
 
-        if (courseList.isEmpty()) {
-            return "N/A"
-        }
-
-
-        return gson.toJson(courseList.distinct())
+        return CourseResponse(dateElement, courseList.distinct())
     }
+
     class SSLSocketFactoryCompat : SSLSocketFactory() {
         private val trustManager = object : X509TrustManager {
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
@@ -133,4 +114,8 @@ data class CourseInfo(
     val classWeek: String,
     val location: String,
     val teacher: String
+)
+data class CourseResponse(
+    val date: String,
+    val courses: List<CourseInfo>
 )

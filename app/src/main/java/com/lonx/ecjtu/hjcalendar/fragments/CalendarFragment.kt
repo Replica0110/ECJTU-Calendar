@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.recyclerAdapters.CalendarAdapter
+import com.lonx.ecjtu.hjcalendar.recyclerAdapters.CourseItemAdapter
+import com.lonx.ecjtu.hjcalendar.recyclerAdapters.CourseDayAdapter
 import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.viewModels.CalendarViewModel
@@ -28,9 +29,9 @@ class CalendarFragment : Fragment() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private var _isRefreshing = false
     private val scope = CoroutineScope(Dispatchers.Main)
-    private val refreshInterval: Long = 3000
+    private val refreshInterval: Long = 2000
 
-    private lateinit var adapter: CalendarAdapter
+    private lateinit var adapter: CourseDayAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,10 +41,8 @@ class CalendarFragment : Fragment() {
 
         val recyclerView: RecyclerView = view.findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = CalendarAdapter(emptyList(), object : CalendarAdapter.OnItemClickListener {
+        adapter = CourseDayAdapter(emptyList(), object: CourseItemAdapter.OnItemClickListener{
             override fun onItemClick(course: CourseInfo, position: Int) {
-                Log.e("CalendarFragment", "点击了课程: ${course.courseName}，位置: $position")
-                // 在这里处理点击事件，打开一个
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(course.courseName)
                     .setMessage("\n${course.classTime}\n\n${course.classWeek}\n\n${course.location}\n\n${course.teacher}")
@@ -67,34 +66,39 @@ class CalendarFragment : Fragment() {
             }
         }
 
-        // 观察 courseList 数据变化
-        calendarViewModel.courseList.observe(viewLifecycleOwner) { courseList ->
-            adapter.updateData(courseList)
+         // 观察 courseList 数据变化
+        calendarViewModel.courseList.observe(viewLifecycleOwner) { dayCourseList ->
+            adapter.updateData(dayCourseList)
+            _isRefreshing = false
+            swipeRefreshLayout.isRefreshing = false
         }
 
         // 获取数据之前检查 LiveData 是否已有数据
         if (calendarViewModel.courseList.value.isNullOrEmpty()) {
-            ToastUtil.showToast(requireContext(), "正在刷新课程信息，请稍后...")
-            refreshCourseData()  // 第一次加载时获取数据
+            swipeRefreshLayout.isRefreshing = true
+            refreshCourseData(false)
         }
 
         return view
     }
-
-    private fun refreshCourseData() {
+    // 刷新课程数据的方法
+    private fun refreshCourseData(anim: Boolean = true) {
         // 初始化 SharedPreferences
-        val sharedPreferences = requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
-        val weiXinID = sharedPreferences.getString("weixin_id", "")  // 使用固定键
-        Log.e("CalendarFragment", "WeiXinID: $weiXinID")
+        val sharedPreferences =
+            requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+        val weiXinID = sharedPreferences.getString("weixin_id", "")
+//        Log.e("CalendarFragment", "WeiXinID: $weiXinID")
 
         // 调用 ViewModel 来获取课程信息
         calendarViewModel.fetchCourseInfo(weiXinID ?: "", object : () -> Unit {
             override fun invoke() {}
         })
-        scope.launch {
-            delay(refreshInterval)
-            _isRefreshing = false
-            swipeRefreshLayout.isRefreshing = false // 刷新结束，取消动画
+        if (anim){
+            scope.launch {
+                delay(refreshInterval)
+                _isRefreshing = false
+                swipeRefreshLayout.isRefreshing = false // 刷新结束，取消动画
+            }
         }
     }
 
@@ -102,4 +106,5 @@ class CalendarFragment : Fragment() {
         super.onDestroyView()
         scope.cancel()
     }
+
 }

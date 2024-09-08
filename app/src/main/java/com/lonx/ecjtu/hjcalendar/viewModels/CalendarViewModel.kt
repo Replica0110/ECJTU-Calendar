@@ -1,20 +1,22 @@
 package com.lonx.ecjtu.hjcalendar.viewModels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
+import com.lonx.ecjtu.hjcalendar.utils.CourseResponse
 import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import kotlinx.coroutines.launch
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _courseList = MutableLiveData<List<CourseInfo>>()
-    val courseList: LiveData<List<CourseInfo>> = _courseList
+    private val _courseList = MutableLiveData<List<CourseResponse>>()
+    val courseList: LiveData<List<CourseResponse>> = _courseList
 
     private val api = ECJTUCalendarAPI()
 
@@ -32,9 +34,12 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                             return@launch
                         } else {
                             ToastUtil.showToast(getApplication(), "课程获取成功")
-                            val parsedData = api.parseHtml(html)
-                            val courses = Gson().fromJson(parsedData, Array<CourseInfo>::class.java).toList()
-                            _courseList.postValue(courses)
+                            val courseResponse = api.parseHtml(html)
+                            // TODO 解析数据得到courseResponse
+                            val courses = courseResponse.courses
+                            val date = courseResponse.date
+                            _courseList.postValue(listOf(courseResponse))
+//                            Log.e("fetchCourseInfo", "Date: $date")
                             callback?.invoke()
                         }
                     } else {
@@ -49,4 +54,5 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
+
 }

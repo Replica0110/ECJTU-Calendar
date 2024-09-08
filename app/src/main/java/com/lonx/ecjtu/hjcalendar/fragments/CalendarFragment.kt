@@ -46,7 +46,7 @@ class CalendarFragment : Fragment() {
             override fun onItemClick(course: CourseInfo, position: Int) {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(course.courseName)
-                    .setMessage("\n${course.classTime}\n\n${course.classWeek}\n\n${course.location}\n\n${course.teacher}")
+                    .setMessage("\n${course.courseTime}\n\n${course.courseWeek}\n\n${course.courseLocation}\n\n${course.courseTeacher}")
                     .show()
             }
         })

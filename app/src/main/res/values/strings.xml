@@ -25,4 +25,5 @@
     <string name="tutorial_date_title">日期选择</string>
     <string name="tutorial_date_summary">日期选择功能介绍</string>
     <string name="tutorial_date_message">·可通过日历页面右下角的按钮选择查看不同日期的课程表\n·长按按钮可快速回到今天</string>
+    <string name="hitokoto_title">一言</string>
 </resources>

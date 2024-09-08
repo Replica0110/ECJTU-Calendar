@@ -40,7 +40,7 @@ class ECJTUCalendarAPI {
 
         // 如果没有课程信息或者只有图片，返回“今日无课”
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
-            return DayCourses(dateElement, listOf(CourseInfo("今日无课", "N/A", "N/A", "N/A", "N/A")))
+            return DayCourses(dateElement, listOf(CourseInfo("课表为空", "N/A", "N/A", "N/A", "N/A")))
         }
 
         // 解析课程信息
@@ -101,10 +101,10 @@ class ECJTUCalendarAPI {
 }
 data class CourseInfo(
     val courseName: String,
-    val classTime: String,
-    val classWeek: String,
-    val location: String,
-    val teacher: String
+    val courseTime: String,
+    val courseWeek: String,
+    val courseLocation: String,
+    val courseTeacher: String
 )
 data class DayCourses(
     val date: String,

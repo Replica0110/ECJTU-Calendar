@@ -7,11 +7,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.utils.CourseResponse
+import com.lonx.ecjtu.hjcalendar.utils.DayCourses
 
 
 class CourseDayAdapter(
-    private var dayCourseList: List<CourseResponse>,
+    private var dayCourseList: List<DayCourses>,
     private var onItemClickListener: CourseItemAdapter.OnItemClickListener?
 ) : RecyclerView.Adapter<CourseDayAdapter.DayCourseViewHolder>() {
 
@@ -37,7 +37,7 @@ class CourseDayAdapter(
 
     override fun getItemCount() = dayCourseList.size
 
-    fun updateData(newDayCourseList: List<CourseResponse>) {
+    fun updateData(newDayCourseList: List<DayCourses>) {
         dayCourseList = newDayCourseList
         notifyDataSetChanged()
     }

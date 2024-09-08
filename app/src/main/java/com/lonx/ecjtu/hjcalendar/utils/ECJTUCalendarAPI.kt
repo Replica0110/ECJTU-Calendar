@@ -1,7 +1,6 @@
 package com.lonx.ecjtu.hjcalendar.utils
 
 import android.util.Log
-import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -9,9 +8,6 @@ import org.jsoup.nodes.Document
 import java.net.InetAddress
 import java.net.Socket
 import java.security.cert.X509Certificate
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
@@ -19,7 +15,7 @@ import javax.net.ssl.X509TrustManager
 
 class ECJTUCalendarAPI {
 
-    suspend fun getCourseInfo(weiXinID: String, date: String=getCurrentDate()): String? = withContext(Dispatchers.IO) {
+    suspend fun getCourseInfo(weiXinID: String, date: String): String? = withContext(Dispatchers.IO) {
         try {
             val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=$date"
 //            Log.e("getCourseInfo", "URL: $url")
@@ -33,7 +29,7 @@ class ECJTUCalendarAPI {
         }
 
     }
-    fun parseHtml(html: String): CourseResponse {
+    fun parseHtml(html: String): DayCourses {
         val doc: Document = Jsoup.parse(html)
         val courseElements = doc.select("ul.rl_info li")
         val courseList = mutableListOf<CourseInfo>()
@@ -44,7 +40,7 @@ class ECJTUCalendarAPI {
 
         // 如果没有课程信息或者只有图片，返回“今日无课”
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
-            return CourseResponse(dateElement, listOf(CourseInfo("今日无课", "N/A", "N/A", "N/A", "N/A")))
+            return DayCourses(dateElement, listOf(CourseInfo("今日无课", "N/A", "N/A", "N/A", "N/A")))
         }
 
         // 解析课程信息
@@ -62,7 +58,7 @@ class ECJTUCalendarAPI {
             }
         }
 
-        return CourseResponse(dateElement, courseList.distinct())
+        return DayCourses(dateElement, courseList.distinct())
     }
 
     class SSLSocketFactoryCompat : SSLSocketFactory() {
@@ -102,10 +98,6 @@ class ECJTUCalendarAPI {
             delegate.createSocket(host, port, localHost, localPort)
     }
 
-    private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(Date())
-    }
 }
 data class CourseInfo(
     val courseName: String,
@@ -114,7 +106,7 @@ data class CourseInfo(
     val location: String,
     val teacher: String
 )
-data class CourseResponse(
+data class DayCourses(
     val date: String,
     val courses: List<CourseInfo>
 )

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        android:title="@string/item_title_settings"
+        android:title="@string/item_title_config"
         app:iconSpaceReserved="false"
         app:allowDividerAbove="true"
         app:allowDividerBelow="true">
@@ -16,19 +16,24 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/faq"
+        android:title="@string/item_title_tutorial"
         app:iconSpaceReserved="false"
         app:allowDividerAbove="true"
         app:allowDividerBelow="true">
         <Preference
             android:icon="@drawable/ic_tutorial_24dp"
-            android:key="@string/tutorial_key"
-            android:title="@string/tutorial_title"
-            android:summary="@string/tutorial_summary" />
+            android:key="@string/tutorial_weixinid_key"
+            android:title="@string/tutorial_weixinid_title"
+            android:summary="@string/tutorial_weixinid_summary" />
+        <Preference
+            android:icon="@drawable/ic_tutorial_24dp"
+            android:key="@string/tutorial_date_key"
+            android:title="@string/tutorial_date_title"
+            android:summary="@string/tutorial_date_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/about"
+        android:title="@string/item_title_about"
         app:iconSpaceReserved="false"
         app:allowDividerAbove="true"
         app:allowDividerBelow="true">

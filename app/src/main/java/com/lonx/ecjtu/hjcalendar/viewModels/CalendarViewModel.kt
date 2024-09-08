@@ -6,35 +6,36 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.hjcalendar.utils.CourseResponse
+import com.lonx.ecjtu.hjcalendar.utils.DayCourses
 import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
 import kotlinx.coroutines.launch
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _courseList = MutableLiveData<List<CourseResponse>>()
-    val courseList: LiveData<List<CourseResponse>> = _courseList
+    private val _courseList = MutableLiveData<List<DayCourses>>()
+    val courseList: LiveData<List<DayCourses>> = _courseList
 
     private val api = ECJTUCalendarAPI()
 
     // 添加回调参数
     fun fetchCourseInfo(
         weiXinID: String,
+        date:String ,
         onSuccess: ((String) -> Unit)? = null,
         onFailure: ((String) -> Unit)? = null
     ) {
         viewModelScope.launch {
             try {
-                val html = api.getCourseInfo(weiXinID)
-                Log.e("fetchCourseInfo", "HTML: $html")
+                val html = api.getCourseInfo(weiXinID,date)
+//                Log.e("fetchCourseInfo", "HTML: $html")
                 if (html != null) {
                     if (html.isNotBlank()) {
                         if (html.contains("<title>教务处微信平台绑定</title>")) {
                             Log.e("fetchCourseInfo", "Invalid weiXinID")
                             onFailure?.invoke("无效的weiXinID")
                         } else {
-                            val courseResponse = api.parseHtml(html)
-                            _courseList.postValue(listOf(courseResponse))
+                            val dayCourse = api.parseHtml(html)
+                            _courseList.postValue(listOf(dayCourse))
                             onSuccess?.invoke("日历已更新")
                         }
                     } else {

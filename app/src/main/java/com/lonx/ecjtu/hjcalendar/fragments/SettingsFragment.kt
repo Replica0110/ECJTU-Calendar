@@ -28,12 +28,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
             getString(R.string.developer) -> openURL(githubIntent)
             getString(R.string.source_code_key) -> openURL(sourceCodeIntent)
             else -> {
-                if (preference.title == getString(R.string.tutorial_title)) {
+                if (preference.title == getString(R.string.tutorial_weixinid_title)) {
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(preference.title)
-                        .setMessage(getString(R.string.tutorial_message))
+                        .setMessage(getString(R.string.tutorial_weixinid_message))
                         .show()
-                } else if (preference.title == getString(R.string.weixin_id_title)) {
+                } else if (preference.title == getString(R.string.tutorial_date_title)) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(preference.title)
+                        .setMessage(getString(R.string.tutorial_date_message))
+                        .show()
+                }
+                else if (preference.title == getString(R.string.weixin_id_title)) {
                     weiXinidInputDialog(preference)
                 }
             }
@@ -42,7 +48,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun weiXinidInputDialog(preference: Preference) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edittext, null)
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_weixinid, null)
         val textInput = dialogView.findViewById<TextInputEditText>(R.id.text_input)
         val sharedPreferences = requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
         val savedValue = sharedPreferences.getString("weixin_id", "")  // 使用固定键

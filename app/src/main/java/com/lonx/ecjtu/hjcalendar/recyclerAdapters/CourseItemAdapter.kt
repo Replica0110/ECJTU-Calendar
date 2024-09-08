@@ -1,6 +1,6 @@
 package com.lonx.ecjtu.hjcalendar.recyclerAdapters
 
-import android.util.Log
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,10 +31,10 @@ class CourseItemAdapter(
         val courseTeacher: TextView = itemView.findViewById(R.id.course_teacher)
     }
 
-    // Hitokoto 空课程 ViewHolder
-    class HitokotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val hitokotoTitle: TextView = itemView.findViewById(R.id.hitokoto_title)
-        val hitokotoMessage: TextView = itemView.findViewById(R.id.hitokoto_message)
+    // 空课程 ViewHolder
+    class EmptyCourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val emptyCourseTitle: TextView = itemView.findViewById(R.id.empty_course_title)
+        val emptyCourseMessage: TextView = itemView.findViewById(R.id.empty_course_message)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -43,8 +43,8 @@ class CourseItemAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_EMPTY) {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_hitokoto, parent, false)
-            HitokotoViewHolder(view)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_empty_course, parent, false)
+            EmptyCourseViewHolder(view)
         } else {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_course, parent, false)
             CourseViewHolder(view)
@@ -65,26 +65,15 @@ class CourseItemAdapter(
             holder.itemView.setOnClickListener {
                 onItemClickListener?.onItemClick(course, position)
             }
-        } else if (holder is HitokotoViewHolder) {
-            // 空课程项，显示一言内容
-            val randomMessages = listOf(
-                "今天没有课程，好好享受空闲时光吧！",
-                "课表今天是空的，安排点其他的事情吧。",
-                "今天是个放松的好机会，没有课哦！",
-                "空课表的日子里，好好休息一下吧。",
-                "没有课程安排，何不去运动一下？"
-            )
-            val randomMessage = randomMessages[Random.nextInt(randomMessages.size)]
-            holder.hitokotoTitle.text = "一言"
-            holder.hitokotoMessage.text = randomMessage
+        } else if (holder is EmptyCourseViewHolder) {
+            val sharedPreferences = holder.itemView.context.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+            val emptyCourseText = sharedPreferences.getString("no_course_text", "")
+            holder.emptyCourseTitle.text = "轻松一下"
+            holder.emptyCourseMessage.text = emptyCourseText
         }
     }
 
     override fun getItemCount() = courseList.size
 
-    fun updateData(newCourseList: List<CourseInfo>) {
-        courseList = newCourseList
-        notifyDataSetChanged()
-    }
 }
 

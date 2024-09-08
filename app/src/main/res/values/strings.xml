@@ -19,11 +19,14 @@
     <string name="developer_key">开发者</string>
     <string name="source_code_key">项目主页</string>
     <string name="snackbar_intent_failed">操作失败</string>
-    <string name="dialog_input_hint">输入您的weiXinID</string>
+    <string name="dialog_input_hint">输入文本</string>
     <string name="floatbutton_select_date">选择日期</string>
     <string name="tutorial_date_key">日期选择</string>
     <string name="tutorial_date_title">日期选择</string>
     <string name="tutorial_date_summary">日期选择功能介绍</string>
     <string name="tutorial_date_message">·可通过日历页面右下角的按钮选择查看不同日期的课程表\n·长按按钮可快速回到今天</string>
-    <string name="hitokoto_title">一言</string>
+    <string name="empty_course_title">轻松一下</string>
+    <string name="no_course_key">无课程卡片文本</string>
+    <string name="no_course_title">无课程卡片文本</string>
+    <string name="no_course_summary">当日历课程为空时卡片显示的文本</string>
 </resources>

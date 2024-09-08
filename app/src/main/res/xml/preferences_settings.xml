@@ -13,6 +13,12 @@
             android:key="@string/weixin_id_key"
             android:title="@string/weixin_id_title"
             android:summary="@string/weixin_id_summary" />
+        <Preference
+            android:icon="@drawable/ic_message_24dp"
+            android:key="@string/no_course_key"
+            android:title="@string/no_course_title"
+            android:summary="@string/no_course_summary"
+            android:defaultValue="原神，启动！"/>
     </PreferenceCategory>
 
     <PreferenceCategory

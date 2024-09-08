@@ -2,7 +2,6 @@ package com.lonx.ecjtu.hjcalendar.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.recyclerAdapters.CourseItemAdapter
 import com.lonx.ecjtu.hjcalendar.recyclerAdapters.CourseDayAdapter
+import com.lonx.ecjtu.hjcalendar.recyclerAdapters.CourseItemAdapter
 import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.viewModels.CalendarViewModel
@@ -41,7 +40,7 @@ class CalendarFragment : Fragment() {
 
         val recyclerView: RecyclerView = view.findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = CourseDayAdapter(emptyList(), object: CourseItemAdapter.OnItemClickListener{
+        adapter = CourseDayAdapter(emptyList(), object : CourseItemAdapter.OnItemClickListener {
             override fun onItemClick(course: CourseInfo, position: Int) {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(course.courseName)
@@ -66,7 +65,7 @@ class CalendarFragment : Fragment() {
             }
         }
 
-         // 观察 courseList 数据变化
+        // 观察 courseList 数据变化
         calendarViewModel.courseList.observe(viewLifecycleOwner) { dayCourseList ->
             adapter.updateData(dayCourseList)
             _isRefreshing = false
@@ -76,35 +75,39 @@ class CalendarFragment : Fragment() {
         // 获取数据之前检查 LiveData 是否已有数据
         if (calendarViewModel.courseList.value.isNullOrEmpty()) {
             swipeRefreshLayout.isRefreshing = true
-            refreshCourseData(false)
+            refreshCourseData()
         }
 
         return view
     }
+
     // 刷新课程数据的方法
-    private fun refreshCourseData(anim: Boolean = true) {
+    private fun refreshCourseData() {
         // 初始化 SharedPreferences
         val sharedPreferences =
             requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
         val weiXinID = sharedPreferences.getString("weixin_id", "")
-//        Log.e("CalendarFragment", "WeiXinID: $weiXinID")
 
         // 调用 ViewModel 来获取课程信息
-        calendarViewModel.fetchCourseInfo(weiXinID ?: "", object : () -> Unit {
-            override fun invoke() {}
-        })
-        if (anim){
-            scope.launch {
-                delay(refreshInterval)
-                _isRefreshing = false
-                swipeRefreshLayout.isRefreshing = false // 刷新结束，取消动画
+        calendarViewModel.fetchCourseInfo(
+            weiXinID ?: "",
+            onSuccess = { message ->
+                ToastUtil.showToast(requireContext(), message )
+            },
+            onFailure = { message ->
+                ToastUtil.showToast(requireContext(), "课程获取失败：$message")
             }
+        )
+        scope.launch {
+            delay(refreshInterval)
+            _isRefreshing = false
+            swipeRefreshLayout.isRefreshing = false
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         scope.cancel()
     }
-
 }

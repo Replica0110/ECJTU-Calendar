@@ -6,11 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
-import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
 import com.lonx.ecjtu.hjcalendar.utils.CourseResponse
 import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
-import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import kotlinx.coroutines.launch
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,33 +18,32 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     private val api = ECJTUCalendarAPI()
 
     // 添加回调参数
-    fun fetchCourseInfo(weiXinID: String, callback: (() -> Unit)? = null) {
+    fun fetchCourseInfo(
+        weiXinID: String,
+        onSuccess: ((String) -> Unit)? = null,
+        onFailure: ((String) -> Unit)? = null
+    ) {
         viewModelScope.launch {
             try {
                 val html = api.getCourseInfo(weiXinID)
+                Log.e("fetchCourseInfo", "HTML: $html")
                 if (html != null) {
                     if (html.isNotBlank()) {
                         if (html.contains("<title>教务处微信平台绑定</title>")) {
-                            // 使用 ToastUtil 显示 Toast
-                            ToastUtil.showToast(getApplication(), "课程获取失败，请检查weiXinID是否正确")
-                            callback?.invoke()
-                            return@launch
+                            Log.e("fetchCourseInfo", "Invalid weiXinID")
+                            onFailure?.invoke("无效的weiXinID")
                         } else {
-                            ToastUtil.showToast(getApplication(), "课程获取成功")
                             val courseResponse = api.parseHtml(html)
                             _courseList.postValue(listOf(courseResponse))
-//                            Log.e("fetchCourseInfo", "Date: $date")
-                            callback?.invoke()
+                            onSuccess?.invoke("日历已更新")
                         }
                     } else {
-                        ToastUtil.showToast(getApplication(), "课程获取失败，请检查网络连接")
-                        callback?.invoke()
+                        onFailure?.invoke("空响应")
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                ToastUtil.showToast(getApplication(), "课程获取失败，请检查网络连接")
-                callback?.invoke()
+                onFailure?.invoke(e.message ?: "未知错误")
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.lonx.ecjtu.hjcalendar.utils
 
 import android.util.Log
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,7 +27,7 @@ class ECJTUCalendarAPI {
                 .sslSocketFactory(SSLSocketFactoryCompat())
                 .get()
             return@withContext doc.html()
-        }catch (e: Exception){
+        } catch (e: Exception){
             Log.e("getCourseInfo", "Error fetching course info: ${e.message}")
             return@withContext ""
         }
@@ -38,7 +37,7 @@ class ECJTUCalendarAPI {
         val doc: Document = Jsoup.parse(html)
         val courseElements = doc.select("ul.rl_info li")
         val courseList = mutableListOf<CourseInfo>()
-        val gson = GsonBuilder().setPrettyPrinting().create()
+//        val gson = GsonBuilder().setPrettyPrinting().create()
 
         // 获取日期信息
         val dateElement = doc.select("div.center").text() ?: "N/A"

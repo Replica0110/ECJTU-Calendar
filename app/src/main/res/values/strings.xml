@@ -26,7 +26,11 @@
     <string name="tutorial_date_summary">日期选择功能介绍</string>
     <string name="tutorial_date_message">·可通过日历页面右下角的按钮选择查看不同日期的课程表\n·长按按钮可快速回到今天</string>
     <string name="empty_course_title">轻松一下</string>
-    <string name="no_course_key">无课程卡片文本</string>
-    <string name="no_course_title">无课程卡片文本</string>
+    <string name="no_course_key">课程卡片文本</string>
+    <string name="no_course_title">课程卡片文本</string>
     <string name="no_course_summary">当日历课程为空时卡片显示的文本</string>
+    <string name="developer_url">https://github.com/Agiens02</string>
+    <string name="source_code_url">https://github.com/Agiens02/ECJTU-Calendar</string>
+    <string name="app_version_key">应用版本</string>
+    <string name="app_version_title">应用版本</string>
 </resources>

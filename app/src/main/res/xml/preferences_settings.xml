@@ -44,6 +44,11 @@
         app:allowDividerAbove="true"
         app:allowDividerBelow="true">
         <Preference
+            android:icon="@drawable/ic_version_24dp"
+            android:key="@string/app_version_key"
+            android:title="@string/app_version_title"
+            android:summary="显示应用版本"/>
+        <Preference
             android:icon="@drawable/ic_developer_24dp"
             android:key="@string/developer_key"
             android:title="@string/developer"

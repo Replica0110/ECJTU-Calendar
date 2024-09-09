@@ -26,7 +26,7 @@ import java.util.Locale
 class CalendarFragment : Fragment() {
     private lateinit var calendarViewModel: CalendarViewModel
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var date_button: FloatingActionButton
+    private lateinit var dateButton: FloatingActionButton
     private var _isRefreshing = false
     private val scope = CoroutineScope(Dispatchers.Main)
     private val refreshInterval: Long = 2000
@@ -68,11 +68,11 @@ class CalendarFragment : Fragment() {
         }
 
         // 初始化日期选择按钮
-        date_button = view.findViewById(R.id.fab_date)
-        date_button.setOnClickListener {// 点击选择日期
+        dateButton = view.findViewById(R.id.fab_date)
+        dateButton.setOnClickListener {// 点击选择日期
             showDatePickerDialog()
         }
-        date_button.setOnLongClickListener {
+        dateButton.setOnLongClickListener {
             resetToToday()  // 长按回到今天
             true  // 返回 true 表示事件已处理
         }
@@ -123,6 +123,7 @@ class CalendarFragment : Fragment() {
                 ToastUtil.showToast(requireContext(), message)
             },
             onFailure = { message ->
+                calendar.time = Date() // 失败时不更改日期
                 ToastUtil.showToast(requireContext(), "课程获取失败：$message")
             }
         )

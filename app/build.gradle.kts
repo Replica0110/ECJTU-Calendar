@@ -34,7 +34,7 @@ fun gitVersionTag(): String {
         process.destroy()
     }
 
-    val pattern = """-(\d+)-g(\w+)"""
+    val pattern = """v-(\d+)-g(\w+)"""
     return when (val matcher = pattern.toRegex().find(version)) {
         null -> "$version.0"
         else -> {
@@ -60,6 +60,18 @@ android {
         val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
             timeZone = getDefault()
         }.format(Date())
+
+        // 设置输出文件名
+        applicationVariants.all {
+            val variant = this
+            variant.outputs
+                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+                .forEach { output ->
+                    val outputFileName = "ECJTU-Calendar-${variant.versionName}.apk"
+                    println("OutputFileName: $outputFileName")
+                    output.outputFileName = outputFileName
+                }
+        }
 
         buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

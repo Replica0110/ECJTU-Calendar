@@ -34,7 +34,7 @@ fun gitVersionTag(): String {
         process.destroy()
     }
 
-    val pattern = """v-(\d+)-g(\w+)"""
+    val pattern = """-(\d+)-g(\w+)"""
     return when (val matcher = pattern.toRegex().find(version)) {
         null -> "$version.0"
         else -> {

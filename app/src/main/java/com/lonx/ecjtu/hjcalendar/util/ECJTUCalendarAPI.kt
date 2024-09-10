@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.utils
+package com.lonx.ecjtu.hjcalendar.util
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -23,16 +23,16 @@ class ECJTUCalendarAPI {
                 .sslSocketFactory(SSLSocketFactoryCompat())
                 .get()
             return@withContext doc.html()
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e("getCourseInfo", "Error fetching course info: ${e.message}")
             return@withContext ""
         }
 
     }
-    fun parseHtml(html: String): DayCourses {
+    fun parseHtml(html: String): CourseData.DayCourses {
         val doc: Document = Jsoup.parse(html)
         val courseElements = doc.select("ul.rl_info li")
-        val courseList = mutableListOf<CourseInfo>()
+        val courseList = mutableListOf<CourseData.CourseInfo>()
 //        val gson = GsonBuilder().setPrettyPrinting().create()
 
         // 获取日期信息
@@ -40,7 +40,10 @@ class ECJTUCalendarAPI {
 
         // 如果没有课程信息或者只有图片，返回“今日无课”
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
-            return DayCourses(dateElement, listOf(CourseInfo("课表为空", "N/A", "N/A", "N/A", "N/A")))
+            return CourseData.DayCourses(
+                dateElement,
+                listOf(CourseData.CourseInfo("课表为空"))
+            )
         }
 
         // 解析课程信息
@@ -52,13 +55,21 @@ class ECJTUCalendarAPI {
                 val location = element.toString().substringAfter("地点：").substringBefore("<br>").trim()
                 val teacher = element.toString().substringAfter("教师：").substringBefore("<br>").trim()
 
-                courseList.add(CourseInfo(courseName, "节次：$classTime", "上课周：$classWeek", "地点：$location", "教师：$teacher"))
+                courseList.add(
+                    CourseData.CourseInfo(
+                        courseName,
+                        "节次：$classTime",
+                        "上课周：$classWeek",
+                        "地点：$location",
+                        "教师：$teacher"
+                    )
+                )
             } catch (e: Exception) {
                 Log.e("parseHtml", "Error parsing course element: ${e.message}")
             }
         }
 
-        return DayCourses(dateElement, courseList.distinct())
+        return CourseData.DayCourses(dateElement, courseList.distinct())
     }
 
     class SSLSocketFactoryCompat : SSLSocketFactory() {
@@ -99,14 +110,4 @@ class ECJTUCalendarAPI {
     }
 
 }
-data class CourseInfo(
-    val courseName: String,
-    val courseTime: String,
-    val courseWeek: String,
-    val courseLocation: String,
-    val courseTeacher: String
-)
-data class DayCourses(
-    val date: String,
-    val courses: List<CourseInfo>
-)
+

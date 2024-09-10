@@ -1,23 +1,29 @@
-package com.lonx.ecjtu.hjcalendar.fragments
+package com.lonx.ecjtu.hjcalendar.fragment
 
 import android.app.DatePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.recyclerAdapters.*
-import com.lonx.ecjtu.hjcalendar.utils.*
-import com.lonx.ecjtu.hjcalendar.viewModels.CalendarViewModel
-import kotlinx.coroutines.*
+import com.lonx.ecjtu.hjcalendar.recycler.CourseDayAdapter
+import com.lonx.ecjtu.hjcalendar.recycler.CourseItemAdapter
+import com.lonx.ecjtu.hjcalendar.util.CourseData.CourseInfo
+import com.lonx.ecjtu.hjcalendar.util.ToastUtil
+import com.lonx.ecjtu.hjcalendar.viewModel.CalendarViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -77,7 +83,6 @@ class CalendarFragment : Fragment() {
             true  // 返回 true 表示事件已处理
         }
 
-
         // 观察数据变化
         calendarViewModel.courseList.observe(viewLifecycleOwner) { dayCourseList ->
             adapter.updateData(dayCourseList)
@@ -112,9 +117,10 @@ class CalendarFragment : Fragment() {
 
     // 更新课程数据
     private fun refreshCourseData(date: String = getCurrentDate()) {
-        val sharedPreferences = requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val weiXinID = sharedPreferences.getString("weixin_id", "")
         swipeRefreshLayout.isRefreshing = true
+
         // 获取数据
         calendarViewModel.fetchCourseInfo(
             weiXinID ?: "",
@@ -127,17 +133,21 @@ class CalendarFragment : Fragment() {
                 ToastUtil.showToast(requireContext(), "课程获取失败：$message")
             }
         )
+
+        // 延迟取消刷新状态
         scope.launch {
             delay(refreshInterval)
             _isRefreshing = false
             swipeRefreshLayout.isRefreshing = false
         }
     }
+
     private fun resetToToday() {
         calendar.time = Date()  // 重置 Calendar 为今天
         refreshCourseData()     // 刷新课程数据
         ToastUtil.showToast(requireContext(), "已回到今天")
     }
+
     private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return dateFormat.format(calendar.time)

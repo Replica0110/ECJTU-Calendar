@@ -33,4 +33,7 @@
     <string name="source_code_url">https://github.com/Agiens02/ECJTU-Calendar</string>
     <string name="app_version_key">应用版本</string>
     <string name="app_version_title">应用版本</string>
+    <string name="empty_course_message">人生得意须尽欢，莫使金樽空对月</string>
+    <string name="error_course_title">课表加载错误</string>
+    <string name="error_course_message">请检查weiXinID是否有误，以及网络是否连接</string>
 </resources>

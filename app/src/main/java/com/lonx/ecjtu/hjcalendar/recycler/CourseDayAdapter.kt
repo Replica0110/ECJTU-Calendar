@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.recyclerAdapters
+package com.lonx.ecjtu.hjcalendar.recycler
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.utils.DayCourses
+import com.lonx.ecjtu.hjcalendar.util.CourseData.DayCourses
 
 
 class CourseDayAdapter(

@@ -1,14 +1,13 @@
-package com.lonx.ecjtu.hjcalendar.recyclerAdapters
+package com.lonx.ecjtu.hjcalendar.recycler
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.utils.CourseInfo
-import kotlin.random.Random
+import com.lonx.ecjtu.hjcalendar.util.CourseData.CourseInfo
 
 class CourseItemAdapter(
     private var courseList: List<CourseInfo>,
@@ -38,7 +37,7 @@ class CourseItemAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (courseList[position].courseName == "课表为空") VIEW_TYPE_EMPTY else VIEW_TYPE_NORMAL
+        return if (courseList[position].courseName == "课表为空" || courseList[position].courseName == "课表加载错误") VIEW_TYPE_EMPTY else VIEW_TYPE_NORMAL
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -66,14 +65,25 @@ class CourseItemAdapter(
                 onItemClickListener?.onItemClick(course, position)
             }
         } else if (holder is EmptyCourseViewHolder) {
-            val sharedPreferences = holder.itemView.context.getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
-            val emptyCourseText = sharedPreferences.getString("no_course_text", "")
-            holder.emptyCourseTitle.text = "轻松一下"
-            holder.emptyCourseMessage.text = emptyCourseText
+            // 使用 PreferenceManager 统一访问 SharedPreferences
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(holder.itemView.context)
+            if (course.courseName == "课表为空") {
+                // 获取空课表的自定义文本
+                val emptyCourseText = sharedPreferences.getString(
+                    "no_course_text",
+                    holder.itemView.context.getString(R.string.empty_course_message)
+                )
+                holder.emptyCourseTitle.text =
+                    holder.itemView.context.getString(R.string.empty_course_title)
+                holder.emptyCourseMessage.text = emptyCourseText
+            } else if (course.courseName == "课表加载错误") {
+                holder.emptyCourseTitle.text =
+                    holder.itemView.context.getString(R.string.error_course_title)
+                holder.emptyCourseMessage.text =
+                    holder.itemView.context.getString(R.string.error_course_message)
+            }
         }
     }
 
     override fun getItemCount() = courseList.size
-
 }
-

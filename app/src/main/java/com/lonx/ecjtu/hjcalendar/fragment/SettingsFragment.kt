@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.fragments
+package com.lonx.ecjtu.hjcalendar.fragment
 
 import android.content.Context
 import android.content.Intent
@@ -7,12 +7,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.google.android.material.textfield.TextInputEditText
+import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
+import com.lonx.ecjtu.hjcalendar.util.ToastUtil
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -24,6 +25,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setVersionInfo()
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
         when (preference.key) {
             getString(R.string.developer) -> openURL(developerIntent)
@@ -45,7 +49,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun showInputDialog(preference: Preference) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edittext, null)
         val textInput = dialogView.findViewById<TextInputEditText>(R.id.text_input)
-        val sharedPreferences = requireActivity().getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+
         val key = when (preference.key) {
             getString(R.string.weixin_id_key) -> "weixin_id"
             getString(R.string.no_course_key) -> "no_course_text"

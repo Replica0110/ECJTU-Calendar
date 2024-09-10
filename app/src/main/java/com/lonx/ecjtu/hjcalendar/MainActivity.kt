@@ -7,8 +7,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.lonx.ecjtu.hjcalendar.fragments.CalendarFragment
-import com.lonx.ecjtu.hjcalendar.fragments.SettingsFragment
+import com.lonx.ecjtu.hjcalendar.fragment.CalendarFragment
+import com.lonx.ecjtu.hjcalendar.fragment.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
 

@@ -38,4 +38,9 @@
     <string name="error_course_message">请检查weiXinID是否有误，以及网络是否连接</string>
     <string name="weixin_id_hint">请输入你的weiXinID</string>
     <string name="no_course_hint">请输入课程卡片文本</string>
+    <string name="sample_date">9.9</string>
+    <string name="widget_sample_weekday">周六</string>
+    <string name="widget_title_today">今天</string>
+    <string name="widget_title_tomorrow">明天</string>
+    <string name="widget_divider">这是一条分割线</string>
 </resources>

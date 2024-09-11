@@ -1,81 +1,145 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    android:theme="@style/Theme.AppWidget.AppWidgetContainerParent"
+    android:id="@android:id/background"
+    android:padding="12dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@color/primary_dark"
-    android:layout_margin="2dp"
-    android:elevation="2dp">
+    style="@style/Widget.AppWidget.AppWidget.Container"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView
-        android:id="@+id/tv_today"
+    <RelativeLayout
+        android:id="@+id/rl_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="2024-09-10"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        android:layout_marginBottom="8dp" />
+        android:layout_height="wrap_content">
+        <TextView
+            android:textSize="13sp"
+            android:textColor="@color/gray"
+            android:id="@+id/tv_schedule_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:maxLines="1"
+            android:maxLength="12"
+            style="@style/TextAppearance.AppCompat.Medium" />
+        <TextView
+            android:textSize="13sp"
+            android:textColor="@color/gray"
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sample_date"
+            android:layout_marginEnd="8dp"
+            android:layout_toStartOf="@id/tv_week"
+            style="@style/TextAppearance.AppCompat.Medium" />
+        <TextView
+            android:textSize="13sp"
+            android:textColor="@color/primary_lite"
+            android:id="@+id/tv_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_sample_weekday"
+            android:layout_alignParentEnd="true"
+            style="@style/TextAppearance.AppCompat.Medium" />
+    </RelativeLayout>
 
     <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/ll_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/rl_title">
+        <TextView
+            android:textSize="12sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_title_today"
+            android:textColor="@color/gray"
+            android:layout_weight="1.0"
+            android:layout_marginStart="4dp"
+            android:gravity="center" />
+        <TextView
+            android:textSize="12sp"
+            android:textColor="@color/gray"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_title_tomorrow"
+            android:layout_weight="1.0"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
+        android:layout_below="@id/ll_title">
 
-        <LinearLayout
+        <ImageView
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.01"
+            android:background="#C5C5C5"
+            android:contentDescription="@string/widget_divider" />
+        <FrameLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:padding="8dp">
-
-            <TextView
-                android:id="@+id/tv_today_title"
+            android:layout_height="match_parent"
+            android:layout_weight="2.5">
+            <ListView
+                android:id="@+id/lv_course"
+                android:scrollbars="none"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="今天课程"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="4dp" />
+                android:dividerHeight="2dp" />
+            <TextView
+                android:textSize="11sp"
+                android:gravity="center"
+                android:id="@+id/empty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/empty_course_message"
+                android:textColor="@android:color/darker_gray"
+                android:lineSpacingExtra="8dp"
+                android:textAlignment="center" />
+        </FrameLayout>
+        <ImageView
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.01"
+            android:background="#C5C5C5"
+            android:contentDescription="@string/widget_divider" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2.5">
 
             <ListView
-                android:id="@+id/lv_today_courses"
+                android:id="@+id/lv_course_next_day"
+                android:scrollbars="none"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/design_default_color_on_primary"
-                android:scrollbars="none" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:padding="8dp">
-
+                android:divider="#00000000"
+                android:dividerHeight="2dp" />
             <TextView
-                android:id="@+id/tv_tomorrow_title"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:id="@+id/empty_next_day"
+                android:padding="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="明天课程"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="4dp" />
+                android:layout_height="match_parent"
+                android:text="@string/empty_course_message"
+                android:textColor="@android:color/darker_gray"
+                android:lineSpacingExtra="8dp"
+                android:textAlignment="center" />
 
-            <ListView
-                android:id="@+id/lv_tomorrow_courses"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/design_default_color_on_primary"
-                android:scrollbars="none" />
-
-        </LinearLayout>
-
+        </FrameLayout>
+        <ImageView
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.01"
+            android:background="#C5C5C5"
+            android:contentDescription="@string/widget_divider" />
     </LinearLayout>
 </RelativeLayout>

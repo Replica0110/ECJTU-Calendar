@@ -45,9 +45,15 @@
 
         <!-- 配置 RemoteViewsService -->
         <service
-            android:name=".service.CourseListWidgetService"
+            android:name=".service.TodayWidgetService"
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS">
         </service>
+        <service
+        android:name=".service.TomorrowWidgetService"
+        android:exported="true"
+        android:permission="android.permission.BIND_REMOTEVIEWS">
+        </service>
+
     </application>
 </manifest>

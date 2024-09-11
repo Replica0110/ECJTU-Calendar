@@ -6,10 +6,7 @@
     </style>
 
     <style name="Widget.AppWidget.AppWidget.Container" parent="@android:style/Widget">
-        <item name="android:background">@drawable/system_appwidget_bg</item>
+        <item name="android:background">@drawable/shape_widget_radius</item>
         <item name="android:colorAccent">@color/md_theme_light_primary</item>
     </style>
-
-
-
 </resources>

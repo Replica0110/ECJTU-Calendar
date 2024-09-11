@@ -21,7 +21,7 @@ class CourseDayAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayCourseViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_day_course, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.cardview_day_course, parent, false)
         return DayCourseViewHolder(view)
     }
 

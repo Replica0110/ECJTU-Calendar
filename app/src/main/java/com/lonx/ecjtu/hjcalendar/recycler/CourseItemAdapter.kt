@@ -42,10 +42,10 @@ class CourseItemAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_EMPTY) {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_empty_course, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.cardview_empty_course, parent, false)
             EmptyCourseViewHolder(view)
         } else {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_course, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.cardview_course, parent, false)
             CourseViewHolder(view)
         }
     }

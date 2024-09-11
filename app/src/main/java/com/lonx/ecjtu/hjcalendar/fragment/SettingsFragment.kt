@@ -25,9 +25,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setVersionInfo()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-    }
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
         when (preference.key) {
             getString(R.string.developer) -> openURL(developerIntent)

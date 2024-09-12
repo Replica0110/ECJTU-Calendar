@@ -13,7 +13,7 @@ import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-class ECJTUCalendarAPI {
+object ECJTUCalendarAPI {
 
     suspend fun getCourseInfo(weiXinID: String, date: String): String? = withContext(Dispatchers.IO) {
         try {

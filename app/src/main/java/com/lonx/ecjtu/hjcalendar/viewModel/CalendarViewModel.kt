@@ -14,7 +14,6 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
 
     private val _courseList = MutableLiveData<List<CourseData.DayCourses>>()
     val courseList: LiveData<List<CourseData.DayCourses>> = _courseList
-    private val ecjtuAPI = ECJTUCalendarAPI()
     // 添加回调参数
     fun fetchCourseInfo(
         weiXinID: String,
@@ -28,7 +27,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     listOf(CourseData.CourseInfo(
                         courseName = "课表加载错误"))
                 ))
-                val html = ecjtuAPI.getCourseInfo(weiXinID,date)
+                val html = ECJTUCalendarAPI.getCourseInfo(weiXinID,date)
 //                Log.e("fetchCourseInfo", "HTML: $html")
                 if (html != null) {
                     if (html.isNotBlank()) {
@@ -37,7 +36,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                             _courseList.postValue(errorDayCourses)
                             onFailure?.invoke("无效的weiXinID")
                         } else {
-                            val dayCourse = ecjtuAPI.parseHtml(html)
+                            val dayCourse = ECJTUCalendarAPI.parseHtml(html)
                             _courseList.postValue(listOf(dayCourse))
                             onSuccess?.invoke("日历已更新")
                         }

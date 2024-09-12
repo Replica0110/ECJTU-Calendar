@@ -110,6 +110,7 @@ android {
 dependencies {
     implementation(libs.gson)
     implementation(libs.jsoup.jsoup)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

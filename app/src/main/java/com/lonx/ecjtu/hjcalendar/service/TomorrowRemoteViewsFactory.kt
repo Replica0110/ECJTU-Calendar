@@ -17,18 +17,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class TodayWidgetService : RemoteViewsService() {
+class TomorrowRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
 
-    override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
-        return TodayRemoteViewsFactory(this.applicationContext, intent)
-    }
-}
-
-
-class TodayRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
-
-    private var todayList: ArrayList<CourseData.CourseInfo> = ArrayList()
-    private var isTodayLoading: Boolean = false
+    private var tomorrowList: ArrayList<CourseData.CourseInfo> = ArrayList()
+    private var isTomorrowLoading: Boolean = false
 
     override fun onCreate() {
         // 初始化，获取数据
@@ -37,40 +29,39 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
 
     override fun onDataSetChanged() {
         // 数据变更时调用，重新获取数据
-        if (!isTodayLoading) {
+        if (!isTomorrowLoading) {
             loadDataInBackground()
         }
     }
 
     override fun onDestroy() {
         // 清理
-        todayList.clear()
+        tomorrowList.clear()
     }
 
     override fun getCount(): Int {
-        return if (todayList.isEmpty() || todayList.all { it.courseName == "课表为空" }) {
+        return if (tomorrowList.isEmpty() || tomorrowList.all { it.courseName == "课表为空" }) {
             0
         } else {
-            todayList.size
+            tomorrowList.size
         }
     }
 
 
     override fun getViewAt(position: Int): RemoteViews? {
-        val course = todayList[position]
+        val course = tomorrowList[position]
 
-        // 检查数据是否为空，如果为空，则返回 null
+        // 检查课程名称是否为 "课表为空"
         if (course.courseName == "课表为空") {
             return null
         }
 
         // 当前位置的数据有效，则设置 RemoteViews
-        val views = RemoteViews(context.packageName, R.layout.widget_course_item)
-        views.setTextViewText(R.id.tv_course_name, course.courseName)
-        views.setTextViewText(R.id.tv_course_time, course.courseTime)
-        views.setTextViewText(R.id.tv_course_location, course.courseLocation)
-
-        return views
+        return RemoteViews(context.packageName, R.layout.widget_course_item).apply {
+            setTextViewText(R.id.tv_course_name, course.courseName)
+            setTextViewText(R.id.tv_course_time, course.courseTime)
+            setTextViewText(R.id.tv_course_location, course.courseLocation)
+        }
     }
 
 
@@ -91,37 +82,37 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
     }
 
     private fun loadDataInBackground() {
-        isTodayLoading = true
+        isTomorrowLoading = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 获取今天的日期
+                // 获取明天的日期
                 val calendar = Calendar.getInstance()
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val todayDate = dateFormat.format(calendar.time)
-                Log.e("今天日期", "重新创建实例获取的今天是：$todayDate")
+                val tomorrowDate = dateFormat.format(calendar.time)
                 val weiXinID = intent.getStringExtra("weiXinID") ?: ""
-                val html = ECJTUCalendarAPI().getCourseInfo(weiXinID, todayDate) ?: ""
-                val dayCourses = ECJTUCalendarAPI().parseHtml(html)
-                Log.e("今天课程", "${dayCourses.courses}")
-                Log.e("日期", "今天是：${dayCourses.date}")
+                val html = ECJTUCalendarAPI.getCourseInfo(weiXinID, tomorrowDate) ?: ""
+                val dayCourses = ECJTUCalendarAPI.parseHtml(html)
+                Log.e("明天课程", "${dayCourses.courses}")
+                Log.e("日期", "明天是：${dayCourses.date}")
 
                 // 更新数据并通知 UI 更新
                 withContext(Dispatchers.Main) {
-                    todayList.clear()
-                    todayList.addAll(dayCourses.courses)
+                    tomorrowList.clear()
+                    tomorrowList.addAll(dayCourses.courses)
 
                     // 仅当数据有变化时才通知 AppWidget 更新
-                    if (todayList.isNotEmpty()) {
+                    if (tomorrowList.isNotEmpty()) {
                         AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(
                             intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID),
-                            R.id.lv_course
+                            R.id.lv_course_next_day
                         )
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                isTodayLoading = false // 标记数据加载结束
+                isTomorrowLoading = false // 标记数据加载结束
             }
         }
     }

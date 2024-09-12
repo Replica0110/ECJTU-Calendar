@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +30,7 @@ import java.util.Date
 import java.util.Locale
 
 class CalendarFragment : Fragment() {
-    private lateinit var calendarViewModel: CalendarViewModel
+    private val calendarViewModel by viewModels<CalendarViewModel>()
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var dateButton: FloatingActionButton
     private var _isRefreshing = false
@@ -58,8 +58,6 @@ class CalendarFragment : Fragment() {
         })
         recyclerView.adapter = adapter
 
-        // 初始化ViewModel
-        calendarViewModel = ViewModelProvider(this)[CalendarViewModel::class.java]
 
         // 初始化下拉刷新
         swipeRefreshLayout = view.findViewById(R.id.swipe_course_card)

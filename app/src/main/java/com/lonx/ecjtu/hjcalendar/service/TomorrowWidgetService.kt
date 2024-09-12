@@ -94,11 +94,17 @@ class TomorrowRemoteViewsFactory(private val context: Context, private val inten
         isTomorrowLoading = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // 获取明天的日期
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val tomorrowDate = dateFormat.format(calendar.time)
                 val weiXinID = intent.getStringExtra("weiXinID") ?: ""
-                val date = getTomorrowDate()
-                val html = ECJTUCalendarAPI().getCourseInfo(weiXinID, date) ?: ""
+                val html = ECJTUCalendarAPI().getCourseInfo(weiXinID, tomorrowDate) ?: ""
                 val dayCourses = ECJTUCalendarAPI().parseHtml(html)
                 Log.e("明天课程", "${dayCourses.courses}")
+                Log.e("日期", "明天是：${dayCourses.date}")
+
                 // 更新数据并通知 UI 更新
                 withContext(Dispatchers.Main) {
                     tomorrowList.clear()
@@ -121,13 +127,4 @@ class TomorrowRemoteViewsFactory(private val context: Context, private val inten
     }
 
 
-    private fun getTomorrowDate(): String {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_MONTH, 1)
-        val dateFormat = SimpleDateFormat(
-            "yyyy-MM-dd", Locale.getDefault()
-        )
-        return dateFormat.format(calendar.time)
-
-    }
 }

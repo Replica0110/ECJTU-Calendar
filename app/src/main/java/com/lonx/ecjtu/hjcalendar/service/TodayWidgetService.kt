@@ -94,10 +94,13 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
         isTodayLoading = true
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // 获取今天的日期
+                val calendar = Calendar.getInstance()
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val todayDate = dateFormat.format(calendar.time)
+                Log.e("今天日期", "重新创建实例获取的今天是：$todayDate")
                 val weiXinID = intent.getStringExtra("weiXinID") ?: ""
-                val date =getTodayDate()
-                val html = ECJTUCalendarAPI().getCourseInfo(weiXinID, date) ?: ""
-
+                val html = ECJTUCalendarAPI().getCourseInfo(weiXinID, todayDate) ?: ""
                 val dayCourses = ECJTUCalendarAPI().parseHtml(html)
                 Log.e("今天课程", "${dayCourses.courses}")
                 Log.e("日期", "今天是：${dayCourses.date}")
@@ -123,11 +126,5 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
         }
     }
 
-    private fun getTodayDate(): String {
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(calendar.time)
 
-    }
-    // TODO 处理获取的dayCourses.date，格式为“2024-09-11 星期三（第2周）”，获取日期，示例格式为“3.26”，获取星期，示例格式为“周四”，获取周数，示例格式为“第2周”
 }

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- 需要网络权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Optional: 如果需要使用 AlarmManager 或其他后台机制来触发更新 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -14,13 +20,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ECJTU"
         tools:targetApi="31">
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,10 +38,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.intent.action.DATE_CHANGED" />
-                <action android:name="android.intent.action.TIME_CHANGED" />
-                <action android:name="android.intent.action.TIME_TICK" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
             <!-- 配置 AppWidgetProvider 的元数据 -->
             <meta-data
@@ -50,10 +53,17 @@
             android:permission="android.permission.BIND_REMOTEVIEWS">
         </service>
         <service
-        android:name=".service.TomorrowWidgetService"
-        android:exported="true"
-        android:permission="android.permission.BIND_REMOTEVIEWS">
+            android:name=".service.TomorrowWidgetService"
+            android:exported="true"
+            android:permission="android.permission.BIND_REMOTEVIEWS">
         </service>
+
+        <!-- WorkManager 必要的服务 -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge" />
 
     </application>
 </manifest>

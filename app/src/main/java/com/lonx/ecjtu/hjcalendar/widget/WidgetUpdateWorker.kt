@@ -41,8 +41,20 @@ class WidgetUpdateWorker(
     }
 
     private suspend fun fetchCourseData(weiXinID: String, date: String): CourseData.DayCourses {
-        val html = ECJTUCalendarAPI.getCourseHtml(weiXinID, date).orEmpty()
-        return ECJTUCalendarAPI.parseCourseHtml(html)
+        return try {
+            val html = ECJTUCalendarAPI.getCourseHtml(weiXinID, date).orEmpty()
+            if (html.isBlank() || html.contains("<title>教务处微信平台绑定</title>")) {
+                Log.e("WidgetUpdateWorker", "Invalid or blank HTML response for date: $date")
+                // Handle invalid HTML response
+                CourseData.DayCourses(date, listOf(CourseData.CourseInfo(courseName = "课表加载错误")))
+            } else {
+                ECJTUCalendarAPI.parseCourseHtml(html)
+            }
+        } catch (e: Exception) {
+            Log.e("WidgetUpdateWorker", "Error fetching course data for date: $date", e)
+            // Handle parsing errors
+            CourseData.DayCourses(date, listOf(CourseData.CourseInfo(courseName = "课表加载错误")))
+        }
     }
 
     private fun getDate(tomorrow: Boolean = false): String {
@@ -53,14 +65,19 @@ class WidgetUpdateWorker(
     }
 
     private fun updateWidgets(todayCourses: CourseData.DayCourses, tomorrowCourses: CourseData.DayCourses) {
-        val appWidgetManager = AppWidgetManager.getInstance(appContext)
-        val thisWidget = ComponentName(appContext, CourseWidgetProvider::class.java)
-        val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
+        try {
+            val appWidgetManager = AppWidgetManager.getInstance(appContext)
+            val thisWidget = ComponentName(appContext, CourseWidgetProvider::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
 
-        val provider = CourseWidgetProvider()
-        for (appWidgetId in appWidgetIds) {
-            provider.updateAppWidget(appContext, appWidgetManager, appWidgetId, todayCourses, tomorrowCourses)
+            val provider = CourseWidgetProvider()
+            for (appWidgetId in appWidgetIds) {
+                provider.updateAppWidget(appContext, appWidgetManager, appWidgetId, todayCourses, tomorrowCourses)
+            }
+            Log.d("WidgetUpdateWorker", "Widgets updated successfully.")
+        } catch (e: Exception) {
+            Log.e("WidgetUpdateWorker", "Error updating widgets", e)
         }
-        Log.d("WidgetUpdateWorker", "Widgets updated successfully.")
     }
 }
+

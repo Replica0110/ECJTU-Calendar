@@ -23,14 +23,15 @@
 
         <ImageButton
             android:id="@+id/refresh_button"
+            style="@style/TextAppearance.AppCompat.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginStart="60dp"
             android:layout_marginEnd="8dp"
+            android:layout_toStartOf="@+id/tv_date"
             android:background="@color/design_default_color_on_primary"
             android:contentDescription="更新按钮"
-            android:src="@drawable/ic_refresh" />
+            android:src="@drawable/ic_refresh_button" />
 
         <TextView
             android:textSize="13sp"
@@ -46,6 +47,7 @@
             android:textSize="13sp"
             android:textColor="@color/primary_lite"
             android:id="@+id/tv_week"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_sample_weekday"

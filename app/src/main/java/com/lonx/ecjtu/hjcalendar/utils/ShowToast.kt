@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.util
+package com.lonx.ecjtu.hjcalendar.utils
 
 import android.content.Context
 import android.widget.Toast

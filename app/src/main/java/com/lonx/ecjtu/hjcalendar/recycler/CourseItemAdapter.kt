@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.util.CourseData.CourseInfo
+import com.lonx.ecjtu.hjcalendar.utils.CourseData.CourseInfo
 
 class CourseItemAdapter(
     private var courseList: List<CourseInfo>,

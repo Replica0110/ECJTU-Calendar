@@ -6,8 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.hjcalendar.util.CourseData
-import com.lonx.ecjtu.hjcalendar.util.ECJTUCalendarAPI
+import com.lonx.ecjtu.hjcalendar.utils.CourseData
+import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
 import kotlinx.coroutines.launch
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {

@@ -12,7 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.util.ToastUtil
+import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

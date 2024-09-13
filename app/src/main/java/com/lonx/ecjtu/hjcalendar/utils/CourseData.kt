@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.util
+package com.lonx.ecjtu.hjcalendar.utils
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -71,6 +71,15 @@ class CourseData {
             override fun newArray(size: Int): Array<DayCourses?> {
                 return arrayOfNulls(size)
             }
+        }
+    }
+
+    companion object {
+        fun DayCourses(): DayCourses {
+            return DayCourses("课表为空", listOf(
+                CourseInfo("N/A", "N/A", "N/A", "N/A", "N/A")
+            ))
+
         }
     }
 }

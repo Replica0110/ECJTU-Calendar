@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.util.CourseData.DayCourses
+import com.lonx.ecjtu.hjcalendar.utils.CourseData.DayCourses
 
 
 class CourseDayAdapter(

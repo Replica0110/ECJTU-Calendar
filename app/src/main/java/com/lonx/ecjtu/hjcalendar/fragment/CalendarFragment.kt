@@ -16,8 +16,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.recycler.CourseDayAdapter
 import com.lonx.ecjtu.hjcalendar.recycler.CourseItemAdapter
-import com.lonx.ecjtu.hjcalendar.util.CourseData.CourseInfo
-import com.lonx.ecjtu.hjcalendar.util.ToastUtil
+import com.lonx.ecjtu.hjcalendar.utils.CourseData.CourseInfo
+import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.viewModel.CalendarViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

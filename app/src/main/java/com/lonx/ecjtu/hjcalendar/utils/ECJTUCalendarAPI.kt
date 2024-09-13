@@ -1,18 +1,13 @@
-package com.lonx.ecjtu.hjcalendar.util
+package com.lonx.ecjtu.hjcalendar.utils
 
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.net.InetAddress
-import java.net.Socket
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
@@ -77,7 +72,7 @@ object ECJTUCalendarAPI {
         return CourseData.DayCourses(dateElement, courseList.distinct())
     }
 
-    private val trustAllCerts: Array<TrustManager> = arrayOf<TrustManager>(
+    private val trustAllCerts = arrayOf<TrustManager>(
         object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
             }

@@ -1,9 +1,16 @@
 package com.lonx.ecjtu.hjcalendar.fragment
 
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.annotation.RequiresApi
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -13,6 +20,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
+import com.lonx.ecjtu.hjcalendar.appWidget.CourseWidgetProvider
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -31,10 +39,25 @@ class SettingsFragment : PreferenceFragmentCompat() {
             getString(R.string.tutorial_weixinid_key) -> showAlertDialog(preference.title, R.string.tutorial_weixinid_message)
             getString(R.string.tutorial_date_key) -> showAlertDialog(preference.title, R.string.tutorial_date_message)
             getString(R.string.weixin_id_key), getString(R.string.no_course_key) -> showInputDialog(preference)
+            getString(R.string.pin_appwidget_key) ->addAppWidget()
         }
         return super.onPreferenceTreeClick(preference)
     }
+    private fun addAppWidget() {
+        try {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val provider = context?.let { ComponentName(it, CourseWidgetProvider::class.java) }
 
+            if (appWidgetManager.isRequestPinAppWidgetSupported) {
+                provider?.let { appWidgetManager.requestPinAppWidget(it, null, null) }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ToastUtil.showToast(requireContext(), "添加失败了~")
+            Snackbar.make(requireView(), getString(R.string.snackbar_intent_failed), Snackbar.LENGTH_SHORT).show()
+        }
+
+    }
     private fun showAlertDialog(titleResId: CharSequence?, messageResId: Int) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(titleResId)

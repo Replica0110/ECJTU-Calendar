@@ -143,7 +143,7 @@ class CalendarFragment : Fragment() {
     private fun resetToToday() {
         calendar.time = Date()  // 重置 Calendar 为今天
         refreshCourseData()     // 刷新课程数据
-        ToastUtil.showToast(requireContext(), "已回到今天")
+        ToastUtil.showToast(requireContext(), "已显示今天的课程")
     }
 
     private fun getCurrentDate(): String {

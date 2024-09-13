@@ -67,7 +67,7 @@ class CourseRemoteViewsFactory(private val context: Context, private val intent:
         val dayCourses = intent.getStringExtra("dayCourses")
         val type = object : TypeToken<CourseData.DayCourses>() {}.type
         val deserializedDayCourses: CourseData.DayCourses = Gson().fromJson(dayCourses, type)
-        Log.e("TodayCourse", "Loaded courses: $deserializedDayCourses")
+//        Log.e("TodayCourse", "Loaded courses: $deserializedDayCourses")
         courseList.clear()
         courseList.addAll(deserializedDayCourses.courses)
     }

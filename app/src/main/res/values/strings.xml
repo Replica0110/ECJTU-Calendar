@@ -44,5 +44,8 @@
     <string name="widget_title_tomorrow">明天</string>
     <string name="widget_divider">这是一条分割线</string>
     <string name="widget_sample_week_number">第14周</string>
-    <string name="desc_refresh_button">点一下应该就能更新日历了吧</string>
+    <string name="desc_refresh_button">点一下大概就能刷新小组件吧</string>
+    <string name="pin_appwidget_key">添加桌面小组件</string>
+    <string name="appwidget_title">桌面小组件</string>
+    <string name="pin_appwidget_summary">添加日历小组件到桌面</string>
 </resources>

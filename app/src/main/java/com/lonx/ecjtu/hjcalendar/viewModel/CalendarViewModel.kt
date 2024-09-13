@@ -32,7 +32,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                 if (html != null) {
                     if (html.isNotBlank()) {
                         if (html.contains("<title>教务处微信平台绑定</title>")) {
-                            Log.e("fetchCourseInfo", "Invalid weiXinID")
+//                            Log.e("fetchCourseInfo", "Invalid weiXinID")
                             _courseList.postValue(errorDayCourses)
                             onFailure?.invoke("无效的weiXinID")
                         } else {

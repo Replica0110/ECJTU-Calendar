@@ -1,6 +1,5 @@
-package com.lonx.ecjtu.hjcalendar.widget
+package com.lonx.ecjtu.hjcalendar.appWidget
 
-import android.app.Application
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -55,9 +54,9 @@ class CourseWidgetProvider : AppWidgetProvider() {
 
     private fun handleTimeChange(context: Context) {
         WorkManager.getInstance(context).cancelAllWork()
-        Log.e("onReceive", "workManager已停止")
+        Log.e("onReceive", "workManager stop")
         startWidgetUpdateWorker(context)
-        Log.e("onReceive", "workManager已重启")
+        Log.e("onReceive", "workManager restart")
     }
 
     private fun updateWidgets(context: Context) {

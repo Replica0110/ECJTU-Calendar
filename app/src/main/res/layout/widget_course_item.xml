@@ -15,8 +15,8 @@
         android:contentDescription="@string/widget_divider"
         android:src="@drawable/widget_divider_primary"
         android:scaleType="fitXY"
-        android:layout_marginEnd="4dp"
-        android:layout_marginStart="4dp"/>
+        android:layout_marginEnd="6dp"
+        android:layout_marginStart="6dp"/>
 
     <LinearLayout
         android:layout_width="0dp"

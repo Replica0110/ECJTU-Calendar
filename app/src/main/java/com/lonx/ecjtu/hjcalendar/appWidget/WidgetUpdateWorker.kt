@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.hjcalendar.widget
+package com.lonx.ecjtu.hjcalendar.appWidget
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -32,7 +32,7 @@ class WidgetUpdateWorker(
     private suspend fun fetchCourses(): Pair<CourseData.DayCourses, CourseData.DayCourses> {
         val preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
         val weiXinID = preferences.getString("weixin_id", "").orEmpty()
-        Log.d("WidgetUpdateWorker", "Fetching courses for WeiXinID: $weiXinID")
+        Log.d("WidgetUpdateWorker", "Fetching courses")
 
         val todayCourses = fetchCourseData(weiXinID, getDate())
         val tomorrowCourses = fetchCourseData(weiXinID, getDate(true))
@@ -44,14 +44,14 @@ class WidgetUpdateWorker(
         return try {
             val html = ECJTUCalendarAPI.getCourseHtml(weiXinID, date).orEmpty()
             if (html.isBlank() || html.contains("<title>教务处微信平台绑定</title>")) {
-                Log.e("WidgetUpdateWorker", "Invalid or blank HTML response for date: $date")
+                Log.e("WidgetUpdateWorker", "Invalid or blank HTML response")
                 // Handle invalid HTML response
                 CourseData.DayCourses(date, listOf(CourseData.CourseInfo(courseName = "课表加载错误")))
             } else {
                 ECJTUCalendarAPI.parseCourseHtml(html)
             }
         } catch (e: Exception) {
-            Log.e("WidgetUpdateWorker", "Error fetching course data for date: $date", e)
+            Log.e("WidgetUpdateWorker", "Error fetching course data", e)
             // Handle parsing errors
             CourseData.DayCourses(date, listOf(CourseData.CourseInfo(courseName = "课表加载错误")))
         }

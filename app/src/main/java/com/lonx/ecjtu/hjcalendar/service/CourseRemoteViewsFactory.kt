@@ -10,10 +10,9 @@ import com.google.gson.reflect.TypeToken
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.utils.CourseData
 
-class TodayRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
+class CourseRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
 
-    private var todayList: ArrayList<CourseData.CourseInfo> = ArrayList()
-    private var isTodayLoading: Boolean = false
+    private var courseList: ArrayList<CourseData.CourseInfo> = ArrayList()
 
     init {
         loadDataInBackground()
@@ -28,16 +27,16 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
     }
 
     override fun onDestroy() {
-        todayList.clear()
+        courseList.clear()
     }
 
     override fun getCount(): Int {
-        return todayList.count { it.courseName != "课表为空" }
+        return courseList.count { it.courseName != "课表为空" && it.courseName != "课表加载错误"}
     }
 
     override fun getViewAt(position: Int): RemoteViews? {
-        val course = todayList[position]
-        return if (course.courseName == "课表为空") {
+        val course = courseList[position]
+        return if (course.courseName == "课表为空" || course.courseName == "课表加载错误") {
             null
         } else {
             RemoteViews(context.packageName, R.layout.widget_course_item).apply {
@@ -65,12 +64,11 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
     }
 
     private fun loadDataInBackground() {
-        isTodayLoading = true
         val dayCourses = intent.getStringExtra("dayCourses")
         val type = object : TypeToken<CourseData.DayCourses>() {}.type
         val deserializedDayCourses: CourseData.DayCourses = Gson().fromJson(dayCourses, type)
         Log.e("TodayCourse", "Loaded courses: $deserializedDayCourses")
-        todayList.clear()
-        todayList.addAll(deserializedDayCourses.courses)
+        courseList.clear()
+        courseList.addAll(deserializedDayCourses.courses)
     }
 }

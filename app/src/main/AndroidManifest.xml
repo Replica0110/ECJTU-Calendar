@@ -52,15 +52,9 @@
 
         <!-- 配置 RemoteViewsService -->
         <service
-            android:name=".service.TodayRemoteViewsService"
+            android:name=".service.CourseRemoteViewsService"
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS">
-        </service>
-        <service
-            android:name=".service.TomorrowRemoteViewsService"
-            android:exported="true"
-            android:permission="android.permission.BIND_REMOTEVIEWS">
-
         </service>
 
         <!-- WorkManager 必要的服务 -->

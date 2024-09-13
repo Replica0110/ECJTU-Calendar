@@ -3,9 +3,9 @@ package com.lonx.ecjtu.hjcalendar.service
 import android.content.Intent
 import android.widget.RemoteViewsService
 
-class TomorrowRemoteViewsService : RemoteViewsService() {
+class CourseRemoteViewsService : RemoteViewsService() {
 
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
-        return TomorrowRemoteViewsFactory(this.applicationContext, intent)
+        return CourseRemoteViewsFactory(this.applicationContext, intent)
     }
 }

@@ -74,4 +74,23 @@ class CourseData {
         }
     }
 }
+fun main(){
+    val gson = Gson()
 
+
+    val dayCourses = CourseData.DayCourses("2024-09-12", listOf(
+        CourseData.CourseInfo("Math", "10:00", "Week 1", "Room 101", "Dr. Smith"),
+        CourseData.CourseInfo("Science", "11:00", "Week 1", "Room 102", "Dr. Jones")
+    ))
+    val json = gson.toJson(dayCourses)
+    println(json)
+
+    val type = object : TypeToken<CourseData.DayCourses>() {}.type
+    val deserializedDayCourses: CourseData.DayCourses = gson.fromJson(json, type)
+    println(deserializedDayCourses.courses)
+    val tomorrowList: ArrayList<CourseData.CourseInfo> = ArrayList()
+    for (course in deserializedDayCourses.courses) {
+        tomorrowList.add(course)
+    }
+    println("tomorrowList: $tomorrowList")
+}

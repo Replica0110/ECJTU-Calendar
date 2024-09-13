@@ -1,12 +1,15 @@
 package com.lonx.ecjtu.hjcalendar.util
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.InetAddress
 import java.net.Socket
+import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
@@ -15,12 +18,14 @@ import javax.net.ssl.X509TrustManager
 
 object ECJTUCalendarAPI {
 
-    suspend fun getCourseInfo(weiXinID: String, date: String): String? = withContext(Dispatchers.IO) {
+    suspend fun getCourseHtml(weiXinID: String, date: String): String? = withContext(Dispatchers.IO) {
         try {
             val url="https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet?weiXinID=$weiXinID&date=$date"
             Log.e("getCourseInfo", "URL: $url")
+            val sslContext: SSLContext = SSLContext.getInstance("SSL")
+            sslContext.init(null, trustAllCerts, SecureRandom())
             val doc: Document = Jsoup.connect(url)
-                .sslSocketFactory(SSLSocketFactoryCompat())
+                .sslSocketFactory(sslContext.socketFactory)
                 .get()
             return@withContext doc.html()
         } catch (e: Exception) {
@@ -29,7 +34,7 @@ object ECJTUCalendarAPI {
         }
 
     }
-    fun parseHtml(html: String): CourseData.DayCourses {
+    fun parseCourseHtml(html: String): CourseData.DayCourses {
         val doc: Document = Jsoup.parse(html)
         val courseElements = doc.select("ul.rl_info li")
         val courseList = mutableListOf<CourseData.CourseInfo>()
@@ -72,42 +77,16 @@ object ECJTUCalendarAPI {
         return CourseData.DayCourses(dateElement, courseList.distinct())
     }
 
-    class SSLSocketFactoryCompat : SSLSocketFactory() {
-        private val trustManager = object : X509TrustManager {
-            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-
+    private val trustAllCerts: Array<TrustManager> = arrayOf<TrustManager>(
+        object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
-                Log.d("SSLSocketFactoryCompat", "checkClientTrusted")
             }
 
             override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
-                Log.d("SSLSocketFactoryCompat", "checkServerTrusted")
             }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         }
-
-        private val sslContext: SSLContext = SSLContext.getInstance("TLS").apply {
-            init(null, arrayOf<TrustManager>(trustManager), java.security.SecureRandom())
-        }
-
-        private val delegate: SSLSocketFactory = sslContext.socketFactory
-
-        override fun getDefaultCipherSuites(): Array<String> = delegate.defaultCipherSuites
-
-        override fun getSupportedCipherSuites(): Array<String> = delegate.supportedCipherSuites
-
-        override fun createSocket(s: Socket, host: String, port: Int, autoClose: Boolean): Socket =
-            delegate.createSocket(s, host, port, autoClose)
-
-        override fun createSocket(host: String, port: Int): Socket = delegate.createSocket(host, port)
-
-        override fun createSocket(host: String, port: Int, localHost: InetAddress, localPort: Int): Socket =
-            delegate.createSocket(host, port, localHost, localPort)
-
-        override fun createSocket(host: InetAddress, port: Int): Socket = delegate.createSocket(host, port)
-
-        override fun createSocket(host: InetAddress, port: Int, localHost: InetAddress, localPort: Int): Socket =
-            delegate.createSocket(host, port, localHost, localPort)
-    }
-
+    )
 }
 

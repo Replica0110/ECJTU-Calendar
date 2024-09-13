@@ -6,16 +6,10 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.util.CourseData
-import com.lonx.ecjtu.hjcalendar.util.ECJTUCalendarAPI
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 class TodayRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
 
@@ -23,16 +17,12 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
     private var isTodayLoading: Boolean = false
 
     override fun onCreate() {
-        // 初始化，获取数据
-        Log.e("今天课程", "初始化加载数据")
+
         loadDataInBackground()
     }
 
     override fun onDataSetChanged() {
-        // 数据变更时调用，重新获取数据
-        if (!isTodayLoading) {
-            loadDataInBackground()
-        }
+        loadDataInBackground()
     }
 
     override fun onDestroy() {
@@ -83,39 +73,17 @@ class TodayRemoteViewsFactory(private val context: Context, private val intent: 
 
     private fun loadDataInBackground() {
         isTodayLoading = true
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // 获取今天的日期
-                val calendar = Calendar.getInstance()
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val todayDate = dateFormat.format(calendar.time)
-                Log.e("今天日期", "重新创建实例获取的今天是：$todayDate")
-                val weiXinID = intent.getStringExtra("weiXinID") ?: ""
-                val html = ECJTUCalendarAPI.getCourseInfo(weiXinID, todayDate) ?: ""
-                val dayCourses = ECJTUCalendarAPI.parseHtml(html)
-                Log.e("今天课程", "${dayCourses.courses}")
-                Log.e("日期", "今天是：${dayCourses.date}")
-
+                val dayCourses = intent.getStringExtra("dayCourses")
+                val type = object : TypeToken<CourseData.DayCourses>() {}.type
+                val deserializedDayCourses: CourseData.DayCourses = Gson().fromJson(dayCourses, type)
+                Log.e("今天课程", "Get courses: $deserializedDayCourses")
                 // 更新数据并通知 UI 更新
-                withContext(Dispatchers.Main) {
                     todayList.clear()
-                    todayList.addAll(dayCourses.courses)
-
-                    // 仅当数据有变化时才通知 AppWidget 更新
-                    if (todayList.isNotEmpty()) {
-                        AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(
-                            intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID),
-                            R.id.lv_course
-                        )
+                    for (course in deserializedDayCourses.courses){
+                        todayList.add(course)
                     }
+
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                isTodayLoading = false // 标记数据加载结束
-            }
-        }
-    }
-
-
 }
+
+

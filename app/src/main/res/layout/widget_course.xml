@@ -20,6 +20,14 @@
             android:maxLines="1"
             android:maxLength="12"
             style="@style/TextAppearance.AppCompat.Medium" />
+        <ImageButton
+            android:id="@+id/refresh_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="更新按钮"
+            android:src="@drawable/ic_refresh"
+            android:layout_marginStart="60dp"
+            android:layout_marginEnd="8dp"/>
         <TextView
             android:textSize="13sp"
             android:textColor="@color/gray"
@@ -86,7 +94,7 @@
             android:layout_height="match_parent"
             android:layout_weight="2.5">
             <ListView
-                android:id="@+id/lv_course"
+                android:id="@+id/lv_course_today"
                 android:scrollbars="none"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -94,7 +102,7 @@
             <TextView
                 android:textSize="11sp"
                 android:gravity="center"
-                android:id="@+id/empty"
+                android:id="@+id/empty_today"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/empty_course_message"

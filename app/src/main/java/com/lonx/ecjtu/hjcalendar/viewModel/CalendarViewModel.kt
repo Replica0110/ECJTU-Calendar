@@ -27,7 +27,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     listOf(CourseData.CourseInfo(
                         courseName = "课表加载错误"))
                 ))
-                val html = ECJTUCalendarAPI.getCourseInfo(weiXinID,date)
+                val html = ECJTUCalendarAPI.getCourseHtml(weiXinID,date)
 //                Log.e("fetchCourseInfo", "HTML: $html")
                 if (html != null) {
                     if (html.isNotBlank()) {
@@ -36,7 +36,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                             _courseList.postValue(errorDayCourses)
                             onFailure?.invoke("无效的weiXinID")
                         } else {
-                            val dayCourse = ECJTUCalendarAPI.parseHtml(html)
+                            val dayCourse = ECJTUCalendarAPI.parseCourseHtml(html)
                             _courseList.postValue(listOf(dayCourse))
                             onSuccess?.invoke("日历已更新")
                         }

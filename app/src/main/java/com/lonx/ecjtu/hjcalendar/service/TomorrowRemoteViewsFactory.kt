@@ -4,8 +4,13 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import androidx.preference.PreferenceManager
+import androidx.room.util.copy
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.util.CourseData
 import com.lonx.ecjtu.hjcalendar.util.ECJTUCalendarAPI
@@ -25,13 +30,15 @@ class TomorrowRemoteViewsFactory(private val context: Context, private val inten
     override fun onCreate() {
         // 初始化，获取数据
         loadDataInBackground()
+        Log.e("明天课程", "onCreate")
+
     }
 
     override fun onDataSetChanged() {
         // 数据变更时调用，重新获取数据
-        if (!isTomorrowLoading) {
-            loadDataInBackground()
-        }
+        loadDataInBackground()
+        Log.e("明天课程", "onDataSetChanged")
+
     }
 
     override fun onDestroy() {
@@ -83,39 +90,21 @@ class TomorrowRemoteViewsFactory(private val context: Context, private val inten
 
     private fun loadDataInBackground() {
         isTomorrowLoading = true
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // 获取明天的日期
-                val calendar = Calendar.getInstance()
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val tomorrowDate = dateFormat.format(calendar.time)
-                val weiXinID = intent.getStringExtra("weiXinID") ?: ""
-                val html = ECJTUCalendarAPI.getCourseInfo(weiXinID, tomorrowDate) ?: ""
-                val dayCourses = ECJTUCalendarAPI.parseHtml(html)
-                Log.e("明天课程", "${dayCourses.courses}")
-                Log.e("日期", "明天是：${dayCourses.date}")
 
-                // 更新数据并通知 UI 更新
-                withContext(Dispatchers.Main) {
+                val dayCourses = intent.getStringExtra("dayCourses")
+                val type = object : TypeToken<CourseData.DayCourses>() {}.type
+                val deserializedDayCourses: CourseData.DayCourses = Gson().fromJson(dayCourses, type)
+                Log.e("明天课程", "Get courses：$deserializedDayCourses")
+
+
                     tomorrowList.clear()
-                    tomorrowList.addAll(dayCourses.courses)
-
-                    // 仅当数据有变化时才通知 AppWidget 更新
-                    if (tomorrowList.isNotEmpty()) {
-                        AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(
-                            intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID),
-                            R.id.lv_course_next_day
-                        )
+                    for (course in deserializedDayCourses.courses) {
+                        tomorrowList.add(course)
                     }
+
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                isTomorrowLoading = false // 标记数据加载结束
-            }
+
         }
-    }
 
 
-}
+

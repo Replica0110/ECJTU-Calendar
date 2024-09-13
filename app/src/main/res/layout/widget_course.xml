@@ -20,14 +20,18 @@
             android:maxLines="1"
             android:maxLength="12"
             style="@style/TextAppearance.AppCompat.Medium" />
+
         <ImageButton
             android:id="@+id/refresh_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="更新按钮"
-            android:src="@drawable/ic_refresh"
+            android:gravity="center"
             android:layout_marginStart="60dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:background="@color/design_default_color_on_primary"
+            android:contentDescription="更新按钮"
+            android:src="@drawable/ic_refresh" />
+
         <TextView
             android:textSize="13sp"
             android:textColor="@color/gray"

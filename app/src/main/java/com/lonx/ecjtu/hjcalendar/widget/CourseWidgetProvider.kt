@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -18,6 +19,7 @@ import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.service.TodayRemoteViewsService
 import com.lonx.ecjtu.hjcalendar.service.TomorrowRemoteViewsService
+import com.lonx.ecjtu.hjcalendar.service.WidgetUpdateWorker
 import com.lonx.ecjtu.hjcalendar.util.CourseData
 import com.lonx.ecjtu.hjcalendar.util.ECJTUCalendarAPI
 import kotlinx.coroutines.CoroutineScope
@@ -76,7 +78,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         Log.e("onUpdate", "onUpdate")
-
+        Log.e("appWidgetIds", appWidgetIds.toString())
         val today=getDate()
         val tomorrow=getDate(true)
         val weiXinID=PreferenceManager.getDefaultSharedPreferences(context).getString("weixin_id", "")?:""
@@ -91,20 +93,6 @@ class CourseWidgetProvider : AppWidgetProvider() {
                 withContext(Dispatchers.Main){
                     for (appWidgetId in appWidgetIds) {
                         updateAppWidget(context, appWidgetManager, appWidgetId,todayCourses, tomorrowCourses)
-                        // 设置点击更新事件
-                        val intent = Intent(context, CourseWidgetProvider::class.java).apply {
-                            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
-                        }
-
-                        val pendingIntent = PendingIntent.getBroadcast(
-                            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                        )
-
-                        val views = RemoteViews(context.packageName, R.layout.widget_course)
-                        views.setOnClickPendingIntent(R.id.refresh_button, pendingIntent) // 点击按钮触发更新
-
-                        appWidgetManager.updateAppWidget(appWidgetId, views)
                     }
                 }
             }
@@ -130,7 +118,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
             )
 
     }
-    private fun updateAppWidget(
+    fun updateAppWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
@@ -146,12 +134,12 @@ class CourseWidgetProvider : AppWidgetProvider() {
             putExtra("weiXinID", weiXinID)
             putExtra("dayCourses", Gson().toJson(todayCourses))
         }
+
         // 构建 TomorrowRemoteViewsService 的 Intent
         val tomorrowIntent = Intent(context, TomorrowRemoteViewsService::class.java).apply {
             putExtra("weiXinID", weiXinID)
             putExtra("dayCourses", Gson().toJson(tomorrowCourses))
         }
-
 
         // 创建 RemoteViews，绑定到小组件布局
         val views = RemoteViews(context.packageName, R.layout.widget_course).apply {
@@ -169,6 +157,16 @@ class CourseWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(R.id.tv_week, weekDay)
         Log.e("onUpdate", "appWidgetId: $appWidgetId")
         // 更新小组件
+        val intent = Intent(context, CourseWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetId)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        views.setOnClickPendingIntent(R.id.refresh_button, pendingIntent) // 点击按钮触发更新
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
@@ -190,43 +188,5 @@ class CourseWidgetProvider : AppWidgetProvider() {
         }
         return dateFormat.format(calendar.time)
     }
-    class WidgetUpdateWorker(private val appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
 
-        override suspend fun doWork(): Result {
-
-            return try {
-                val (todayCourses, tomorrowCourses) = getTodayAndTomorrowCourse(appContext)
-                val appWidgetManager = AppWidgetManager.getInstance(appContext)
-                val thisWidget = ComponentName(appContext, CourseWidgetProvider::class.java)
-                val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
-                val provider = CourseWidgetProvider()
-                for (appWidgetId in appWidgetIds){
-                    provider.updateAppWidget(appContext, appWidgetManager, appWidgetId,todayCourses, tomorrowCourses)
-                }
-                Result.success()
-            } catch (e: Exception) {
-                Result.failure()
-            }
-
-
-        }
-        private suspend fun getTodayAndTomorrowCourse(appContext: Context): Pair<CourseData.DayCourses, CourseData.DayCourses> {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
-            val weiXinID = preferences.getString("weixin_id", "")?: ""
-            Log.e("getTodayAndTomorrowCourse", "getTodayAndTomorrowCourse", )
-            val todayHtml = ECJTUCalendarAPI.getCourseHtml(weiXinID, getDate()) ?: ""
-            val todayCourses: CourseData.DayCourses = ECJTUCalendarAPI.parseCourseHtml(todayHtml)
-            val tomorrowHtml = ECJTUCalendarAPI.getCourseHtml(weiXinID, getDate(true)) ?: ""
-            val tomorrowCourses: CourseData.DayCourses = ECJTUCalendarAPI.parseCourseHtml(tomorrowHtml)
-            return Pair(todayCourses, tomorrowCourses)
-        }
-        private fun getDate(tomorrow: Boolean=false): String {
-            val calendar = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            if (tomorrow){
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-            }
-            return dateFormat.format(calendar.time)
-        }
-    }
 }

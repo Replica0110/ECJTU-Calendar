@@ -36,20 +36,8 @@
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/day_text_view"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/tips_text_view" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- 新增的tips TextView -->
-        <TextView
-            android:id="@+id/tips_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tips:下拉可以刷新日历~"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:padding="1dp"
-            android:layout_margin="8dp"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

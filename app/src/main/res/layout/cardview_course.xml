@@ -21,22 +21,14 @@
             android:layout_width="match_parent"
             android:gravity="center"
             android:layout_height="wrap_content"
-            android:paddingBottom="4dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
             android:text="课程"
             android:maxLines="1"
             android:textStyle="bold"
             android:textSize="18sp"
             android:textColor="@android:color/black" />
-        <view class="android.view.View"
-            android:layout_width="match_parent"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_height="1dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
-            android:background="@android:color/darker_gray"
-            />
+
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/course_time"
             android:layout_width="wrap_content"
@@ -48,7 +40,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/black_lite"
             android:paddingBottom="4dp" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -62,7 +54,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/black_lite"
             android:paddingBottom="4dp"/>
 
         <com.google.android.material.textview.MaterialTextView
@@ -76,7 +68,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/black_lite"
             android:paddingBottom="4dp" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -90,9 +82,8 @@
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
-            android:paddingBottom="4dp"
-            android:layout_marginBottom="8dp"/>
+            android:textColor="@color/black_lite"
+            android:paddingBottom="4dp"/>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

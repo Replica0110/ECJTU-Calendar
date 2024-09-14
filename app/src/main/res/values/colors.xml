@@ -9,6 +9,7 @@
     <color name="secondary">#ff0099cc</color>
     <color name="secondaryTransparent">#320099cc</color>
     <color name="black">#212121</color>
+    <color name="black_lite">#3C3E45</color>
     <color name="gray">#717171</color>
     <color name="md_theme_light_primary">#ff3271F1</color>
 </resources>

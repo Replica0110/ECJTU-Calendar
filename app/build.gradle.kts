@@ -34,18 +34,20 @@ fun gitVersionTag(): String {
         process.destroy()
     }
 
+    val cleanVersion = if (version.startsWith("v")) version.substring(1) else version
+
     val pattern = """-(\d+)-g(\w+)"""
-    return when (val matcher = pattern.toRegex().find(version)) {
-        null -> "$version.0"
+    return when (val matcher = pattern.toRegex().find(cleanVersion)) {
+        null -> "$cleanVersion.0"
         else -> {
-            val majorMinor = version.substring(1, matcher.range.first)
+            val majorMinor = cleanVersion.substring(0, matcher.range.first)
             val patch = matcher.groupValues[1]
             val commitHash = matcher.groupValues[2]
             "$majorMinor.$patch.$commitHash"
-
         }
     }
 }
+
 
 android {
     namespace = "com.lonx.ecjtu.hjcalendar"

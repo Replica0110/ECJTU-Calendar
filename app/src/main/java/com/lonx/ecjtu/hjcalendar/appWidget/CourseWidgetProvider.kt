@@ -10,9 +10,6 @@ import android.net.Uri
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.preference.PreferenceManager
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.service.CourseRemoteViewsService
@@ -26,7 +23,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class CourseWidgetProvider : AppWidgetProvider() {
 
@@ -34,10 +30,6 @@ class CourseWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
         intent.action?.let { Log.e("intent.action", it) }
         if (shouldUpdateWidget(intent.action)) {
-            if (intent.action == Intent.ACTION_TIME_CHANGED) {
-                handleTimeChange(context)
-            }
-
             updateWidgets(context)
         }
     }
@@ -52,13 +44,6 @@ class CourseWidgetProvider : AppWidgetProvider() {
         )
     }
 
-    private fun handleTimeChange(context: Context) {
-        WorkManager.getInstance(context).cancelAllWork()
-        Log.e("onReceive", "workManager stop")
-        startWidgetUpdateWorker(context)
-        Log.e("onReceive", "workManager restart")
-    }
-
     private fun updateWidgets(context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val appWidgetIds = appWidgetManager.getAppWidgetIds(
@@ -70,13 +55,11 @@ class CourseWidgetProvider : AppWidgetProvider() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
         Log.e("onEnabled", "onEnabled")
-        startWidgetUpdateWorker(context)
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
         Log.e("onDisabled", "onDisabled")
-        WorkManager.getInstance(context).cancelAllWork()
     }
 
     override fun onUpdate(
@@ -104,15 +87,6 @@ class CourseWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    private fun startWidgetUpdateWorker(context: Context) {
-        val periodicUpdateRequest = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(15, TimeUnit.MINUTES, 5, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "widget_course_update",
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodicUpdateRequest
-        )
-    }
-
     fun updateAppWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -134,6 +108,19 @@ class CourseWidgetProvider : AppWidgetProvider() {
             putExtra("random", randomNumber) // Adding random number to the intent
             data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME)) // Make the intent unique
         }
+        // 点击刷新按钮
+        val refreshIntent = Intent(context, CourseWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+            putExtra("random", randomNumber) // Adding random number to the intent
+            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME)) // Make the intent unique
+        }
+        val refreshPendingIntent = PendingIntent.getBroadcast(
+            context,
+            appWidgetId,
+            refreshIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val (date, weekDay, weekNumber) = getToday(todayCourses.date)
         val views = RemoteViews(context.packageName, R.layout.widget_course).apply {
             setRemoteAdapter(R.id.lv_course_today, intentToday)
@@ -143,22 +130,8 @@ class CourseWidgetProvider : AppWidgetProvider() {
             setTextViewText(R.id.tv_date, date)
             setTextViewText(R.id.tv_week, weekDay)
             setTextViewText(R.id.tv_week_number, weekNumber)
-            // 点击刷新按钮
-            val refreshIntent = Intent(context, CourseWidgetProvider::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-                putExtra("random", randomNumber) // Adding random number to the intent
-                data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME)) // Make the intent unique
-            }
-            val refreshPendingIntent = PendingIntent.getBroadcast(
-                context,
-                appWidgetId,
-                refreshIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
             setOnClickPendingIntent(R.id.refresh_button, refreshPendingIntent)
         }
-
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 

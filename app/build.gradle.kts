@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
 }
 
-fun getVersionCode(): Int {
+fun gitVersionCode(): Int {
     val cmd = "git rev-list HEAD --first-parent --count"
     val process = Runtime.getRuntime().exec(cmd)
     return try {
@@ -38,10 +38,11 @@ fun gitVersionTag(): String {
     return when (val matcher = pattern.toRegex().find(version)) {
         null -> "$version.0"
         else -> {
-            val majorMinor = version.substring(0, matcher.range.first)
+            val majorMinor = version.substring(1, matcher.range.first)
             val patch = matcher.groupValues[1]
             val commitHash = matcher.groupValues[2]
             "$majorMinor.$patch.$commitHash"
+
         }
     }
 }
@@ -54,7 +55,7 @@ android {
         applicationId = "com.lonx.ecjtu.hjcalendar"
         minSdk = 26
         targetSdk = 34
-        versionCode = getVersionCode()
+        versionCode = gitVersionCode()
         versionName = gitVersionTag()
 
         val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
@@ -121,7 +122,6 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

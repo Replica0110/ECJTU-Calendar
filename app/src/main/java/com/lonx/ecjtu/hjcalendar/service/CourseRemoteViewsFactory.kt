@@ -19,7 +19,7 @@ class CourseRemoteViewsFactory(private val context: Context, private val intent:
     }
 
     override fun onCreate() {
-        Log.e("TodayCourse", "Factory created.")
+        Log.e("RemoteViewsFactory", "Factory created.")
     }
 
     override fun onDataSetChanged() {

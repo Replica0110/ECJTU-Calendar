@@ -10,7 +10,7 @@
     <string name="tutorial_weixinid_key">获取weiXinID</string>
     <string name="tutorial_weixinid_title">获取weiXinID</string>
     <string name="tutorial_weixinid_summary">获取weiXinID步骤</string>
-    <string name="tutorial_weixinid_message">·关注华交教务微信公众号\n·登录绑定个人账号\n·点击更多功能->我的日历\n·打开公众号回复的链接\n·点击右上角三点后选择在浏览器打开\n·复制网址中的 weiXinID 参数，填写到设置</string>
+    <string name="tutorial_weixinid_message">·关注华交教务微信公众号\n·登录绑定个人账号\n·点击[更多功能]->[我的日历]\n·打开[我的日历]\n·点击右上角三点，选择在浏览器打开\n·复制网址中的 weiXinID 参数，填写到设置\n·详细教程请查看GitHub主页介绍</string>
     <string name="item_title_about">关于应用</string>
     <string name="developer">开发者</string>
     <string name="developer_summary">可燃乌龙茶</string>
@@ -24,11 +24,11 @@
     <string name="tutorial_date_key">日期选择</string>
     <string name="tutorial_date_title">日期选择</string>
     <string name="tutorial_date_summary">日期选择功能介绍</string>
-    <string name="tutorial_date_message">·可通过日历页面右下角的按钮选择查看不同日期的课程表\n·长按按钮可快速回到今天</string>
+    <string name="tutorial_date_message">·通过日历页面右下角的按钮选择日期\n·长按日期选择按钮快速回到今天</string>
     <string name="empty_course_title">轻松一下</string>
-    <string name="no_course_key">课程卡片文本</string>
-    <string name="no_course_title">课程卡片文本</string>
-    <string name="no_course_summary">当日历课程为空时卡片显示的文本</string>
+    <string name="no_course_key">自定义文本</string>
+    <string name="no_course_title">自定义文本</string>
+    <string name="no_course_summary">当日历为空时卡片和小组件显示的文本</string>
     <string name="developer_url">https://github.com/Agiens02</string>
     <string name="source_code_url">https://github.com/Agiens02/ECJTU-Calendar</string>
     <string name="app_version_key">应用版本</string>

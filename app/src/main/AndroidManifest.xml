@@ -38,11 +38,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_TICK" />
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.DATE_CHANGED" />
-                <action android:name="com.lonx.ecjtu.hjcalendar.UPDATE_WIDGET" />
             </intent-filter>
             <!-- 配置 AppWidgetProvider 的元数据 -->
             <meta-data
@@ -56,13 +55,6 @@
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS">
         </service>
-
-        <!-- WorkManager 必要的服务 -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge" />
 
     </application>
 </manifest>

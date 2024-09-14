@@ -7,7 +7,7 @@
     android:focusable="true"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
-    android:layout_margin="12dp"
+    android:layout_margin="20dp"
     android:padding="12dp"
     android:id="@+id/day_course_card">
 
@@ -26,7 +26,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:padding="8dp" />
+            android:padding="4dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/course_recycler_view"

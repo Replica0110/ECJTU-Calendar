@@ -39,7 +39,6 @@ class CourseWidgetProvider : AppWidgetProvider() {
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_DATE_CHANGED,
-            Intent.ACTION_TIME_TICK,
             "android.appwidget.action.APPWIDGET_UPDATE"
         )
     }
@@ -67,8 +66,10 @@ class CourseWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        Log.e("onUpdate", "onUpdate")
-        Log.e("appWidgetIds", appWidgetIds.joinToString())
+        if (appWidgetIds.isEmpty()) {
+            Log.e("appWidgetIds", "appWidgetIds is empty")
+            return
+        }
         val today = getFormatDate()
         val tomorrow = getFormatDate(true)
         val weiXinID = PreferenceManager.getDefaultSharedPreferences(context).getString("weixin_id", "") ?: ""
@@ -87,7 +88,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    fun updateAppWidget(
+    private fun updateAppWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,

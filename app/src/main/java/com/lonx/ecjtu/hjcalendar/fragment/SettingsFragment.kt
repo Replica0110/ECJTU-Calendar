@@ -1,16 +1,11 @@
 package com.lonx.ecjtu.hjcalendar.fragment
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.annotation.RequiresApi
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -19,8 +14,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.appWidget.CourseWidgetProvider
+import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -54,7 +49,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         } catch (e: Exception) {
             e.printStackTrace()
             ToastUtil.showToast(requireContext(), "添加失败了~")
-            Snackbar.make(requireView(), getString(R.string.snackbar_intent_failed), Snackbar.LENGTH_SHORT).show()
         }
 
     }

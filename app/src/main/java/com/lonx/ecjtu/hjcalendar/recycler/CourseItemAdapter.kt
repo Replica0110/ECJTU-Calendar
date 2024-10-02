@@ -69,12 +69,16 @@ class CourseItemAdapter(
             val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(holder.itemView.context)
             if (course.courseName == "课表为空") {
                 // 获取空课表的自定义文本
-                val emptyCourseText = sharedPreferences.getString(
+                var emptyCourseText = sharedPreferences.getString(
                     "no_course_text",
-                    holder.itemView.context.getString(R.string.empty_course_message)
+                    holder.itemView.context.getString(R.string.empty_course)
                 )
                 holder.emptyCourseTitle.text =
                     holder.itemView.context.getString(R.string.empty_course_title)
+                if (emptyCourseText == "") {
+                    emptyCourseText =
+                        holder.itemView.context.getString(R.string.empty_course)
+                }
                 holder.emptyCourseMessage.text = emptyCourseText
             } else if (course.courseName == "课表加载错误") {
                 holder.emptyCourseTitle.text =

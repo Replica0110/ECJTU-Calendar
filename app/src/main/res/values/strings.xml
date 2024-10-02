@@ -26,14 +26,14 @@
     <string name="tutorial_date_summary">日期选择功能介绍</string>
     <string name="tutorial_date_message">·通过日历页面右下角的按钮选择日期\n·长按日期选择按钮快速回到今天</string>
     <string name="empty_course_title">轻松一下</string>
-    <string name="no_course_key">自定义文本</string>
-    <string name="no_course_title">自定义文本</string>
-    <string name="no_course_summary">当日历为空时卡片和小组件显示的文本</string>
+    <string name="no_course_key">自定义卡片文本</string>
+    <string name="no_course_title">自定义卡片文本</string>
+    <string name="no_course_summary">当日历为空时卡片显示的文本</string>
     <string name="developer_url">https://github.com/Agiens02</string>
     <string name="source_code_url">https://github.com/Agiens02/ECJTU-Calendar</string>
     <string name="app_version_key">应用版本</string>
     <string name="app_version_title">应用版本</string>
-    <string name="empty_course_message">人生得意须尽欢，莫使金樽空对月</string>
+    <string name="empty_course">ο(=•ω＜=)ρ⌒☆</string>
     <string name="error_course_title">课表加载错误</string>
     <string name="error_course_message">请检查weiXinID是否有误，以及网络是否连接</string>
     <string name="weixin_id_hint">请输入你的weiXinID</string>

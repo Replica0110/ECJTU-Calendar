@@ -5,10 +5,6 @@
     <!-- 需要网络权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Optional: 如果需要使用 AlarmManager 或其他后台机制来触发更新 -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

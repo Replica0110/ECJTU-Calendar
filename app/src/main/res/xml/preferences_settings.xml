@@ -19,7 +19,7 @@
             android:title="@string/appwidget_title"
             android:summary="@string/pin_appwidget_summary" />
         <Preference
-            android:icon="@drawable/ic_message_24dp"
+            android:icon="@drawable/ic_card_text_24dp"
             android:key="@string/no_course_key"
             android:title="@string/no_course_title"
             android:summary="@string/no_course_summary"

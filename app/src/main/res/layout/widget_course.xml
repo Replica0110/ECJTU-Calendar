@@ -10,13 +10,13 @@
     <RelativeLayout
         android:id="@+id/rl_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="18dp">
         <TextView
             android:id="@+id/tv_app_name"
             android:textSize="13sp"
             android:textColor="@color/primary_lite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="55dp"
+            android:layout_height="18dp"
             android:text="@string/app_name"
             android:maxLines="1"
             android:maxLength="12"
@@ -25,12 +25,11 @@
         <ImageButton
             android:id="@+id/refresh_button"
             style="@style/TextAppearance.AppCompat.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@+id/tv_app_name"
             android:background="@drawable/widget_button_background"
-            android:contentDescription="@string/desc_refresh_button"
             android:src="@drawable/ic_refresh_button" />
 
         <TextView
@@ -38,7 +37,7 @@
             android:textColor="@color/gray"
             android:id="@+id/tv_date"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:text="@string/sample_date"
             android:layout_marginEnd="8dp"
             android:layout_toStartOf="@id/tv_week_number"
@@ -48,7 +47,7 @@
             android:textColor="@color/gray"
             android:id="@+id/tv_week_number"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:text="@string/widget_sample_week_number"
             android:maxLength="8"
             android:layout_marginEnd="8dp"
@@ -60,10 +59,11 @@
             android:textColor="@color/gray"
             android:gravity="center"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:text="@string/widget_sample_weekday"
             android:layout_alignParentEnd="true"
             style="@style/TextAppearance.AppCompat.Medium" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -73,23 +73,27 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_below="@id/rl_title">
+
         <TextView
             android:textSize="12sp"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:text="@string/widget_title_today"
             android:textColor="@color/gray"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:layout_weight="1.0"
-            android:layout_marginStart="4dp"
-            android:gravity="center" />
+            android:gravity="start" />
         <TextView
             android:textSize="12sp"
             android:textColor="@color/gray"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:layout_height="18dp"
             android:text="@string/widget_title_tomorrow"
             android:layout_weight="1.0"
-            android:gravity="center"/>
+            android:gravity="start"/>
     </LinearLayout>
 
     <LinearLayout
@@ -100,12 +104,6 @@
         android:layout_marginTop="4dp"
         android:layout_below="@id/ll_title">
 
-        <ImageView
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.01"
-            android:background="@color/gray"
-            android:contentDescription="@string/widget_divider" />
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -122,16 +120,17 @@
                 android:id="@+id/empty_today"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/empty_course_message"
+                android:text="@string/empty_course"
                 android:textColor="@android:color/darker_gray"
                 android:lineSpacingExtra="8dp"
                 android:textAlignment="center" />
         </FrameLayout>
         <ImageView
-            android:layout_width="1dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="0.01"
-            android:background="@color/gray"
+            android:layout_weight="0.02"
+            android:background="#b7b7b7"
+            android:scaleType="fitXY"
             android:contentDescription="@string/widget_divider" />
 
         <FrameLayout
@@ -153,17 +152,12 @@
                 android:padding="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/empty_course_message"
+                android:text="@string/empty_course"
                 android:textColor="@android:color/darker_gray"
                 android:lineSpacingExtra="8dp"
                 android:textAlignment="center" />
 
         </FrameLayout>
-        <ImageView
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.01"
-            android:background="@color/gray"
-            android:contentDescription="@string/widget_divider" />
+
     </LinearLayout>
 </RelativeLayout>

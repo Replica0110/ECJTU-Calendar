@@ -10,7 +10,7 @@
     <string name="tutorial_weixinid_key">获取weiXinID</string>
     <string name="tutorial_weixinid_title">获取weiXinID</string>
     <string name="tutorial_weixinid_summary">获取weiXinID步骤</string>
-    <string name="tutorial_weixinid_message">·关注华交教务微信公众号\n·登录绑定个人账号\n·点击[更多功能]->[我的日历]\n·打开[我的日历]\n·点击右上角三点，选择在浏览器打开\n·复制网址中的 weiXinID 参数，填写到设置\n·详细教程请查看GitHub主页介绍</string>
+    <string name="tutorial_weixinid_message">·关注华交教务微信公众号\n·登录绑定个人账号\n·点击[更多功能]->[我的日历]\n·打开[我的日历]\n·点击右上角三点，选择[复制链接]\n·将复制的链接粘贴到设置中\n·图文教程请查看GitHub主页</string>
     <string name="item_title_about">关于应用</string>
     <string name="developer">开发者</string>
     <string name="developer_summary">可燃乌龙茶</string>

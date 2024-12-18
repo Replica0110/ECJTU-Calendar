@@ -75,7 +75,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
             .setTitle(preference.title)
             .setView(dialogView)
             .setPositiveButton("保存") { dialog, _ ->
-                val inputText = textInput.text.toString()
+                var inputText = textInput.text.toString()
+                if (inputText.startsWith("https://jwxt.ecjtu.edu.cn/weixin")) {
+                    ToastUtil.showToast(requireContext(), "已获取链接")
+                    inputText = inputText.substringAfter("=")
+                }
                 with(sharedPreferences.edit()) {
                     putString(key, inputText)
                     apply()

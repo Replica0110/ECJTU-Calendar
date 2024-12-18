@@ -27,7 +27,7 @@
 
 - 查看课程方便，可通过日期选择快速查看指定日期的课程
 
-- 桌面小组件功能，可查看今天和明天课程~~(开发小组件比我想象中困难)~~
+- 桌面小组件功能，可查看今天和明天课程 ~~(开发小组件比我想象中困难)~~
 
 - 没了
 
@@ -37,24 +37,15 @@
 
 <img src="./screenshots/1.jpg" alt="步骤1" style="width: 200px; height: auto;" />
 
-2. 打开日历，点击右上角三点，选择在浏览器打开
+2. 打开日历，点击右上角三点，选择复制链接
 
 <img src="./screenshots/2.jpg" alt="步骤2" style="width: 200px; height: auto;" />
 
-3. 点击地址栏的链接并复制（如果你知道怎么查看网址中的`weiXinID`参数，也可复制后直接跳转到第6步）
+3. 打开**花椒日历**，在设置页找到**weiXinID设置**，填入复制的链接，保存后在日历页面下拉或长按日期选择按钮即可刷新
 
-<img src="./screenshots/3.jpg" alt="步骤3" style="width: 200px; height: auto;" />
-
-4. 将复制的链接粘贴到任意文本编辑器（例如备忘录~~或者QQ~~），查看链接中`weiXinID=`后面的字段，复制这段文本
-
-<img src="./screenshots/4.jpg" alt="步骤4" style="width: 200px; height: auto;" />
-
-6. 打开**花椒日历**，在设置页找到**weiXinID设置**，点击后填入刚刚复制的`weiXinID`，保存后在日历页面下拉或长按日期选择按钮即可刷新
-
-<img src="./screenshots/5.jpg" alt="步骤5" style="width: 200px; height: auto;" />
+<img src="screenshots/3.jpg" alt="步骤3" style="width: 200px; height: auto;" />
 
 
-<img src="./screenshots/6.jpg" alt="步骤6" style="width: 200px; height: auto;" />
 
 ## 特别感谢
 - 应用的所有图标都来源于[阿里矢量图标库](https://www.iconfont.cn/)

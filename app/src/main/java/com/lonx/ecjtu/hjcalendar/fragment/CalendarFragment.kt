@@ -9,17 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.adapter.CourseDayAdapter
 import com.lonx.ecjtu.hjcalendar.adapter.CourseItemAdapter
 import com.lonx.ecjtu.hjcalendar.databinding.FragmentCalendarBinding
 import com.lonx.ecjtu.hjcalendar.utils.CourseData.CourseInfo
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
-import com.lonx.ecjtu.hjcalendar.viewModel.CalendarViewModel
+import com.lonx.ecjtu.hjcalendar.viewmodel.CalendarViewModel
 import kotlinx.coroutines.*
 
 import java.text.SimpleDateFormat

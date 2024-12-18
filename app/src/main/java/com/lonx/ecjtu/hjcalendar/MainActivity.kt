@@ -2,7 +2,6 @@ package com.lonx.ecjtu.hjcalendar
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -14,9 +13,9 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.lonx.ecjtu.hjcalendar.fragment.CalendarFragment
 import com.lonx.ecjtu.hjcalendar.fragment.SettingsFragment
-import com.lonx.ecjtu.hjcalendar.utils.UpdateCheckResult
-import com.lonx.ecjtu.hjcalendar.utils.UpdateManager
-import com.lonx.ecjtu.hjcalendar.viewModel.MainViewModel
+import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
+import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
+import com.lonx.ecjtu.hjcalendar.viewmodel.MainViewModel
 import androidx.core.content.edit
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 

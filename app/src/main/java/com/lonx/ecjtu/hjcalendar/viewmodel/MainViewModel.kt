@@ -1,12 +1,12 @@
-package com.lonx.ecjtu.hjcalendar.viewModel
+package com.lonx.ecjtu.hjcalendar.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.hjcalendar.utils.UpdateCheckResult
-import com.lonx.ecjtu.hjcalendar.utils.UpdateManager
+import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
+import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {

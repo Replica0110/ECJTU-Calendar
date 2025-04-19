@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
+    android:id="@+id/widget_item_container"
     android:background="@drawable/widget_background"
     android:padding="2dp"
     app:circularflow_defaultRadius="60dp">

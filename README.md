@@ -35,6 +35,12 @@
 <img src="screenshots/3.jpg" alt="步骤3" style="width: 200px; height: auto;" />
 
 
+## 注
+- 在第2步时，你也可以选择**在浏览器打开**，选择**花椒日历**，应用会自动读取weiXinID并保存
+- 如果不想使用本应用，你也可以使用[via浏览器](https://viayoo.com/zh-cn)将第2步中复制的链接作为快捷方式添加到桌面
+
+
+
 
 ## 特别感谢
 - 应用图标来源于[阿里矢量图标库](https://www.iconfont.cn/)
@@ -42,5 +48,5 @@
 ## 其他项目
 - [ECJTU-AutoLogin](https://github.com/Replica0110/ECJTU-AutoLogin)
    - 校园网登录工具，Windows桌面端见 [ECJTU-AutoLogin-Desktop](https://github.com/Replica0110/ECJTU-AutoLogin-Desktop)
-- [ECJTU-Toolbox](https://github.com/Replica0110/ECJTU-Toolbox)
-   - 华东交通大学学生工具箱，支持课程查询、成绩查询、个人信息查询、校园网登录及其他教务系统相关的功能（开发中）
+- [ECJTU-PDA](https://github.com/Replica0110/ECJTU-PDA)
+   - 华东交通大学学生信息查询应用，支持课程查询、成绩查询、个人信息查询、校园网登录及其他教务系统相关的功能（开发中）

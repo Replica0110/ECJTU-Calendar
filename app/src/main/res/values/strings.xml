@@ -29,8 +29,8 @@
     <string name="no_course_key">自定义卡片文本</string>
     <string name="no_course_title">自定义卡片文本</string>
     <string name="no_course_summary">当日历为空时卡片显示的文本</string>
-    <string name="developer_url">https://github.com/Agiens02</string>
-    <string name="source_code_url">https://github.com/Agiens02/ECJTU-Calendar</string>
+    <string name="developer_url">https://github.com/Replica0110</string>
+    <string name="source_code_url">https://github.com/Replica0110/ECJTU-Calendar</string>
     <string name="app_version_key">应用版本</string>
     <string name="app_version_title">应用版本</string>
     <string name="empty_course">ο(=•ω＜=)ρ⌒☆</string>
@@ -48,4 +48,5 @@
     <string name="pin_appwidget_key">添加桌面小组件</string>
     <string name="appwidget_title">桌面小组件</string>
     <string name="pin_appwidget_summary">添加日历小组件到桌面</string>
+    <string name="date">日期</string>
 </resources>

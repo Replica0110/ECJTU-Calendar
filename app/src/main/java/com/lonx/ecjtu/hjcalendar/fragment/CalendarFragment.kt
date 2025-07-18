@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.preference.PreferenceManager
@@ -15,8 +14,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.lonx.ecjtu.hjcalendar.R
-import com.lonx.ecjtu.hjcalendar.recycler.CourseDayAdapter
-import com.lonx.ecjtu.hjcalendar.recycler.CourseItemAdapter
+import com.lonx.ecjtu.hjcalendar.adapter.CourseDayAdapter
+import com.lonx.ecjtu.hjcalendar.adapter.CourseItemAdapter
 import com.lonx.ecjtu.hjcalendar.utils.CourseData.CourseInfo
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.viewModel.CalendarViewModel

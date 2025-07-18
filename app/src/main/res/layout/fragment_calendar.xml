@@ -16,14 +16,4 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="40dp"
-        android:contentDescription="@string/floatbutton_select_date"
-        app:layout_anchor="@id/swipe_course_card"
-        app:layout_anchorGravity="bottom|right|end"
-        app:srcCompat="@drawable/ic_date_24dp" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

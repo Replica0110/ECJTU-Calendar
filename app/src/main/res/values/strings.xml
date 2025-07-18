@@ -24,7 +24,7 @@
     <string name="tutorial_date_key">日期选择</string>
     <string name="tutorial_date_title">日期选择</string>
     <string name="tutorial_date_summary">日期选择功能介绍</string>
-    <string name="tutorial_date_message">·通过日历页面右下角的按钮选择日期\n·长按日期选择按钮快速回到今天</string>
+    <string name="tutorial_date_message">·通过日历页面顶部的日期卡片选择日期\n·长按日期卡片快速回到今天</string>
     <string name="empty_course_title">轻松一下</string>
     <string name="no_course_key">自定义卡片文本</string>
     <string name="no_course_title">自定义卡片文本</string>

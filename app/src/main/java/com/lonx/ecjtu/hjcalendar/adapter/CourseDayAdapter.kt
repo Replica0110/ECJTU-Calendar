@@ -10,7 +10,9 @@ import com.lonx.ecjtu.hjcalendar.utils.CourseData.DayCourses
 
 class CourseDayAdapter(
     private var dayCourseList: List<DayCourses>,
-    private var onItemClickListener: CourseItemAdapter.OnItemClickListener?
+    private var onItemClickListener: CourseItemAdapter.OnItemClickListener?,
+    private var onDateCardClickListener: ((position: Int) -> Unit)? = null,
+    private var onDateCardLongClickListener: ((position: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<CourseDayAdapter.DayCourseViewHolder>() {
 
     class DayCourseViewHolder(val binding: ItemDayCoursesBinding) : RecyclerView.ViewHolder(binding.root)
@@ -34,6 +36,14 @@ class CourseDayAdapter(
             holder.binding.dayTextView.text = dayCourseInfo.date
             holder.binding.weekInfoTextView.text = ""
         }
+        // 日期卡片点击和长按
+        holder.binding.dateCard.setOnClickListener {
+            onDateCardClickListener?.invoke(position)
+        }
+        holder.binding.dateCard.setOnLongClickListener {
+            onDateCardLongClickListener?.invoke(position)
+            true
+        }
         // 设置RecyclerView嵌套用于显示当天的课程
         val courseAdapter = CourseItemAdapter(dayCourseInfo.courses, onItemClickListener)
         holder.binding.courseRecyclerView.apply {
@@ -48,5 +58,12 @@ class CourseDayAdapter(
     fun updateData(newDayCourseList: List<DayCourses>) {
         dayCourseList = newDayCourseList
         notifyDataSetChanged()
+    }
+
+    fun setOnDateCardClickListener(listener: ((position: Int) -> Unit)?) {
+        onDateCardClickListener = listener
+    }
+    fun setOnDateCardLongClickListener(listener: ((position: Int) -> Unit)?) {
+        onDateCardLongClickListener = listener
     }
 }

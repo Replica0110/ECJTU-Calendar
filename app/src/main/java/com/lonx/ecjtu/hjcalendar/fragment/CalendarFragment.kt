@@ -16,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.adapter.CourseDayAdapter
 import com.lonx.ecjtu.hjcalendar.adapter.CourseItemAdapter
+import com.lonx.ecjtu.hjcalendar.databinding.FragmentCalendarBinding
 import com.lonx.ecjtu.hjcalendar.utils.CourseData.CourseInfo
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.viewModel.CalendarViewModel
@@ -26,8 +27,8 @@ import java.util.*
 
 class CalendarFragment : Fragment() {
     private val calendarViewModel by viewModels<CalendarViewModel>()
-    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var dateButton: FloatingActionButton
+    private var _binding: FragmentCalendarBinding? = null
+    private val binding get() = _binding!!
     private var isRefreshing = false
     private val scope = CoroutineScope(Dispatchers.Main)
     private val refreshInterval: Long = 2000
@@ -38,33 +39,29 @@ class CalendarFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
+        _binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        val view = binding.root
 
         // 初始化RecyclerView
-        val recyclerView: RecyclerView = view.findViewById(R.id.recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = CourseDayAdapter(emptyList(), object : CourseItemAdapter.OnItemClickListener {
             override fun onItemClick(course: CourseInfo, position: Int) {
                 showCourseDetails(course)
             }
         })
-        recyclerView.adapter = adapter
+        binding.recyclerView.adapter = adapter
 
+        // 日期卡片点击和长按事件
+        adapter.setOnDateCardClickListener { position ->
+            showDatePickerDialog(position)
+        }
+        adapter.setOnDateCardLongClickListener {
+            resetToToday()
+        }
 
         // 初始化下拉刷新
-        swipeRefreshLayout = view.findViewById(R.id.swipe_course_card)
-        swipeRefreshLayout.setOnRefreshListener {
+        binding.swipeCourseCard.setOnRefreshListener {
             handleRefresh()
-        }
-
-        // 初始化日期选择按钮
-        dateButton = view.findViewById(R.id.fab_date)
-        dateButton.setOnClickListener {
-            showDatePickerDialog()
-        }
-        dateButton.setOnLongClickListener {
-            resetToToday()
-            true
         }
 
         // 观察数据变化
@@ -80,24 +77,28 @@ class CalendarFragment : Fragment() {
 
     // 显示课程详情对话框
     private fun showCourseDetails(course: CourseInfo) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(course.courseName)
-            .setMessage("\n${course.courseTime}\n\n${course.courseWeek}\n\n${course.courseLocation}\n\n${course.courseTeacher}")
-            .show()
+        val bottomSheet = CourseDetailBottomSheetFragment.newInstance(course)
+        bottomSheet.show(parentFragmentManager, "CourseDetailBottomSheet")
     }
 
-
-    // 日期选择对话框
-    private fun showDatePickerDialog() {
+    // 日期选择对话框，position 用于获取对应日期
+    private fun showDatePickerDialog(position: Int) {
+        val dayCourseList = calendarViewModel.courseList.value
+        if (dayCourseList.isNullOrEmpty() || position !in dayCourseList.indices) return
+        val dateStr = dayCourseList[position].date
+        val dateRegex = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
+        val match = dateRegex.find(dateStr)
+        val (year, month, day) = match?.destructured ?: return
+        calendar.set(year.toInt(), month.toInt() - 1, day.toInt())
         val datePickerDialog = DatePickerDialog(
             requireContext(),
-            { _, year, month, dayOfMonth ->
-                calendar.set(year, month, dayOfMonth)
+            { _, y, m, d ->
+                calendar.set(y, m, d)
                 refreshCourseData(getFormattedDate())
             },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
+            year.toInt(),
+            month.toInt() - 1,
+            day.toInt()
         )
         datePickerDialog.show()
     }
@@ -105,7 +106,7 @@ class CalendarFragment : Fragment() {
     // 更新课程数据
     private fun refreshCourseData(date: String = getCurrentDate()) {
         val weiXinID = getWeixinID()
-        swipeRefreshLayout.isRefreshing = true
+        binding.swipeCourseCard.isRefreshing = true
 
         // 获取数据
         calendarViewModel.fetchCourseInfo(
@@ -117,7 +118,7 @@ class CalendarFragment : Fragment() {
         scope.launch {
             delay(refreshInterval)
             isRefreshing = false
-            swipeRefreshLayout.isRefreshing = false
+            binding.swipeCourseCard.isRefreshing = false
         }
     }
 
@@ -133,7 +134,7 @@ class CalendarFragment : Fragment() {
             ToastUtil.showToast(requireContext(), "正在刷新课程信息，请稍后...")
             refreshCourseData()
         } else {
-            swipeRefreshLayout.isRefreshing = false
+            binding.swipeCourseCard.isRefreshing = false
         }
     }
 
@@ -166,12 +167,13 @@ class CalendarFragment : Fragment() {
         calendarViewModel.courseList.observe(viewLifecycleOwner) { dayCourseList ->
             adapter.updateData(dayCourseList)
             isRefreshing = false
-            swipeRefreshLayout.isRefreshing = false
+            binding.swipeCourseCard.isRefreshing = false
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         scope.cancel()
+        _binding = null
     }
 }

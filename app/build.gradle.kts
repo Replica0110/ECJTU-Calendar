@@ -36,7 +36,7 @@ fun getGitCommitLog(versionName: String): String {
 
     // 如果没有上一个 tag，直接查当前 tag 的所有提交
     if (previousTag.isEmpty()) {
-        val cmd = "git log $currentTag --pretty=format:%s"
+        val cmd = "git log $currentTag --pretty=format:%s --invert-grep --grep=^docs --grep=^build"
         val process = ProcessBuilder(cmd.split(" "))
             .redirectErrorStream(true)
             .start()
@@ -53,7 +53,7 @@ fun getGitCommitLog(versionName: String): String {
     }
 
     // 正常情况，查两个 tag 之间的提交
-    val cmd = "git log $previousTag..$currentTag --pretty=format:%s"
+    val cmd = "git log $previousTag..$currentTag --pretty=format:%s --invert-grep --grep=^docs --grep=^build"
     val process = ProcessBuilder(cmd.split(" "))
         .redirectErrorStream(true)
         .start()

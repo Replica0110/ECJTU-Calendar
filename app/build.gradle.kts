@@ -10,17 +10,23 @@ plugins {
 
 fun getGitCommitLog(versionName: String): String {
     // 查找当前版本（versionName）对应的 git tag
-    val currentTag = versionName
+    val currentTag = "v$versionName"
 
     // 查找当前版本的上一个 git tag
     val getPreviousTagCmd = "git describe --abbrev=0 --tags $currentTag^"
     val previousTagProcess = ProcessBuilder(getPreviousTagCmd.split(" "))
         .redirectErrorStream(true)
         .start()
-
+    println(previousTagProcess)
     val previousTag = try {
-        previousTagProcess.waitFor()
-        previousTagProcess.inputStream.bufferedReader().readText().trim()
+        val exitCode = previousTagProcess.waitFor()
+        // 检查命令是否成功执行（退出码为0）
+        if (exitCode == 0) {
+            previousTagProcess.inputStream.bufferedReader().readText().trim()
+        } else {
+            // 命令执行失败，返回空字符串
+            ""
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         ""
@@ -28,15 +34,29 @@ fun getGitCommitLog(versionName: String): String {
         previousTagProcess.destroy()
     }
 
-    // 如果没有找到上一个 tag，则取当前 tag
-    val startTag = if (previousTag.isNotEmpty()) previousTag else currentTag
+    // 如果没有上一个 tag，直接查当前 tag 的所有提交
+    if (previousTag.isEmpty()) {
+        val cmd = "git log $currentTag --pretty=format:%s"
+        val process = ProcessBuilder(cmd.split(" "))
+            .redirectErrorStream(true)
+            .start()
+        return try {
+            process.waitFor()
+            val logs = process.inputStream.bufferedReader().readLines()
+            logs.joinToString(separator = ", ", prefix = "[", postfix = "]") { "\"$it\"" }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            "[]"
+        } finally {
+            process.destroy()
+        }
+    }
 
-    // 获取当前 tag 到上一个 tag（或当前 tag）的提交记录
-    val cmd = "git log $startTag..$currentTag --pretty=format:\"%s\""
+    // 正常情况，查两个 tag 之间的提交
+    val cmd = "git log $previousTag..$currentTag --pretty=format:%s"
     val process = ProcessBuilder(cmd.split(" "))
         .redirectErrorStream(true)
         .start()
-
     return try {
         process.waitFor()
         val logs = process.inputStream.bufferedReader().readLines()
@@ -48,6 +68,8 @@ fun getGitCommitLog(versionName: String): String {
         process.destroy()
     }
 }
+
+
 
 fun gitVersionCode(): Int {
     val cmd = "git rev-list HEAD --first-parent --count"

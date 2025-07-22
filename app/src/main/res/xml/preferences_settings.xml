@@ -24,6 +24,18 @@
             android:title="@string/no_course_title"
             android:summary="@string/no_course_summary"
             android:defaultValue="原神，启动！"/>
+        <SwitchPreference
+            android:icon="@drawable/ic_update"
+            android:key="@string/check_update_key"
+            android:title="@string/check_update_title"
+            android:summary="@string/check_update_summary"
+
+            android:defaultValue="false" />
+        <Preference
+            android:icon="@drawable/ic_refresh_button"
+            android:key="@string/check_update_now_key"
+            android:title="@string/check_update_now_title"
+            android:summary="@string/check_update_now_summary"/>
     </PreferenceCategory>
 
     <PreferenceCategory

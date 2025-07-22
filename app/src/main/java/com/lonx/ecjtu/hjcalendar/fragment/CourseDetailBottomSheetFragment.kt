@@ -1,9 +1,11 @@
 package com.lonx.ecjtu.hjcalendar.fragment
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.lonx.ecjtu.hjcalendar.databinding.FragmentCourseDetailBottomSheetBinding
 import com.lonx.ecjtu.hjcalendar.utils.CourseData

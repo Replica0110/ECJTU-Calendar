@@ -1,8 +1,9 @@
 [versions]
-agp = "8.5.0"
+agp = "8.10.0"
+appupdater = "1.1.2"
 gson = "2.11.0"
 jsoup = "1.17.2"
-kotlin = "1.9.0"
+kotlin = "2.2.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -15,12 +16,14 @@ lifecycleLivedataKtx = "2.8.5"
 lifecycleViewmodelKtx = "2.8.5"
 navigationFragmentKtx = "2.8.0"
 navigationUiKtx = "2.8.0"
+okhttp = "5.1.0"
 preferenceKtx = "1.2.1"
 swiperefreshlayout = "1.1.0"
 timelineview = "1.2.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+appupdater = { module = "com.github.JebySun:AppUpdater", version.ref = "appupdater" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jsoup-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -36,6 +39,7 @@ androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navi
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 timelineview = { module = "com.github.vipulasri:timelineview", version.ref = "timelineview" }
 
 [plugins]

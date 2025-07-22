@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.core.net.toUri
 
 const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRESH"
 
@@ -134,7 +135,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
         val refreshIntent = Intent(context, CourseWidgetProvider::class.java).apply {
             action = ACTION_MANUAL_REFRESH
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            data = Uri.parse("widget://${context.packageName}/$appWidgetId/refresh")
+            data = "widget://${context.packageName}/$appWidgetId/refresh".toUri()
         }
         val refreshPendingIntent = PendingIntent.getBroadcast(
             context,

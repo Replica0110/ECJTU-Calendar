@@ -1,3 +1,4 @@
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone.getDefault
@@ -7,9 +8,52 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
 }
 
+fun getGitCommitLog(versionName: String): String {
+    // 查找当前版本（versionName）对应的 git tag
+    val currentTag = versionName
+
+    // 查找当前版本的上一个 git tag
+    val getPreviousTagCmd = "git describe --abbrev=0 --tags $currentTag^"
+    val previousTagProcess = ProcessBuilder(getPreviousTagCmd.split(" "))
+        .redirectErrorStream(true)
+        .start()
+
+    val previousTag = try {
+        previousTagProcess.waitFor()
+        previousTagProcess.inputStream.bufferedReader().readText().trim()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ""
+    } finally {
+        previousTagProcess.destroy()
+    }
+
+    // 如果没有找到上一个 tag，则取当前 tag
+    val startTag = if (previousTag.isNotEmpty()) previousTag else currentTag
+
+    // 获取当前 tag 到上一个 tag（或当前 tag）的提交记录
+    val cmd = "git log $startTag..$currentTag --pretty=format:\"%s\""
+    val process = ProcessBuilder(cmd.split(" "))
+        .redirectErrorStream(true)
+        .start()
+
+    return try {
+        process.waitFor()
+        val logs = process.inputStream.bufferedReader().readLines()
+        logs.joinToString(separator = ", ", prefix = "[", postfix = "]") { "\"$it\"" }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        "[]"
+    } finally {
+        process.destroy()
+    }
+}
+
 fun gitVersionCode(): Int {
     val cmd = "git rev-list HEAD --first-parent --count"
-    val process = Runtime.getRuntime().exec(cmd)
+    val process = ProcessBuilder(cmd.split(" "))
+        .redirectErrorStream(true)
+        .start()
     return try {
         process.waitFor()
         process.inputStream.bufferedReader().readText().trim().toInt()
@@ -22,8 +66,10 @@ fun gitVersionCode(): Int {
 }
 
 fun gitVersionTag(): String {
-    val cmd = "git describe --tags"
-    val process = Runtime.getRuntime().exec(cmd)
+    val cmd = "git describe --tags --match v*.*.*"
+    val process = ProcessBuilder(cmd.split(" "))
+        .redirectErrorStream(true)
+        .start()
     val version = try {
         process.waitFor()
         process.inputStream.bufferedReader().readText().trim()
@@ -36,14 +82,14 @@ fun gitVersionTag(): String {
 
     val cleanVersion = if (version.startsWith("v")) version.substring(1) else version
 
-    val pattern = """-(\d+)-g(\w+)"""
+
+    val pattern = """(\d+\.\d+)(\.\d+)?"""
     return when (val matcher = pattern.toRegex().find(cleanVersion)) {
         null -> "$cleanVersion.0"
         else -> {
-            val majorMinor = cleanVersion.substring(0, matcher.range.first)
-            val patch = matcher.groupValues[1]
-            val commitHash = matcher.groupValues[2]
-            "$majorMinor.$patch.$commitHash"
+            val majorMinor = matcher.groupValues[1]
+            val patch = matcher.groupValues[2].takeIf { it.isNotEmpty() } ?: ".0"
+            "$majorMinor$patch"
         }
     }
 }
@@ -51,12 +97,12 @@ fun gitVersionTag(): String {
 
 android {
     namespace = "com.lonx.ecjtu.hjcalendar"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.lonx.ecjtu.hjcalendar"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = gitVersionCode()
         versionName = gitVersionTag()
 
@@ -99,9 +145,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        }
     }
 
     buildFeatures {
@@ -114,6 +161,8 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.timelineview)
     implementation(libs.jsoup.jsoup)
+    implementation(libs.okhttp)
+    implementation(libs.appupdater)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -129,3 +178,54 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+tasks.register("generateMetadata") {
+    doLast {
+        val versionCode = android.defaultConfig.versionCode
+        val versionName = android.defaultConfig.versionName
+        val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
+            timeZone = getDefault()
+        }.format(Date())
+
+        // 传递 versionName 到 getGitCommitLog 获取更精确的 changelog
+        val changelog = versionName?.let { getGitCommitLog(it) }
+
+        // 获取release目录中的所有APK文件
+        val outputDir = file("${project.projectDir}/release")
+        val apkFiles = outputDir.listFiles { _, name -> name.endsWith(".apk") }
+
+        // 如果存在APK文件，则选取第一个APK文件作为应用APK
+        val outputFile = apkFiles?.firstOrNull()
+
+        // 转换文件大小为MB并保留两位小数
+        val fileSizeInMB = outputFile?.let {
+            val sizeInMB = it.length() / (1024.0 * 1024.0) // 文件大小转换为MB
+            val df = DecimalFormat("#.00") // 格式化为两位小数
+            df.format(sizeInMB)
+        } ?: "0.00" // 如果没有找到APK文件，大小为0.00MB
+
+        // APK URL（假设存储在GitHub发布页）
+        val apkUrl = outputFile?.let {
+            "https://github.com/Replica0110/ECJTU-Calendar/releases/download/$versionName/${it.name}"
+        } ?: ""
+
+        // 准备元数据
+        val metadata = """
+            {
+                "versionCode": $versionCode,
+                "versionName": "$versionName",
+                "buildTime": "$buildTime",
+                "changelog": $changelog,
+                "fileSize": "$fileSizeInMB MB",
+                "apkUrl": "$apkUrl"
+            }
+        """.trimIndent()
+
+        // 创建release目录（如果不存在的话）
+        outputDir.mkdirs()
+        val metadataFile = file("${outputDir}/metadata.json")
+        metadataFile.writeText(metadata)
+        println("Metadata file generated at: ${metadataFile.absolutePath}")
+    }
+}
+

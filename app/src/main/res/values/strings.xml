@@ -49,4 +49,10 @@
     <string name="appwidget_title">桌面小组件</string>
     <string name="pin_appwidget_summary">添加日历小组件到桌面</string>
     <string name="date">日期</string>
+    <string name="check_update_key">启动时检查更新</string>
+    <string name="check_update_title">启动时检查更新</string>
+    <string name="check_update_summary">应用启动时检查更新</string>
+    <string name="check_update_now_key">检查更新</string>
+    <string name="check_update_now_title">检查更新</string>
+    <string name="check_update_now_summary">立即检查更新</string>
 </resources>

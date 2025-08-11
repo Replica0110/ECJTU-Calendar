@@ -23,8 +23,17 @@ class UpdateManager {
     private val GITHUB_API_URL = "https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
     private val TAG = "UpdateManager"
 
-    data class UpdateInfo(val versionName: String, val downloadUrl: String)
-    data class GitHubRelease(val tag_name: String?, val assets: List<Asset>?) {
+    data class UpdateInfo(
+        val versionName: String,
+        val downloadUrl: String,
+        val releaseNotes: String
+    )
+
+    data class GitHubRelease(
+        val tag_name: String?,
+        val body: String?,
+        val assets: List<Asset>?
+    ) {
         data class Asset(val browser_download_url: String?)
     }
 
@@ -48,26 +57,25 @@ class UpdateManager {
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            // 提取关键信息，如果缺失也认为是解析错误
             val latestVersion = release?.tag_name
             val downloadUrl = release?.assets?.firstOrNull { it.browser_download_url?.endsWith(".apk") == true }?.browser_download_url
+
+            val releaseNotes = release?.body?.trim()?.ifBlank { "没有提供具体的更新说明。" } ?: "没有提供具体的更新说明。"
+
             if (latestVersion == null || downloadUrl == null) {
-                Log.e(TAG, "Required fields (tag_name, browser_download_url) are missing in the response.")
+                Log.e(TAG, "Required fields (tag_name, browser_download_url) are missing.")
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            // 4. 处理获取应用版本错误
             val currentVersion = BuildConfig.VERSION_NAME
 
-            // 5. 比较版本，返回成功结果
             return@withContext if (isNewerVersion(currentVersion, latestVersion)) {
-                UpdateCheckResult.NewVersion(UpdateInfo(latestVersion, downloadUrl))
+                UpdateCheckResult.NewVersion(UpdateInfo(latestVersion, downloadUrl, releaseNotes))
             } else {
                 UpdateCheckResult.NoUpdateAvailable
             }
 
         } catch (e: IOException) {
-            // 6. 处理网络连接错误
             Log.e(TAG, "Network error during update check", e)
             return@withContext UpdateCheckResult.NetworkError(e)
         }

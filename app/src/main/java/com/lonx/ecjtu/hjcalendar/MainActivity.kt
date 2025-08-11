@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
     private fun showUpdateDialog(info: UpdateManager.UpdateInfo) {
         MaterialAlertDialogBuilder(this)
             .setTitle("发现新版本: ${info.versionName}")
-            .setMessage("检测到新的应用版本，是否立即下载更新？")
+            .setMessage(info.releaseNotes)
             .setPositiveButton("立即下载") { _, _ ->
                 mainViewModel.downloadUpdate()
             }

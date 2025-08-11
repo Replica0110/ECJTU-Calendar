@@ -109,7 +109,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
         val itemClickIntent = Intent(context, MainActivity::class.java).apply {
             action = "com.lonx.ecjtu.pda.action.VIEW_COURSE_DETAIL"
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            data = Uri.parse("widget://item_click_template/$appWidgetId")
+            data = "widget://item_click_template/$appWidgetId".toUri()
         }
 
         val flags =
@@ -123,13 +123,13 @@ class CourseWidgetProvider : AppWidgetProvider() {
         val intentToday = Intent(context, CourseRemoteViewsService::class.java).apply {
             putExtra("dayCourses", Gson().toJson(todayCourses))
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            data = Uri.parse("widget://${context.packageName}/$appWidgetId/today/$randomNumber")
+            data = "widget://${context.packageName}/$appWidgetId/today/$randomNumber".toUri()
         }
 
         val intentTomorrow = Intent(context, CourseRemoteViewsService::class.java).apply {
             putExtra("dayCourses", Gson().toJson(tomorrowCourses))
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            data = Uri.parse("widget://${context.packageName}/$appWidgetId/tomorrow/$randomNumber")
+            data = "widget://${context.packageName}/$appWidgetId/tomorrow/$randomNumber".toUri()
         }
         // 点击刷新按钮
         val refreshIntent = Intent(context, CourseWidgetProvider::class.java).apply {

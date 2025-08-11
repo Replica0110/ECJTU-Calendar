@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import com.lonx.ecjtu.hjcalendar.R
+import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
 import com.lonx.ecjtu.hjcalendar.utils.CourseData
 import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
 import com.lonx.ecjtu.hjcalendar.utils.Event
@@ -16,8 +17,7 @@ import java.util.*
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
 
-    // --- LiveData for UI State ---
-
+    private enum class SpecialState { EMPTY, ERROR }
     // 课程列表数据
     private val _courseList = MutableLiveData<List<CourseData.DayCourses>>()
     val courseList: LiveData<List<CourseData.DayCourses>> = _courseList
@@ -31,10 +31,9 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     val toastMessage: LiveData<Event<String>> = _toastMessage
 
     // 当前显示的日期
-    private val _currentDate = MutableLiveData<Date>(Date()) // 初始化为今天
+    private val _currentDate = MutableLiveData(Date()) // 初始化为今天
     val currentDate: LiveData<Date> = _currentDate
 
-    // --- Public Functions for Fragment to Call ---
 
     /**
      * 初始化数据，如果列表为空则刷新。
@@ -49,47 +48,76 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
      * 刷新当前日期的课程。
      */
     fun refreshCourses() {
-        // 使用 LiveData 中的日期
         val date = _currentDate.value ?: Date()
         val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
 
-        // 从 SharedPreferences 获取 weiXinID
-        val weiXinID = getWeixinID()
+        val weiXinID = DataStoreManager.getWeiXinId()
         if (weiXinID.isBlank()) {
             _toastMessage.value = Event("请先在设置中配置 weiXinID")
-            // 创建一个表示错误的列表项
-            _courseList.value = createErrorCourseList(formattedDate, "未配置weiXinID")
+            _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, "未配置weiXinID")
             return
         }
 
-        // 使用 viewModelScope 执行网络请求
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val html = ECJTUCalendarAPI.getCourseHtml(weiXinID, formattedDate)
                 if (html != null && html.isNotBlank()) {
                     if (html.contains("<title>教务处微信平台绑定</title>")) {
-                        _courseList.value = createErrorCourseList(formattedDate, "无效的weiXinID")
+                        _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, "无效的weiXinID")
                         _toastMessage.value = Event("获取课程失败: 无效的weiXinID")
                     } else {
                         val dayCourse = ECJTUCalendarAPI.parseCourseHtml(html)
-                        _courseList.value = listOf(dayCourse)
+
+                        if (dayCourse.courses.isEmpty()) {
+                            // 课表为空
+                            _courseList.value = createSpecialStateList(formattedDate, SpecialState.EMPTY)
+                        } else {
+                            // 课表不为空
+                            _courseList.value = listOf(dayCourse)
+                        }
                         _toastMessage.value = Event("日历已更新")
                     }
                 } else {
-                    _courseList.value = createErrorCourseList(formattedDate, "空响应")
+                    _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, "服务器响应为空")
                     _toastMessage.value = Event("获取课程失败: 服务器响应为空")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _courseList.value = createErrorCourseList(formattedDate, e.message ?: "未知错误")
+                _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, e.message ?: "未知错误")
                 _toastMessage.value = Event("获取课程失败: ${e.message ?: "未知错误"}")
             } finally {
-                _isLoading.value = false // 确保刷新动画总是会停止
+                _isLoading.value = false
             }
         }
     }
+    /**
+     * 创建一个用于表示特殊状态（如课表为空或加载错误）的列表。
+     * @param date 日期字符串
+     * @param state 状态类型 (EMPTY 或 ERROR)
+     * @param errorMessage 仅在 state 为 ERROR 时使用
+     * @return 包含单个特殊 CourseInfo 的 DayCourses 列表
+     */
+    private fun createSpecialStateList(date: String, state: SpecialState, errorMessage: String? = null): List<CourseData.DayCourses> {
+        val courseName: String
+        val displayMessage: String
 
+        if (state == SpecialState.EMPTY) {
+            courseName = "课表为空"
+            val defaultText = getApplication<Application>().getString(R.string.empty_course)
+            displayMessage = DataStoreManager.getNoCourseText(defaultText)
+        } else {
+            courseName = "课表加载错误"
+            displayMessage = errorMessage ?: getApplication<Application>().getString(R.string.error_course_message)
+        }
+
+        val specialCourse = CourseData.CourseInfo(
+            courseName = courseName,
+            courseLocation = displayMessage
+        )
+
+        return listOf(CourseData.DayCourses(date, listOf(specialCourse)))
+    }
     /**
      * 选择一个新的日期并刷新课程。
      */
@@ -107,18 +135,4 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         refreshCourses()
     }
 
-    // --- Private Helper Functions ---
-
-    private fun getWeixinID(): String {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(getApplication())
-        val key = getApplication<Application>().getString(R.string.weixin_id_key)
-        return prefs.getString(key, "") ?: ""
-    }
-
-    private fun createErrorCourseList(date: String, errorMsg: String): List<CourseData.DayCourses> {
-        return listOf(CourseData.DayCourses(date,
-            listOf(CourseData.CourseInfo(
-                courseName = "课表加载错误: $errorMsg"))
-        ))
-    }
 }

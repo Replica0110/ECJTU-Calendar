@@ -12,6 +12,7 @@ import androidx.preference.PreferenceManager
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.appWidget.CourseWidgetProvider
+import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
 import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
 import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
 import com.lonx.ecjtu.hjcalendar.utils.Event
@@ -32,6 +33,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     var newVersionInfo: UpdateManager.UpdateInfo? = null
 
+    fun getWeiXinId(): String {
+        return DataStoreManager.getWeiXinId()
+    }
+
+    fun isUpdateCheckEnabled(): Boolean {
+        return DataStoreManager.isUpdateCheckOnStartEnabled()
+    }
+
+    fun setUpdateCheck(enabled: Boolean) {
+        DataStoreManager.setUpdateCheckOnStart(enabled)
+    }
 
     /** 获取格式化的版本信息 */
     fun getVersionSummary(): String {
@@ -53,6 +65,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         newVersionInfo?.let {
             updateManager.downloadUpdate(getApplication(), it)
         }
+    }
+    /** 保存输入框中的字符串设置 */
+    fun getNoCourseText(): String {
+        val defaultText = getApplication<Application>().getString(R.string.empty_course)
+        return DataStoreManager.getNoCourseText(defaultText)
     }
 
     /** 将课程小组件固定到桌面 */
@@ -77,19 +94,26 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     /** 保存输入框中的字符串设置 */
     fun saveStringPreference(key: String, value: String) {
+        val app = getApplication<Application>()
         var processedValue = value
-        var message: String
+        val message: String
 
-        if (key == getApplication<Application>().getString(R.string.weixin_id_key)) {
-            if (value.startsWith("https://jwxt.ecjtu.edu.cn/weixin")) {
-                processedValue = value.substringAfter("=", "")
+        when (key) {
+            app.getString(R.string.weixin_id_key) -> {
+                if (value.startsWith("https://jwxt.ecjtu.edu.cn/weixin")) {
+                    processedValue = value.substringAfter("=", "")
+                }
+                DataStoreManager.saveWeiXinId(processedValue)
+                message = "weiXinID已保存，在日历页面下拉刷新课表"
             }
-            message = "weiXinID已保存，在日历页面下拉刷新课表"
-        } else {
-            message = "自定义文本已保存"
+            app.getString(R.string.no_course_key) -> {
+                DataStoreManager.saveNoCourseText(processedValue)
+                message = "自定义文本已保存"
+            }
+            else -> {
+                return
+            }
         }
-
-        prefs.edit { putString(key, processedValue) }
         _pinWidgetResult.value = Event(message)
     }
 }

@@ -25,6 +25,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.core.net.toUri
+import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
 
 const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRESH"
 
@@ -71,16 +72,22 @@ class CourseWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         if (appWidgetIds.isEmpty()) {
-            Log.e("appWidgetIds", "appWidgetIds is empty")
             return
         }
-        val today = getFormatDate()
-        val tomorrow = getFormatDate(true)
-        val weiXinID = PreferenceManager.getDefaultSharedPreferences(context).getString("weixin_id", "") ?: ""
+        val todayStr = getFormatDate()
+        val tomorrowStr = getFormatDate(true)
+
+        val weiXinID = DataStoreManager.getWeiXinId()
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val todayCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, today)?.let { ECJTUCalendarAPI.parseCourseHtml(it) } ?: CourseData.DayCourses()
-                val tomorrowCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, tomorrow)?.let { ECJTUCalendarAPI.parseCourseHtml(it) } ?: CourseData.DayCourses()
+                // 获取原始数据
+                val rawTodayCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, todayStr)?.let { ECJTUCalendarAPI.parseCourseHtml(it) }
+                val rawTomorrowCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, tomorrowStr)?.let { ECJTUCalendarAPI.parseCourseHtml(it) }
+
+                val todayCourses = processCourseData(context, rawTodayCourses, todayStr)
+                val tomorrowCourses = processCourseData(context, rawTomorrowCourses, tomorrowStr)
+
                 withContext(Dispatchers.Main) {
                     appWidgetIds.forEach { appWidgetId ->
                         updateAppWidget(context, appWidgetManager, appWidgetId, todayCourses, tomorrowCourses)
@@ -90,6 +97,27 @@ class CourseWidgetProvider : AppWidgetProvider() {
                 e.printStackTrace()
             }
         }
+    }
+    /**
+     * 用于处理空/错误课程数据
+     */
+    private fun processCourseData(context: Context, dayCourses: CourseData.DayCourses?, dateStr: String): CourseData.DayCourses {
+        // 如果 API 调用失败，dayCourses 会是 null
+        if (dayCourses == null) {
+            val errorCourse = CourseData.CourseInfo(courseName = "课表加载错误", courseLocation = "网络请求失败")
+            return CourseData.DayCourses(dateStr, listOf(errorCourse))
+        }
+
+        // 课程列表为空
+        if (dayCourses.courses.isEmpty()) {
+            val defaultText = context.getString(R.string.empty_course)
+            val customText = DataStoreManager.getNoCourseText(defaultText)
+            val emptyCourse = CourseData.CourseInfo(courseName = "课表为空", courseLocation = customText)
+            return CourseData.DayCourses(dayCourses.date, listOf(emptyCourse))
+        }
+
+        // 否则返回原始数据
+        return dayCourses
     }
 
     private fun updateAppWidget(

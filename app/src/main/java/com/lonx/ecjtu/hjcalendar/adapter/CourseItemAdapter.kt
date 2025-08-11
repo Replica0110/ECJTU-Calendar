@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.hjcalendar.adapter
 
+import android.app.Application
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -97,20 +98,12 @@ class CourseItemAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(course: CourseInfo) {
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(itemView.context)
-            if (course.courseName == "课表为空") {
-                var emptyCourseText = sharedPreferences.getString(
-                    "no_course_text",
-                    itemView.context.getString(R.string.empty_course)
-                )
+            if (course.courseName.contains("课表为空")) {
                 binding.emptyCourseTitle.text = itemView.context.getString(R.string.empty_course_title)
-                if (emptyCourseText.isNullOrEmpty()) {
-                    emptyCourseText = itemView.context.getString(R.string.empty_course)
-                }
-                binding.emptyCourseMessage.text = emptyCourseText
-            } else if (course.courseName == "课表加载错误") {
+                binding.emptyCourseMessage.text = course.courseLocation
+            } else if (course.courseName.contains("课表加载错误")) {
                 binding.emptyCourseTitle.text = itemView.context.getString(R.string.error_course_title)
-                binding.emptyCourseMessage.text = itemView.context.getString(R.string.error_course_message)
+                binding.emptyCourseMessage.text = course.courseLocation
             }
         }
     }

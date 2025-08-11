@@ -119,6 +119,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.timelineview)
     implementation(libs.jsoup.jsoup)
+    implementation(libs.mmkv)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)

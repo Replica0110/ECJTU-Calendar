@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import com.lonx.ecjtu.hjcalendar.R
+import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
 import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
 import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
 import com.lonx.ecjtu.hjcalendar.utils.Event
@@ -29,26 +30,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var newVersionInfo: UpdateManager.UpdateInfo? = null
 
 
-    /**
-     * 执行应用启动时的检查。
-     */
     fun runStartupChecks() {
-        val checkUpdateOnStart = prefs.getBoolean(getApplication<Application>().getString(R.string.check_update_key), true)
-        if (checkUpdateOnStart) {
+        if (DataStoreManager.isUpdateCheckOnStartEnabled()) {
             viewModelScope.launch {
                 _updateResult.postValue(updateManager.checkForUpdate())
             }
         }
     }
 
-    /**
-     * 处理传入的 Intent。
-     */
     fun handleIntent(intent: Intent?) {
         if (intent?.action == Intent.ACTION_VIEW) {
             intent.data?.let { uri ->
                 uri.getQueryParameter("weiXinID")?.let { id ->
-                    prefs.edit { putString(getApplication<Application>().getString(R.string.weixin_id_key), id) }
+                    DataStoreManager.saveWeiXinId(id)
                     _toastMessage.value = Event("weiXinID 已获取，请下拉刷新日历")
                 }
             }

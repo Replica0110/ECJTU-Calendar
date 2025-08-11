@@ -18,7 +18,8 @@ const val EXTRA_COURSE_LOCATION = "com.lonx.ecjtu.hjcalendar.widget.EXTRA_COURSE
 class CourseRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
 
     private var courseList: ArrayList<CourseData.CourseInfo> = ArrayList()
-
+    private val VIEW_TYPE_NORMAL = 0
+    private val VIEW_TYPE_EMPTY = 1
     init {
         loadDataInBackground()
     }
@@ -36,44 +37,54 @@ class CourseRemoteViewsFactory(private val context: Context, private val intent:
     }
 
     override fun getCount(): Int {
-        return courseList.count { it.courseName != "课表为空" && it.courseName != "课表加载错误"}
+        return courseList.size
     }
 
     override fun getViewAt(position: Int): RemoteViews? {
-
         if (position < 0 || position >= courseList.size) {
             return null
         }
 
         val course = courseList[position]
+        val viewType = getItemViewType(position)
 
-        return if (course.courseName == "课表为空" || course.courseName == "课表加载错误") {
-            null
-        } else {
-            val itemView = RemoteViews(context.packageName, R.layout.widget_course_item).apply {
+        return if (viewType == VIEW_TYPE_EMPTY) {
+            Log.e("RemoteViewsFactory", "Empty course item created.")
+            RemoteViews(context.packageName, R.layout.widget_course_item_empty).apply {
+                setTextViewText(R.id.tv_empty_message, course.courseLocation)
+            }
+        } else { // VIEW_TYPE_NORMAL
+            RemoteViews(context.packageName, R.layout.widget_course_item).apply {
                 setTextViewText(R.id.tv_course_name, course.courseName)
                 setTextViewText(R.id.tv_course_time, course.courseTime)
                 setTextViewText(R.id.tv_course_location, course.courseLocation)
-            }
-            val fillInIntent = Intent().apply {
-                val extras = Bundle()
-                extras.putString(EXTRA_COURSE_NAME, course.courseName)
-                extras.putString(EXTRA_COURSE_TIME, course.courseTime)
-                extras.putString(EXTRA_COURSE_LOCATION, course.courseLocation)
-                putExtras(extras)
-            }
 
-            itemView.setOnClickFillInIntent(R.id.widget_item_container, fillInIntent)
-            return itemView
+                // 设置点击事件的 fillInIntent
+                val fillInIntent = Intent().apply {
+                    val extras = Bundle()
+                    extras.putString(EXTRA_COURSE_NAME, course.courseName)
+                    extras.putString(EXTRA_COURSE_TIME, course.courseTime)
+                    extras.putString(EXTRA_COURSE_LOCATION, course.courseLocation)
+                    putExtras(extras)
+                }
+                setOnClickFillInIntent(R.id.widget_item_container, fillInIntent)
+            }
         }
     }
 
     override fun getLoadingView(): RemoteViews? {
         return null
     }
-
+    fun getItemViewType(position: Int): Int {
+        val course = courseList[position]
+        return if (course.courseName == "课表为空" || course.courseName == "课表加载错误") {
+            VIEW_TYPE_EMPTY
+        } else {
+            VIEW_TYPE_NORMAL
+        }
+    }
     override fun getViewTypeCount(): Int {
-        return 1
+        return 2
     }
 
     override fun getItemId(position: Int): Long {

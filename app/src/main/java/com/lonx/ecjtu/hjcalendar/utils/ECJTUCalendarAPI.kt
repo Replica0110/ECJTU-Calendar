@@ -36,13 +36,13 @@ object ECJTUCalendarAPI {
 //        val gson = GsonBuilder().setPrettyPrinting().create()
 
         // 获取日期信息
-        val dateElement = doc.select("div.center").text() ?: "N/A"
+        val dateElement = doc.select("div.center").text()
 
         // 如果没有课程信息或者只有图片，返回“今日无课”
         if (courseElements.isEmpty() || courseElements.all { it.select("img").isNotEmpty() }) {
             return CourseData.DayCourses(
                 dateElement,
-                listOf(CourseData.CourseInfo("课表为空"))
+                emptyList()
             )
         }
 

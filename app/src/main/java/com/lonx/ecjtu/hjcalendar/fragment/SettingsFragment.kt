@@ -3,11 +3,11 @@ package com.lonx.ecjtu.hjcalendar.fragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
@@ -28,14 +28,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences_settings, rootKey)
 
         setupInitialState()
+        setupListeners()
         setupObservers()
     }
-
     private fun setupInitialState() {
         // 从 ViewModel 获取版本信息
         findPreference<Preference>(getString(R.string.app_version_key))?.summary = viewModel.getVersionSummary()
     }
-
+    private fun setupListeners() {
+        val checkUpdatePref = findPreference<SwitchPreference>(getString(R.string.check_update_key))
+        checkUpdatePref?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue is Boolean) {
+                viewModel.setUpdateCheck(newValue)
+            }
+            true
+        }
+    }
     private fun setupObservers() {
         // 观察更新检查的结果
         viewModel.updateResult.observe(this) { result ->
@@ -52,7 +60,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
         }
 
-        // 观察一次性事件，例如 Toast 消息
         viewModel.pinWidgetResult.observe(this) { event ->
             event.getContentIfNotHandled()?.let { message ->
                 ToastUtil.showToast(requireContext(), message)
@@ -61,7 +68,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        // 将点击事件委托给 ViewModel 或 Fragment 内的 UI 方法
         when (preference.key) {
             getString(R.string.developer) -> openURL(developerIntent)
             getString(R.string.source_code_key) -> openURL(sourceCodeIntent)
@@ -102,7 +108,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val textInput = dialogView.findViewById<TextInputEditText>(R.id.text_input)
         val key = preference.key ?: return
 
-        val savedValue = preference.sharedPreferences?.getString(key, "")
+        val savedValue = when (key) {
+            getString(R.string.weixin_id_key) -> viewModel.getWeiXinId()
+            getString(R.string.no_course_key) -> viewModel.getNoCourseText()
+            else -> ""
+        }
         textInput.setText(savedValue)
 
         MaterialAlertDialogBuilder(requireContext())
@@ -110,7 +120,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
             .setView(dialogView)
             .setPositiveButton("保存") { dialog, _ ->
                 val inputText = textInput.text?.toString()?.trim() ?: ""
-                // 调用 ViewModel 保存数据
                 viewModel.saveStringPreference(key, inputText)
                 dialog.dismiss()
             }

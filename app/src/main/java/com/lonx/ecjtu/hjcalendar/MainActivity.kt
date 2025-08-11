@@ -3,12 +3,12 @@ package com.lonx.ecjtu.hjcalendar
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.lonx.ecjtu.hjcalendar.databinding.ActivityMainBinding
 import com.lonx.ecjtu.hjcalendar.fragment.CalendarFragment
 import com.lonx.ecjtu.hjcalendar.fragment.SettingsFragment
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showUpdateDialog(info: UpdateManager.UpdateInfo) {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("发现新版本: ${info.versionName}")
             .setMessage("检测到新的应用版本，是否立即下载更新？")
             .setPositiveButton("立即下载") { _, _ ->

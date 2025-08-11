@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ECJTUcalendar"
+rootProject.name = "ECJTU-Calendar"
 include(":app")
  

@@ -55,6 +55,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         if (weiXinID.isBlank()) {
             _toastMessage.value = Event("请先在设置中配置 weiXinID")
             _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, "未配置weiXinID")
+            _isLoading.value = false
             return
         }
 
@@ -82,11 +83,11 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, "服务器响应为空")
                     _toastMessage.value = Event("获取课程失败: 服务器响应为空")
                 }
+                _isLoading.value = false
             } catch (e: Exception) {
                 e.printStackTrace()
                 _courseList.value = createSpecialStateList(formattedDate, SpecialState.ERROR, e.message ?: "未知错误")
                 _toastMessage.value = Event("获取课程失败: ${e.message ?: "未知错误"}")
-            } finally {
                 _isLoading.value = false
             }
         }

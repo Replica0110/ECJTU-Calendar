@@ -1,6 +1,0 @@
-{
-    "versionCode": 54,
-    "versionName": "1.5.1",
-    "buildTime": "2025-07-22 14:42:43",
-    "changelog": ["feat(calendar): 重构日历界面并添加新功能", "feat/ui: 重构课程表展示布局并添加新功能", "feat(widget): 优化课程日历小组件功能和性能", "docs(README): 更新应用说明和使用步骤", "feat(app): 添加Deep Link功能并更新相关配置", "docs(README): 更新教程", "feat: 优化微信id获取并更新教程(#1)", "Merge remote-tracking branch 'origin/main'", "细节优化", "细节优化"]
-}

@@ -3,6 +3,8 @@ package com.lonx.ecjtu.hjcalendar
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -12,10 +14,15 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.lonx.ecjtu.hjcalendar.fragment.CalendarFragment
 import com.lonx.ecjtu.hjcalendar.fragment.SettingsFragment
+import com.lonx.ecjtu.hjcalendar.utils.UpdateCheckResult
+import com.lonx.ecjtu.hjcalendar.utils.UpdateManager
+import com.lonx.ecjtu.hjcalendar.viewModel.MainViewModel
+import androidx.core.content.edit
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 
 class MainActivity : AppCompatActivity() {
 
+    private val mainViewModel: MainViewModel by viewModels()
     private lateinit var viewPager: ViewPager2
     private lateinit var bottomNav: BottomNavigationView
     private val prefs by lazy { PreferenceManager.getDefaultSharedPreferences(this) }
@@ -28,7 +35,33 @@ class MainActivity : AppCompatActivity() {
         // 初始化ViewPager
         viewPager = findViewById(R.id.view_pager)
         bottomNav = findViewById(R.id.bottom_navigation)
+        mainViewModel.checkForUpdate()
 
+        // 观察结果
+        mainViewModel.updateResult.observe(this) { result ->
+            when (result) {
+                is UpdateCheckResult.NewVersion -> {
+                    // 存储信息以便下载时使用
+                    mainViewModel.newVersionInfo = result.info
+                    showUpdateDialog(result.info)
+                }
+                is UpdateCheckResult.NoUpdateAvailable -> {
+                    ToastUtil.showToast(this, "已经是最新版本")
+                }
+                is UpdateCheckResult.ApiError -> {
+                    ToastUtil.showToast(this, "检查更新失败: API 错误 ${result.code}")
+                }
+                is UpdateCheckResult.NetworkError -> {
+                    ToastUtil.showToast(this, "检查更新失败: 请检查网络连接")
+                }
+                is UpdateCheckResult.ParsingError -> {
+                    ToastUtil.showToast(this, "检查更新失败: 无法解析服务器响应")
+                }
+                is UpdateCheckResult.VersionError -> {
+                    ToastUtil.showToast(this, "检查更新失败: 应用内部错误")
+                }
+            }
+        }
         val adapter = ViewPagerAdapter(this)
         viewPager.adapter = adapter
 
@@ -67,7 +100,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
+    private fun showUpdateDialog(info: UpdateManager.UpdateInfo) {
+        AlertDialog.Builder(this)
+            .setTitle("发现新版本: ${info.versionName}")
+            .setMessage("检测到新的应用版本，是否立即下载更新？")
+            .setPositiveButton("立即下载") { _, _ ->
+                // 通知 ViewModel 开始下载
+                mainViewModel.downloadUpdate()
+            }
+            .setNegativeButton("稍后", null)
+            .setCancelable(false)
+            .show()
+    }
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         parseIntent(intent)
@@ -78,7 +122,7 @@ class MainActivity : AppCompatActivity() {
             uri?.let {
                 val weixinID = it.getQueryParameter("weiXinID")
                 weixinID?.let { id ->
-                    prefs.edit().putString("weixin_id", id).apply()
+                    prefs.edit { putString("weixin_id", id) }
                 }
             }
         }

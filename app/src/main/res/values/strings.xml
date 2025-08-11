@@ -55,4 +55,6 @@
     <string name="check_update_now_key">检查更新</string>
     <string name="check_update_now_title">检查更新</string>
     <string name="check_update_now_summary">立即检查更新</string>
+    <string name="settings_title">设置</string>
+    <string name="calendar_title">日历</string>
 </resources>

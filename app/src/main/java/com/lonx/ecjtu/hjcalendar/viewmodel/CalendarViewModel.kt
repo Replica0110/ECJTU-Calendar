@@ -71,7 +71,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
 
                         if (dayCourse.courses.isEmpty()) {
                             // 课表为空
-                            _courseList.value = createSpecialStateList(formattedDate, SpecialState.EMPTY)
+                            _courseList.value = createSpecialStateList(dayCourse.date, SpecialState.EMPTY)
                         } else {
                             // 课表不为空
                             _courseList.value = listOf(dayCourse)

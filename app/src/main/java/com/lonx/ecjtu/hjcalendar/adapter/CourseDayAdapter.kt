@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.hjcalendar.adapter
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,9 +30,9 @@ class CourseDayAdapter(
         val match = dateRegex.find(dayCourseInfo.date)
         if (match != null) {
             val (date, weekDay, weekNum) = match.destructured
-            // 设置日期信息（适配新布局的垂直排列）
+            Log.e("CourseDayAdapter", "Date: $date, Week Day: $weekDay, Week Num: $weekNum")
             holder.binding.dayTextView.text = date
-            holder.binding.weekInfoTextView.text = "${weekDay} · 第${weekNum}周"
+            holder.binding.weekInfoTextView.text = "$weekDay · 第${weekNum}周"
         } else {
             holder.binding.dayTextView.text = dayCourseInfo.date
             holder.binding.weekInfoTextView.text = ""

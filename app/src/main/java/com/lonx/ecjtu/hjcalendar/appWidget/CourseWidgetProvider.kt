@@ -80,21 +80,24 @@ class CourseWidgetProvider : AppWidgetProvider() {
         val weiXinID = DataStoreManager.getWeiXinId()
 
         CoroutineScope(Dispatchers.IO).launch {
+            var todayCourses: CourseData.DayCourses
+            var tomorrowCourses: CourseData.DayCourses
             try {
-                // 获取原始数据
                 val rawTodayCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, todayStr)?.let { ECJTUCalendarAPI.parseCourseHtml(it) }
                 val rawTomorrowCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, tomorrowStr)?.let { ECJTUCalendarAPI.parseCourseHtml(it) }
 
-                val todayCourses = processCourseData(context, rawTodayCourses, todayStr)
-                val tomorrowCourses = processCourseData(context, rawTomorrowCourses, tomorrowStr)
-
-                withContext(Dispatchers.Main) {
-                    appWidgetIds.forEach { appWidgetId ->
-                        updateAppWidget(context, appWidgetManager, appWidgetId, todayCourses, tomorrowCourses)
-                    }
-                }
+                todayCourses = processCourseData(context, rawTodayCourses, todayStr)
+                tomorrowCourses = processCourseData(context, rawTomorrowCourses, tomorrowStr)
             } catch (e: Exception) {
                 e.printStackTrace()
+                todayCourses = CourseData.DayCourses(todayStr, emptyList())
+                tomorrowCourses = CourseData.DayCourses(tomorrowStr, emptyList())
+            }
+
+            withContext(Dispatchers.Main) {
+                appWidgetIds.forEach { appWidgetId ->
+                    updateAppWidget(context, appWidgetManager, appWidgetId, todayCourses, tomorrowCourses)
+                }
             }
         }
     }
@@ -102,22 +105,29 @@ class CourseWidgetProvider : AppWidgetProvider() {
      * 用于处理空/错误课程数据
      */
     private fun processCourseData(context: Context, dayCourses: CourseData.DayCourses?, dateStr: String): CourseData.DayCourses {
-        // 如果 API 调用失败，dayCourses 会是 null
-        if (dayCourses == null) {
-            val errorCourse = CourseData.CourseInfo(courseName = "课表加载错误", courseLocation = "网络请求失败")
-            return CourseData.DayCourses(dateStr, listOf(errorCourse))
+        if (dayCourses != null) {
+            if (dayCourses.courses.isEmpty()) {
+                val defaultText = context.getString(R.string.empty_course)
+                val customText = DataStoreManager.getNoCourseText(defaultText)
+                val emptyInfoCourse = CourseData.CourseInfo(courseName = "课表为空", courseLocation = customText)
+                return dayCourses.copy(courses = listOf(emptyInfoCourse))
+            }
+            return dayCourses
         }
 
-        // 课程列表为空
-        if (dayCourses.courses.isEmpty()) {
-            val defaultText = context.getString(R.string.empty_course)
-            val customText = DataStoreManager.getNoCourseText(defaultText)
-            val emptyCourse = CourseData.CourseInfo(courseName = "课表为空", courseLocation = customText)
-            return CourseData.DayCourses(dayCourses.date, listOf(emptyCourse))
-        }
+        else {
+            // 获取当天的星期信息
+            val calendar = Calendar.getInstance()
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            calendar.time = inputFormat.parse(dateStr) ?: Date()
+            val weekDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(calendar.time)
 
-        // 否则返回原始数据
-        return dayCourses
+            // 构造一个用于显示的错误日期字符串
+            val errorDateString = "$dateStr $weekDay (网络错误)"
+            val errorCourse = CourseData.CourseInfo(courseName = "课表加载错误", courseLocation = "请检查网络或配置")
+
+            return CourseData.DayCourses(errorDateString, listOf(errorCourse))
+        }
     }
 
     private fun updateAppWidget(
@@ -172,31 +182,43 @@ class CourseWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val (date, weekDay, weekNumber) = getToday(todayCourses.date)
+        val todayEmptyText = todayCourses.courses.firstOrNull()?.courseLocation ?: context.getString(R.string.empty_course)
+        val tomorrowEmptyText = tomorrowCourses.courses.firstOrNull()?.courseLocation ?: context.getString(R.string.empty_course)
         val views = RemoteViews(context.packageName, R.layout.widget_course).apply {
-            setRemoteAdapter(R.id.lv_course_today, intentToday)
-            setRemoteAdapter(R.id.lv_course_next_day, intentTomorrow)
-            setPendingIntentTemplate(R.id.lv_course_today, itemClickPendingIntentTemplate)
-            setPendingIntentTemplate(R.id.lv_course_next_day, itemClickPendingIntentTemplate)
-            setEmptyView(R.id.lv_course_today, R.id.empty_today)
-            setEmptyView(R.id.lv_course_next_day, R.id.empty_next_day)
+            // 更新标题栏，这一步现在总是能获取到有效数据
             setTextViewText(R.id.tv_date, date)
             setTextViewText(R.id.tv_week, weekDay)
             setTextViewText(R.id.tv_week_number, weekNumber)
+
+            // 设置 Adapter
+            setRemoteAdapter(R.id.lv_course_today, intentToday)
+            setRemoteAdapter(R.id.lv_course_next_day, intentTomorrow)
+
+            setEmptyView(R.id.lv_course_today, R.id.empty_today)
+            setEmptyView(R.id.lv_course_next_day, R.id.empty_next_day)
+
+            setTextViewText(R.id.empty_today, todayEmptyText)
+            setTextViewText(R.id.empty_next_day, tomorrowEmptyText)
+
+            // 设置点击模板和刷新按钮
+            setPendingIntentTemplate(R.id.lv_course_today, itemClickPendingIntentTemplate)
+            setPendingIntentTemplate(R.id.lv_course_next_day, itemClickPendingIntentTemplate)
             setOnClickPendingIntent(R.id.refresh_button, refreshPendingIntent)
         }
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
 
-    private fun getToday(time:String): Triple<String, String, String> {
+    private fun getToday(time: String): Triple<String, String, String> {
         val pattern = """(\d{4}-\d{2}-\d{2})\s(星期.+)（(第\d+周)）""".toRegex()
 
         val matchResult = pattern.find(time)
+
         if (matchResult != null) {
             val (date, weekDay, weekNumber) = matchResult.destructured
             val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val outputFormat = SimpleDateFormat("M.d", Locale.getDefault())
-            val formatDate = inputFormat.parse(date)?: Date()
+            val formatDate = inputFormat.parse(date) ?: Date()
             val formattedDate = outputFormat.format(formatDate)
             return Triple(formattedDate, weekDay, weekNumber)
         } else {

@@ -3,7 +3,6 @@ package com.lonx.ecjtu.hjcalendar.service
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.google.gson.Gson
@@ -17,23 +16,22 @@ const val EXTRA_COURSE_LOCATION = "com.lonx.ecjtu.hjcalendar.widget.EXTRA_COURSE
 
 class CourseRemoteViewsFactory(private val context: Context, private val intent: Intent) : RemoteViewsService.RemoteViewsFactory {
 
-    private var courseList: ArrayList<CourseData.CourseInfo> = ArrayList()
-    private val VIEW_TYPE_NORMAL = 0
-    private val VIEW_TYPE_EMPTY = 1
-    init {
-        loadDataInBackground()
-    }
+    private var courseList: List<CourseData.CourseInfo> = emptyList()
 
     override fun onCreate() {
-        Log.e("RemoteViewsFactory", "Factory created.")
     }
 
     override fun onDataSetChanged() {
-        loadDataInBackground()
+        val dayCoursesJson = intent.getStringExtra("dayCourses")
+        val type = object : TypeToken<CourseData.DayCourses>() {}.type
+        val deserializedDayCourses: CourseData.DayCourses? = Gson().fromJson(dayCoursesJson, type)
+        courseList = deserializedDayCourses?.courses?.filterNot {
+            it.courseName == "课表为空" || it.courseName == "课表加载错误"
+        } ?: emptyList()
     }
 
     override fun onDestroy() {
-        courseList.clear()
+        courseList = emptyList()
     }
 
     override fun getCount(): Int {
@@ -41,50 +39,34 @@ class CourseRemoteViewsFactory(private val context: Context, private val intent:
     }
 
     override fun getViewAt(position: Int): RemoteViews? {
-        if (position < 0 || position >= courseList.size) {
+        if (position !in courseList.indices) {
             return null
         }
 
         val course = courseList[position]
-        val viewType = getItemViewType(position)
 
-        return if (viewType == VIEW_TYPE_EMPTY) {
-            Log.e("RemoteViewsFactory", "Empty course item created.")
-            RemoteViews(context.packageName, R.layout.widget_course_item_empty).apply {
-                setTextViewText(R.id.tv_empty_message, course.courseLocation)
-            }
-        } else { // VIEW_TYPE_NORMAL
-            RemoteViews(context.packageName, R.layout.widget_course_item).apply {
-                setTextViewText(R.id.tv_course_name, course.courseName)
-                setTextViewText(R.id.tv_course_time, course.courseTime)
-                setTextViewText(R.id.tv_course_location, course.courseLocation)
+        return RemoteViews(context.packageName, R.layout.widget_course_item).apply {
+            setTextViewText(R.id.tv_course_name, course.courseName)
+            setTextViewText(R.id.tv_course_time, course.courseTime)
+            setTextViewText(R.id.tv_course_location, course.courseLocation)
 
-                // 设置点击事件的 fillInIntent
-                val fillInIntent = Intent().apply {
-                    val extras = Bundle()
-                    extras.putString(EXTRA_COURSE_NAME, course.courseName)
-                    extras.putString(EXTRA_COURSE_TIME, course.courseTime)
-                    extras.putString(EXTRA_COURSE_LOCATION, course.courseLocation)
-                    putExtras(extras)
-                }
-                setOnClickFillInIntent(R.id.widget_item_container, fillInIntent)
+            val fillInIntent = Intent().apply {
+                val extras = Bundle()
+                extras.putString(EXTRA_COURSE_NAME, course.courseName)
+                extras.putString(EXTRA_COURSE_TIME, course.courseTime)
+                extras.putString(EXTRA_COURSE_LOCATION, course.courseLocation)
+                putExtras(extras)
             }
+            setOnClickFillInIntent(R.id.widget_item_container, fillInIntent)
         }
     }
 
     override fun getLoadingView(): RemoteViews? {
         return null
     }
-    fun getItemViewType(position: Int): Int {
-        val course = courseList[position]
-        return if (course.courseName == "课表为空" || course.courseName == "课表加载错误") {
-            VIEW_TYPE_EMPTY
-        } else {
-            VIEW_TYPE_NORMAL
-        }
-    }
+
     override fun getViewTypeCount(): Int {
-        return 2
+        return 1
     }
 
     override fun getItemId(position: Int): Long {
@@ -93,14 +75,5 @@ class CourseRemoteViewsFactory(private val context: Context, private val intent:
 
     override fun hasStableIds(): Boolean {
         return true
-    }
-
-    private fun loadDataInBackground() {
-        val dayCourses = intent.getStringExtra("dayCourses")
-        val type = object : TypeToken<CourseData.DayCourses>() {}.type
-        val deserializedDayCourses: CourseData.DayCourses = Gson().fromJson(dayCourses, type)
-//        Log.e("TodayCourse", "Loaded courses: $deserializedDayCourses")
-        courseList.clear()
-        courseList.addAll(deserializedDayCourses.courses)
     }
 }

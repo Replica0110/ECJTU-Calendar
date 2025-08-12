@@ -1,5 +1,7 @@
 package com.lonx.ecjtu.hjcalendar.fragment
 
+import android.annotation.SuppressLint
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,6 +14,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.lonx.ecjtu.hjcalendar.R
+import com.lonx.ecjtu.hjcalendar.logic.DownloadState
 import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
 import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
@@ -20,7 +23,7 @@ import com.lonx.ecjtu.hjcalendar.viewmodel.SettingsViewModel
 class SettingsFragment : PreferenceFragmentCompat() {
 
     private val viewModel: SettingsViewModel by viewModels()
-
+    private var updateDialog: AlertDialog? = null
     private val developerIntent by lazy { Intent(Intent.ACTION_VIEW, getString(R.string.developer_url).toUri()) }
     private val sourceCodeIntent by lazy { Intent(Intent.ACTION_VIEW, getString(R.string.source_code_url).toUri()) }
 
@@ -44,6 +47,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
     }
+    @SuppressLint("SetTextI18n")
     private fun setupObservers() {
         // 观察更新检查的结果
         viewModel.updateResult.observe(this) { result ->
@@ -63,6 +67,34 @@ class SettingsFragment : PreferenceFragmentCompat() {
         viewModel.pinWidgetResult.observe(this) { event ->
             event.getContentIfNotHandled()?.let { message ->
                 ToastUtil.showToast(requireContext(), message)
+            }
+        }
+        viewModel.downloadState.observe(this) { state ->
+            // 如果对话框不存在，则不执行任何操作
+            if (updateDialog == null || !updateDialog!!.isShowing) return@observe
+
+            val positiveButton = updateDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+            when (state) {
+                is DownloadState.Idle -> {
+                    positiveButton?.text = "立即下载"
+                    positiveButton?.setOnClickListener { viewModel.downloadUpdate() }
+                }
+                is DownloadState.InProgress -> {
+                    positiveButton?.text = "取消下载 (${state.progress}%)"
+                    positiveButton?.setOnClickListener { viewModel.cancelDownload() }
+                }
+                is DownloadState.Success -> {
+                    ToastUtil.showToast(requireContext(), "下载完成，即将安装...")
+                    updateDialog?.dismiss()
+                    // 调用 UpdateManager 中的安装方法
+                    viewModel.updateManager.installApk(requireContext(), state.file)
+                    viewModel.resetDownloadState() // 重置状态
+                }
+                is DownloadState.Error -> {
+                    ToastUtil.showToast(requireContext(), "下载失败: ${state.exception.message}")
+                    positiveButton?.text = "重试"
+                    positiveButton?.setOnClickListener { viewModel.downloadUpdate() }
+                }
             }
         }
     }
@@ -86,13 +118,35 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
 
     private fun showUpdateDialog(info: UpdateManager.UpdateInfo) {
-        MaterialAlertDialogBuilder(requireContext())
+        updateDialog?.dismiss()
+
+        val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("发现新版本: ${info.versionName}")
             .setMessage(info.releaseNotes)
-            .setPositiveButton("立即下载") { _, _ -> viewModel.downloadUpdate() }
             .setNegativeButton("稍后", null)
             .setCancelable(false)
-            .show()
+            .setPositiveButton("立即下载", null)
+            .setOnDismissListener {
+                viewModel.cancelDownload()
+                updateDialog = null
+            }
+
+        updateDialog = builder.create()
+
+        updateDialog?.setOnShowListener {
+            val positiveButton = updateDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton?.setOnClickListener {
+                // 根据当前状态决定是开始下载还是取消下载
+                val currentState = viewModel.downloadState.value
+                if (currentState is DownloadState.InProgress) {
+                    viewModel.cancelDownload()
+                } else {
+                    viewModel.downloadUpdate()
+                }
+            }
+        }
+
+        updateDialog?.show()
     }
 
     private fun showAlertDialog(titleResId: CharSequence?, messageResId: Int) {

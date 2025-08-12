@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.hjcalendar.logic
 
+import java.io.File
 import java.io.IOException
 
 // 可以定义在 UpdateManager.kt 文件顶部
@@ -21,4 +22,15 @@ sealed class UpdateCheckResult {
 
     /** 失败：无法获取应用当前的版本号 */
     object VersionError : UpdateCheckResult()
+}
+
+sealed class DownloadState {
+    /** 空闲状态 */
+    object Idle : DownloadState()
+    /** 下载中状态，包含进度 */
+    data class InProgress(val progress: Int) : DownloadState()
+    /** 下载成功状态，包含APK文件 */
+    data class Success(val file: File) : DownloadState()
+    /** 下载失败状态，包含异常信息 */
+    data class Error(val exception: Throwable) : DownloadState()
 }

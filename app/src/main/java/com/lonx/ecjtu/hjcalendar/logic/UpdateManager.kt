@@ -1,19 +1,27 @@
 package com.lonx.ecjtu.hjcalendar.logic
 
-import android.app.DownloadManager
 import android.content.Context
-import android.os.Environment
+import android.content.Intent
+import kotlinx.coroutines.ensureActive
 import android.util.Log
+import android.provider.Settings
+import androidx.core.content.FileProvider
 import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import androidx.core.net.toUri
 import com.google.gson.JsonSyntaxException
-import com.lonx.ecjtu.hjcalendar.R
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import androidx.core.net.toUri
+import com.lonx.ecjtu.hjcalendar.R
+import kotlinx.coroutines.currentCoroutineContext
 
 
 class UpdateManager {
@@ -81,20 +89,74 @@ class UpdateManager {
         }
     }
 
-    /**
-     * 使用系统的 DownloadManager 下载 APK。
-     */
-    fun downloadUpdate(context: Context, info: UpdateInfo) {
-        val request = DownloadManager.Request(info.downloadUrl.toUri())
-            .setTitle("正在下载 ${context.getString(R.string.app_name)} ${info.versionName}")
-            .setDescription("下载完成后将提示安装")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "${context.getString(R.string.app_name)}-${info.versionName}.apk")
-            .setMimeType("application/vnd.android.package-archive")
+    fun installApk(context: Context, apkFile: File) {
+        val authority = "${context.packageName}.provider"
+        val apkUri = FileProvider.getUriForFile(context, authority, apkFile)
 
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        downloadManager.enqueue(request)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(apkUri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        // 检查安装未知来源应用的权限（Android 8.0+）
+        if (!context.packageManager.canRequestPackageInstalls()) {
+            // 跳转到设置页面请求权限
+            val settingsIntent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                .setData("package:${context.packageName}".toUri())
+            context.startActivity(settingsIntent)
+            // 提示用户开启权限后再试
+            Log.w(TAG, "用户需要开启“安装未知应用”的权限")
+            return
+        }
+
+        context.startActivity(intent)
     }
+
+
+    fun downloadUpdate(context: Context, info: UpdateInfo): Flow<DownloadState> = flow {
+        emit(DownloadState.InProgress(0)) // 开始下载，进度0%
+
+        val request = Request.Builder().url(info.downloadUrl).build()
+        val response = client.newCall(request).execute()
+
+        if (!response.isSuccessful) {
+            throw IOException("下载失败: ${response.code}")
+        }
+
+        val body = response.body
+        val totalBytes = body.contentLength()
+        val appName = context.getString(R.string.app_name)
+        val appVersion = info.versionName
+        // 将文件保存在应用的内部缓存目录
+        val apkFile = File(context.cacheDir, "${appName}-${appVersion}.apk")
+        if (apkFile.exists()) {
+            apkFile.delete()
+        }
+
+        var bytesCopied: Long = 0
+        val buffer = ByteArray(8 * 1024)
+        var bytes = body.byteStream().read(buffer)
+
+        FileOutputStream(apkFile).use { output ->
+            while (bytes >= 0) {
+                currentCoroutineContext().ensureActive()
+
+                output.write(buffer, 0, bytes)
+                bytesCopied += bytes
+
+                if (totalBytes > 0) {
+                    val progress = (100 * bytesCopied / totalBytes).toInt()
+                    emit(DownloadState.InProgress(progress))
+                }
+
+                bytes = body.byteStream().read(buffer)
+            }
+        }
+
+        emit(DownloadState.Success(apkFile))
+
+    }.flowOn(Dispatchers.IO)
 
     private fun isNewerVersion(currentVersion: String, latestVersion: String): Boolean {
         // 移除版本号中的 'v' 或其他非数字前缀

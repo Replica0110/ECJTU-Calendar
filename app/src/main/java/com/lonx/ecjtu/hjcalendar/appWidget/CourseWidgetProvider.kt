@@ -13,7 +13,6 @@ import com.lonx.ecjtu.hjcalendar.MainActivity
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.service.CourseRemoteViewsService
 import com.lonx.ecjtu.hjcalendar.utils.CourseData
-import com.lonx.ecjtu.hjcalendar.utils.ECJTUCalendarAPI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,12 +22,15 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.core.net.toUri
+import com.lonx.ecjtu.hjcalendar.data.parser.InvalidWeiXinIdException
+import com.lonx.ecjtu.hjcalendar.data.repository.CalendarRepository
 import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
 
 const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRESH"
 
 class CourseWidgetProvider : AppWidgetProvider() {
     private var lastUpdateTime = 0L
+    private val calendarRepository = CalendarRepository()
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         intent.action?.let { Log.e("intent.action", it) }
@@ -69,28 +71,21 @@ class CourseWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        if (appWidgetIds.isEmpty()) {
-            return
-        }
+        if (appWidgetIds.isEmpty()) return
+        val calendarRepository = CalendarRepository()
         val todayStr = getFormatDate()
         val tomorrowStr = getFormatDate(true)
-
         val weiXinID = DataStoreManager.getWeiXinId()
 
         CoroutineScope(Dispatchers.IO).launch {
-            var todayCourses: CourseData.DayCourses
-            var tomorrowCourses: CourseData.DayCourses
-            try {
-                val rawTodayCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, todayStr)?.let { ECJTUCalendarAPI.parseCourseHtml(it) }
-                val rawTomorrowCourses = ECJTUCalendarAPI.getCourseHtml(weiXinID, tomorrowStr)?.let { ECJTUCalendarAPI.parseCourseHtml(it) }
+            val todayResult = calendarRepository.getDailyCourses(weiXinID, todayStr)
+            val tomorrowResult = calendarRepository.getDailyCourses(weiXinID, tomorrowStr)
 
-                todayCourses = processCourseData(context, rawTodayCourses, todayStr)
-                tomorrowCourses = processCourseData(context, rawTomorrowCourses, tomorrowStr)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                todayCourses = CourseData.DayCourses(todayStr, emptyList())
-                tomorrowCourses = CourseData.DayCourses(tomorrowStr, emptyList())
-            }
+            val rawTodayCourses = todayResult.getOrNull()
+            val rawTomorrowCourses = tomorrowResult.getOrNull()
+
+            val todayCourses = processCourseData(context, rawTodayCourses, todayStr, todayResult.exceptionOrNull())
+            val tomorrowCourses = processCourseData(context, rawTomorrowCourses, tomorrowStr, tomorrowResult.exceptionOrNull())
 
             withContext(Dispatchers.Main) {
                 appWidgetIds.forEach { appWidgetId ->
@@ -100,32 +95,41 @@ class CourseWidgetProvider : AppWidgetProvider() {
         }
     }
     /**
-     * 用于处理空/错误课程数据
+     * 用于处理空/错误课程数据的辅助方法，现在也接收一个异常参数
      */
-    private fun processCourseData(context: Context, dayCourses: CourseData.DayCourses?, dateStr: String): CourseData.DayCourses {
+    private fun processCourseData(context: Context, dayCourses: CourseData.DayCourses?, dateStr: String, exception: Throwable?): CourseData.DayCourses {
+        // 成功获取数据
         if (dayCourses != null) {
+            // 当天无课
             if (dayCourses.courses.isEmpty()) {
                 val defaultText = context.getString(R.string.empty_course)
                 val customText = DataStoreManager.getNoCourseText(defaultText)
                 val emptyInfoCourse = CourseData.CourseInfo(courseName = "课表为空", courseLocation = customText)
                 return dayCourses.copy(courses = listOf(emptyInfoCourse))
             }
+            // 当天有课
             return dayCourses
         }
 
-        else {
-            // 获取当天的星期信息
-            val calendar = Calendar.getInstance()
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            calendar.time = inputFormat.parse(dateStr) ?: Date()
-            val weekDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(calendar.time)
-
-            // 构造一个用于显示的错误日期字符串
-            val errorDateString = "$dateStr $weekDay (网络错误)"
-            val errorCourse = CourseData.CourseInfo(courseName = "课表加载错误", courseLocation = "请检查网络或配置")
-
-            return CourseData.DayCourses(errorDateString, listOf(errorCourse))
+        val errorMessage = when (exception) {
+            is InvalidWeiXinIdException -> "无效的weiXinID"
+            is java.io.IOException -> "请检查网络连接"
+            else -> "未知错误"
         }
+        val errorCourse = CourseData.CourseInfo(courseName = "课表加载错误", courseLocation = errorMessage)
+
+        // 构造一个包含错误信息的日期标题
+        val calendar = Calendar.getInstance()
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        try {
+            calendar.time = inputFormat.parse(dateStr) ?: Date()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        val weekDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(calendar.time)
+        val errorDateString = "$dateStr $weekDay (加载失败)"
+
+        return CourseData.DayCourses(errorDateString, listOf(errorCourse))
     }
 
     private fun updateAppWidget(

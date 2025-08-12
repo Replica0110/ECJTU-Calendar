@@ -2,7 +2,6 @@ package com.lonx.ecjtu.hjcalendar.utils
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Bitmap.createBitmap
 import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable

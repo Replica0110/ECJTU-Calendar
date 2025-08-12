@@ -4,12 +4,10 @@ import android.app.Application
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.util.Log
-import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.appWidget.CourseWidgetProvider
@@ -20,12 +18,10 @@ import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
 import com.lonx.ecjtu.hjcalendar.utils.Event
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.io.IOException
 import java.util.concurrent.CancellationException
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
     val updateManager = UpdateManager()
 
     private val _downloadState = MutableLiveData<DownloadState>(DownloadState.Idle)

@@ -117,44 +117,64 @@ class UpdateManager {
     fun downloadUpdate(context: Context, info: UpdateInfo): Flow<DownloadState> = flow {
 
         val appName = context.getString(R.string.app_name)
-        val apkFile = File(context.cacheDir, "${appName}-${info.versionName}.apk")
+        val finalFile = File(context.cacheDir, "${appName}-${info.versionName}.apk")
+        val tempFile = File(context.cacheDir, "${appName}-${info.versionName}.apk.tmp")
 
-        if (apkFile.exists()) {
-            Log.i(TAG, "找到了已下载的安装包: ${apkFile.name}")
-            emit(DownloadState.Success(apkFile))
-            return@flow // 结束 Flow，不再执行后续的网络请求
+
+        if (finalFile.exists()) {
+            Log.i(TAG, "找到了已下载的安装包: ${finalFile.name}")
+            emit(DownloadState.Success(finalFile))
+            return@flow
         }
-        Log.i(TAG, "本地未找到安装包，开始从网络下载...")
-        emit(DownloadState.InProgress(0))
-
-        val request = Request.Builder().url(info.downloadUrl).build()
-        val response = client.newCall(request).execute()
-
-        if (!response.isSuccessful) {
-            throw IOException("下载失败: ${response.code}")
-        }
-
-        val body = response.body
-        val totalBytes = body.contentLength()
-
-        var bytesCopied: Long = 0
-        val buffer = ByteArray(8 * 1024)
-        var bytes = body.byteStream().read(buffer)
-
-        FileOutputStream(apkFile).use { output ->
-            while (bytes >= 0) {
-                currentCoroutineContext().ensureActive()
-                output.write(buffer, 0, bytes)
-                bytesCopied += bytes
-                if (totalBytes > 0) {
-                    val progress = (100 * bytesCopied / totalBytes).toInt()
-                    emit(DownloadState.InProgress(progress))
-                }
-                bytes = body.byteStream().read(buffer)
+        try {
+            // 如果旧的临时文件存在，先删除它
+            if (tempFile.exists()) {
+                tempFile.delete()
             }
-        }
 
-        emit(DownloadState.Success(apkFile))
+            Log.i(TAG, "开始下载，临时文件为: ${tempFile.name}")
+            emit(DownloadState.InProgress(0))
+
+            val request = Request.Builder().url(info.downloadUrl).build()
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) throw IOException("下载失败: ${response.code}")
+            val body = response.body
+            val totalBytes = body.contentLength()
+
+            var bytesCopied: Long = 0
+            val buffer = ByteArray(8 * 1024)
+            var bytes = body.byteStream().read(buffer)
+
+            // 所有写入操作都针对临时文件
+            FileOutputStream(tempFile).use { output ->
+                while (bytes >= 0) {
+                    currentCoroutineContext().ensureActive()
+                    output.write(buffer, 0, bytes)
+                    bytesCopied += bytes
+                    if (totalBytes > 0) {
+                        val progress = (100 * bytesCopied / totalBytes).toInt()
+                        emit(DownloadState.InProgress(progress))
+                    }
+                    bytes = body.byteStream().read(buffer)
+                }
+            }
+
+            // 下载成功后，将临时文件重命名为最终文件
+            if (!tempFile.renameTo(finalFile)) {
+                throw IOException("重命名临时文件失败")
+            }
+
+            emit(DownloadState.Success(finalFile))
+
+        } catch (e: Exception) {
+            // 捕获任何异常（包括取消），并删除临时文件
+            if (tempFile.exists()) {
+                tempFile.delete()
+                Log.i(TAG, "下载被取消或失败，已删除临时文件: ${tempFile.name}")
+            }
+            // 将异常重新抛出，让 ViewModel 处理
+            throw e
+        }
 
     }.flowOn(Dispatchers.IO)
 

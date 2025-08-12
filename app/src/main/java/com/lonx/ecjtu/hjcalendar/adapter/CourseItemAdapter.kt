@@ -1,10 +1,8 @@
 package com.lonx.ecjtu.hjcalendar.adapter
 
-import android.app.Application
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.vipulasri.timelineview.TimelineView
 import com.lonx.ecjtu.hjcalendar.R

@@ -6,10 +6,8 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.MainActivity
 import com.lonx.ecjtu.hjcalendar.R

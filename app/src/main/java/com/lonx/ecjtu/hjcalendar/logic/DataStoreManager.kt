@@ -39,7 +39,9 @@ object DataStoreManager {
         return mmkv.decodeString(KEY_NO_COURSE_TEXT, defaultValue) ?: defaultValue
     }
     /**
-     * 清理缓存目录中所有版本号小于或等于当前应用版本的 APK 文件。
+     * - 保留唯一一个版本号最高的、且比当前应用新的APK。
+     * - 删除所有其他APK文件（包括旧版本和命名不规范的）。
+     * - 删除所有残留的.tmp文件。
      */
     fun cleanUpOldApks(context: Context) {
         val cacheDir = context.cacheDir
@@ -47,28 +49,46 @@ object DataStoreManager {
 
         val appName = context.getString(R.string.app_name)
         val currentVersion = BuildConfig.VERSION_NAME
+        Log.i("DataStoreManager", "开始清理缓存目录，当前版本: $currentVersion")
 
-        Log.i("DataStoreManager", "开始清理旧的APK文件，当前版本: $currentVersion")
+        val allFiles = cacheDir.listFiles() ?: return
 
-        cacheDir.listFiles()?.forEach { file ->
-            // 检查文件名是否符合我们的命名规则
-            if (file.isFile && file.name.startsWith(appName) && file.name.endsWith(".apk")) {
+        // 找到唯一应该被保留的文件
+        val fileToKeep = allFiles
+            .filter { it.isFile && it.name.startsWith(appName) && it.name.endsWith(".apk") }
+            .mapNotNull { file ->
+                // 尝试从文件名解析版本号
                 try {
-                    val fileVersion = file.name
-                        .removePrefix(appName)
-                        .removePrefix("-")
-                        .removeSuffix(".apk")
-
-                    // 如果文件版本不比当前版本新，就删除它
-                    if (!isNewerVersion(currentVersion, fileVersion)) {
-                        if (file.delete()) {
-                            Log.i("DataStoreManager", "已删除过时的安装包: ${file.name}")
-                        }
+                    val version = file.name.removePrefix(appName).removePrefix("-").removeSuffix(".apk")
+                    // 只有版本比当前新的APK才被保留
+                    if (isNewerVersion(currentVersion, version)) {
+                        Pair(file, version)
                     } else {
-                        Log.i("DataStoreManager", "保留较新的安装包: ${file.name}")
+                        null
                     }
                 } catch (e: Exception) {
-                    Log.e("DataStoreManager", "处理文件 ${file.name} 时出错", e)
+                    null // 解析失败的文件不是我们的目标
+                }
+            }
+            .maxByOrNull { it.second } // 找到版本号最高的那个
+            ?.first // 只取它的 File 对象
+
+        if (fileToKeep != null) {
+            Log.i("DataStoreManager", "决定保留最新版安装包: ${fileToKeep.name}")
+        } else {
+            Log.i("DataStoreManager", "没有需要保留的较新版本安装包。")
+        }
+
+        allFiles.forEach { file ->
+            // 如果这个文件就是我们要保留的那个，就跳过
+            if (file == fileToKeep) {
+                return@forEach
+            }
+
+            // 否则，只要是 .apk 或 .apk.tmp 文件，就删除
+            if (file.name.endsWith(".apk") || file.name.endsWith(".apk.tmp")) {
+                if (file.delete()) {
+                    Log.i("DataStoreManager", "已清理无效或过时的文件: ${file.name}")
                 }
             }
         }

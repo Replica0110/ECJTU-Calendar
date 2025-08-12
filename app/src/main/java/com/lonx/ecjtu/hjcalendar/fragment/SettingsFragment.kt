@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import androidx.preference.Preference
@@ -74,14 +75,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
             if (updateDialog == null || !updateDialog!!.isShowing) return@observe
 
             val positiveButton = updateDialog?.getButton(AlertDialog.BUTTON_POSITIVE)
+            // 获取对“稍后”按钮的引用
+            val negativeButton = updateDialog?.getButton(AlertDialog.BUTTON_NEGATIVE)
+
             when (state) {
                 is DownloadState.Idle -> {
                     positiveButton?.text = "立即下载"
                     positiveButton?.setOnClickListener { viewModel.downloadUpdate() }
+                    negativeButton?.visibility = View.VISIBLE
                 }
                 is DownloadState.InProgress -> {
                     positiveButton?.text = "取消下载 (${state.progress}%)"
                     positiveButton?.setOnClickListener { viewModel.cancelDownload() }
+                    negativeButton?.visibility = View.GONE
                 }
                 is DownloadState.Success -> {
                     ToastUtil.showToast(requireContext(), "下载完成，即将安装...")
@@ -94,6 +100,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     ToastUtil.showToast(requireContext(), "下载失败: ${state.exception.message}")
                     positiveButton?.text = "重试"
                     positiveButton?.setOnClickListener { viewModel.downloadUpdate() }
+                    // 在出错后，让用户可以选择“重试”或“稍后”，所以恢复“稍后”按钮的可见性
+                    negativeButton?.visibility = View.VISIBLE
                 }
             }
         }

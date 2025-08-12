@@ -21,12 +21,13 @@ import java.io.FileOutputStream
 import java.io.IOException
 import androidx.core.net.toUri
 import com.lonx.ecjtu.hjcalendar.R
+import com.lonx.ecjtu.hjcalendar.utils.NetworkModule
 import kotlinx.coroutines.currentCoroutineContext
 
 
 class UpdateManager {
 
-    private val client = OkHttpClient()
+    private val client = NetworkModule.okHttpClient
     private val gson = Gson()
     private val GITHUB_API_URL = "https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
     private val TAG = "UpdateManager"

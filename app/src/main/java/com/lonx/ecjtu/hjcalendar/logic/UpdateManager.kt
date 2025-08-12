@@ -115,7 +115,17 @@ class UpdateManager {
 
 
     fun downloadUpdate(context: Context, info: UpdateInfo): Flow<DownloadState> = flow {
-        emit(DownloadState.InProgress(0)) // 开始下载，进度0%
+
+        val appName = context.getString(R.string.app_name)
+        val apkFile = File(context.cacheDir, "${appName}-${info.versionName}.apk")
+
+        if (apkFile.exists()) {
+            Log.i(TAG, "找到了已下载的安装包: ${apkFile.name}")
+            emit(DownloadState.Success(apkFile))
+            return@flow // 结束 Flow，不再执行后续的网络请求
+        }
+        Log.i(TAG, "本地未找到安装包，开始从网络下载...")
+        emit(DownloadState.InProgress(0))
 
         val request = Request.Builder().url(info.downloadUrl).build()
         val response = client.newCall(request).execute()
@@ -126,13 +136,6 @@ class UpdateManager {
 
         val body = response.body
         val totalBytes = body.contentLength()
-        val appName = context.getString(R.string.app_name)
-        val appVersion = info.versionName
-        // 将文件保存在应用的内部缓存目录
-        val apkFile = File(context.cacheDir, "${appName}-${appVersion}.apk")
-        if (apkFile.exists()) {
-            apkFile.delete()
-        }
 
         var bytesCopied: Long = 0
         val buffer = ByteArray(8 * 1024)
@@ -141,15 +144,12 @@ class UpdateManager {
         FileOutputStream(apkFile).use { output ->
             while (bytes >= 0) {
                 currentCoroutineContext().ensureActive()
-
                 output.write(buffer, 0, bytes)
                 bytesCopied += bytes
-
                 if (totalBytes > 0) {
                     val progress = (100 * bytesCopied / totalBytes).toInt()
                     emit(DownloadState.InProgress(progress))
                 }
-
                 bytes = body.byteStream().read(buffer)
             }
         }

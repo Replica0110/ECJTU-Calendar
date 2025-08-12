@@ -15,6 +15,7 @@ import com.lonx.ecjtu.hjcalendar.logic.DownloadState
 import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
 import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
 import com.lonx.ecjtu.hjcalendar.utils.Event
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -38,6 +39,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun runStartupChecks() {
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.IO) {
+            DataStoreManager.cleanUpOldApks(app)
+        }
         if (DataStoreManager.isUpdateCheckOnStartEnabled()) {
             viewModelScope.launch {
                 _updateResult.postValue(updateManager.checkForUpdate())

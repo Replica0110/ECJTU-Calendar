@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.hjcalendar.fragment
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import com.lonx.ecjtu.hjcalendar.data.model.Course
 class CourseDetailBottomSheetFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentCourseDetailBottomSheetBinding? = null
     private val binding get() = _binding!!
+    private var onDismissListener: (() -> Unit)? = null
 
     companion object {
         private const val ARG_COURSE = "arg_course"
@@ -50,9 +52,18 @@ class CourseDetailBottomSheetFragment : BottomSheetDialogFragment() {
         
         return binding.root
     }
+    
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        onDismissListener?.invoke()
+    }
+    
+    fun setOnDismissListener(listener: () -> Unit) {
+        onDismissListener = listener
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

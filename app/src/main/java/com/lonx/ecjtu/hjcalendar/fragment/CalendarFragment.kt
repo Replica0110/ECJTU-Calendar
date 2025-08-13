@@ -27,6 +27,8 @@ class CalendarFragment : Fragment() {
     private val viewModel by viewModels<CalendarViewModel>()
     private var _binding: FragmentCalendarBinding? = null
     private val binding get() = _binding!!
+
+    private var isShowingCourseDetails = false
     private lateinit var adapter: CourseDayAdapter
 
     override fun onCreateView(
@@ -126,8 +128,15 @@ class CalendarFragment : Fragment() {
     }
 
     private fun showCourseDetails(course: Course) {
+        if (isShowingCourseDetails) {
+            return
+        }
+        isShowingCourseDetails = true
         val bottomSheet = CourseDetailBottomSheetFragment.newInstance(course)
         bottomSheet.show(parentFragmentManager, "CourseDetailBottomSheet")
+        bottomSheet.setOnDismissListener {
+            isShowingCourseDetails = false
+        }
     }
 
     private fun showDatePickerDialog(date: Date) {

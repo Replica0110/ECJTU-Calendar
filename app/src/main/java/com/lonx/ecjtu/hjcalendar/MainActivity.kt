@@ -20,6 +20,7 @@ import com.lonx.ecjtu.hjcalendar.logic.UpdateCheckResult
 import com.lonx.ecjtu.hjcalendar.logic.UpdateManager
 import com.lonx.ecjtu.hjcalendar.utils.ToastUtil
 import com.lonx.ecjtu.hjcalendar.viewmodel.MainViewModel
+import com.lonx.ecjtu.hjcalendar.appWidget.CourseWidgetProvider
 
 class MainActivity : AppCompatActivity() {
     private var updateDialog: AlertDialog? = null
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.handleIntent(intent)
         viewModel.runStartupChecks()
-
+        CourseWidgetProvider.updateAllWidgets(this)
         setupViews()
         setupObservers()
     }

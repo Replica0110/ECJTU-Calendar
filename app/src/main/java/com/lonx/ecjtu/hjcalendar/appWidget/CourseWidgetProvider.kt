@@ -28,12 +28,33 @@ import java.util.*
 const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRESH"
 
 class CourseWidgetProvider : AppWidgetProvider() {
+    companion object {
+        fun updateAllWidgets(context: Context) {
+            val intent = Intent(context, CourseWidgetProvider::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            context.sendBroadcast(intent)
+        }
+    }
+
     private var lastUpdateTime = 0L
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        intent.action?.let { Log.e("intent.action", it) }
-        if (shouldUpdateWidget(intent.action)) {
-            updateWidgets(context)
+        intent.action?.let { action ->
+            Log.e("onReceive", action)
+            when (action) {
+                Intent.ACTION_BOOT_COMPLETED,
+                Intent.ACTION_MY_PACKAGE_REPLACED -> {
+                    // 系统启动或应用更新后，强制更新所有widget
+                    Log.e("Widget", "系统启动或应用更新，正在更新小组件")
+                    updateWidgets(context)
+                }
+                else -> {
+                    if (shouldUpdateWidget(action)) {
+                        updateWidgets(context)
+                    }
+                }
+            }
         }
     }
 
@@ -42,7 +63,10 @@ class CourseWidgetProvider : AppWidgetProvider() {
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_DATE_CHANGED,
-            "android.appwidget.action.APPWIDGET_UPDATE"
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_MY_PACKAGE_REPLACED,
+            "android.appwidget.action.APPWIDGET_UPDATE",
+            ACTION_MANUAL_REFRESH
         )
     }
 

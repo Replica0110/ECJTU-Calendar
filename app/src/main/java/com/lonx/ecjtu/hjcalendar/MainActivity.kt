@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.handleIntent(intent)
         viewModel.runStartupChecks()
-        CourseWidgetProvider.updateAllWidgets(this)
+//        CourseWidgetProvider.updateAllWidgets(this)
         setupViews()
         setupObservers()
     }

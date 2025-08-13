@@ -28,14 +28,14 @@ import java.util.*
 const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRESH"
 
 class CourseWidgetProvider : AppWidgetProvider() {
-    companion object {
-        fun updateAllWidgets(context: Context) {
-            val intent = Intent(context, CourseWidgetProvider::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            }
-            context.sendBroadcast(intent)
-        }
-    }
+//    companion object {
+//        fun updateAllWidgets(context: Context) {
+//            val intent = Intent(context, CourseWidgetProvider::class.java).apply {
+//                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+//            }
+//            context.sendBroadcast(intent)
+//        }
+//    }
 
     private var lastUpdateTime = 0L
     override fun onReceive(context: Context, intent: Intent) {

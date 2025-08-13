@@ -84,17 +84,24 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     private fun handleScheduleResult(result: ScheduleResult) {
         when (result) {
             is ScheduleResult.Success -> {
-                _uiState.value = ScheduleUiState.Success(result.schedule)
-                _events.value = Event("日历已更新")
+                val schedule = if (result.schedule.hasValidCourses) {
+                    result.schedule
+                } else {
+                    createEmptySchedule(result.schedule.dateInfo)
+                }
+                _uiState.value = ScheduleUiState.Success(schedule)
+                _events.value = Event(
+                    if (schedule.hasValidCourses) "日历已更新" else "当天没有课程"
+                )
             }
             is ScheduleResult.Empty -> {
-                val emptySchedule = createEmptySchedule(result.dateInfo)
-                _uiState.value = ScheduleUiState.Empty(emptySchedule)
+                val schedule = createEmptySchedule(result.dateInfo)
+                _uiState.value = ScheduleUiState.Empty(schedule)
                 _events.value = Event("当天没有课程")
             }
             is ScheduleResult.Error -> {
-                val errorSchedule = createErrorSchedule(result.dateInfo, result.message)
-                _uiState.value = ScheduleUiState.Error(errorSchedule)
+                val schedule = createErrorSchedule(result.dateInfo, result.message)
+                _uiState.value = ScheduleUiState.Error(schedule)
                 _events.value = Event("获取课程失败: ${result.message}")
             }
         }
@@ -106,18 +113,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     private fun createEmptySchedule(dateInfo: String): DailySchedule {
         val defaultText = getApplication<Application>().getString(R.string.empty_course)
         val message = DataStoreManager.getNoCourseText(defaultText)
-        return DailySchedule(
-            dateInfo = dateInfo,
-            courses = listOf(
-                Course(
-                    name = "课表为空",
-                    time = "",
-                    week = "",
-                    location = message,
-                    teacher = ""
-                )
-            )
-        )
+        return DailySchedule.empty(dateInfo, message)
     }
 
     /**
@@ -127,18 +123,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         val message = errorMessage.ifBlank { 
             getApplication<Application>().getString(R.string.error_course_message)
         }
-        return DailySchedule(
-            dateInfo = dateInfo,
-            courses = listOf(
-                Course(
-                    name = "课表加载错误",
-                    time = "",
-                    week = "",
-                    location = message,
-                    teacher = ""
-                )
-            )
-        )
+        return DailySchedule.error(dateInfo, message)
     }
 
     /**

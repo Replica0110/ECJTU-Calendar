@@ -10,6 +10,7 @@ import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.databinding.ItemCourseBinding
 import com.lonx.ecjtu.hjcalendar.databinding.ItemCourseEmptyBinding
 import com.lonx.ecjtu.hjcalendar.data.model.Course
+import com.lonx.ecjtu.hjcalendar.data.model.CourseType
 import com.lonx.ecjtu.hjcalendar.utils.VectorDrawableUtils
 
 class CourseItemAdapter(
@@ -27,10 +28,10 @@ class CourseItemAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (items[position].name == "课表为空" || items[position].name == "课表加载错误") {
-            VIEW_TYPE_EMPTY
-        } else {
+        return if (items[position].type == CourseType.NORMAL) {
             VIEW_TYPE_NORMAL
+        } else {
+            VIEW_TYPE_EMPTY
         }
     }
 
@@ -101,14 +102,17 @@ class CourseItemAdapter(
 
         fun bind(course: Course) {
             binding.apply {
-                when (course.name) {
-                    "课表为空" -> {
-                        emptyCourseTitle.text = itemView.context.getString(R.string.empty_course_title)
-                        emptyCourseMessage.text = course.location
+                when (course.type) {
+                    CourseType.NORMAL -> {
+
                     }
-                    "课表加载错误" -> {
+                    CourseType.EMPTY -> {
+                        emptyCourseTitle.text = itemView.context.getString(R.string.empty_course_title)
+                        emptyCourseMessage.text = course.msg
+                    }
+                    CourseType.ERROR -> {
                         emptyCourseTitle.text = itemView.context.getString(R.string.error_course_title)
-                        emptyCourseMessage.text = course.location
+                        emptyCourseMessage.text = course.msg
                     }
                 }
             }

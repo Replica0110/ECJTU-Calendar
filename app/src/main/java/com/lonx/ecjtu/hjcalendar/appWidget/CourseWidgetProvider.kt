@@ -29,7 +29,6 @@ const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRE
 
 class CourseWidgetProvider : AppWidgetProvider() {
     private var lastUpdateTime = 0L
-    private val calendarRepository = CalendarRepository()
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         intent.action?.let { Log.e("intent.action", it) }
@@ -107,13 +106,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
                     val customText = DataStoreManager.getNoCourseText(defaultText)
                     result.schedule.copy(
                         courses = listOf(
-                            Course(
-                                name = "课表为空",
-                                time = "",
-                                week = "",
-                                location = customText,
-                                teacher = ""
-                            )
+                            Course.createEmpty(customText)
                         )
                     )
                 } else {
@@ -126,13 +119,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
                 DailySchedule(
                     dateInfo = result.dateInfo,
                     courses = listOf(
-                        Course(
-                            name = "课表为空",
-                            time = "",
-                            week = "",
-                            location = customText,
-                            teacher = ""
-                        )
+                        Course.createEmpty(customText)
                     )
                 )
             }
@@ -151,13 +138,7 @@ class CourseWidgetProvider : AppWidgetProvider() {
                 DailySchedule(
                     dateInfo = errorDateString,
                     courses = listOf(
-                        Course(
-                            name = "课表加载错误",
-                            time = "",
-                            week = "",
-                            location = result.message,
-                            teacher = ""
-                        )
+                        Course.createError(result.message)
                     )
                 )
             }
@@ -226,9 +207,9 @@ class CourseWidgetProvider : AppWidgetProvider() {
         val (date, weekDay, weekNumber) = getToday(todaySchedule.dateInfo)
 
         // 获取空视图的文本
-        val todayEmptyText = todaySchedule.courses.firstOrNull()?.location 
+        val todayEmptyText = todaySchedule.courses.firstOrNull()?.msg
             ?: context.getString(R.string.empty_course)
-        val tomorrowEmptyText = tomorrowSchedule.courses.firstOrNull()?.location 
+        val tomorrowEmptyText = tomorrowSchedule.courses.firstOrNull()?.msg
             ?: context.getString(R.string.empty_course)
 
         // 创建和配置RemoteViews

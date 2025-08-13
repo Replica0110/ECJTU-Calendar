@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.data.model.Course
+import com.lonx.ecjtu.hjcalendar.data.model.CourseType
 import com.lonx.ecjtu.hjcalendar.data.model.DailySchedule
 
 const val EXTRA_COURSE_NAME = "com.lonx.ecjtu.hjcalendar.widget.EXTRA_COURSE_NAME"
@@ -32,8 +33,8 @@ class CourseRemoteViewsFactory(
         val scheduleJson = intent.getStringExtra("schedule")
         val type = object : TypeToken<DailySchedule>() {}.type
         val schedule: DailySchedule? = Gson().fromJson(scheduleJson, type)
-        courseList = schedule?.courses?.filterNot {
-            it.name == "课表为空" || it.name == "课表加载错误"
+        courseList = schedule?.courses?.filter {
+            it.type == CourseType.NORMAL
         } ?: emptyList()
     }
 

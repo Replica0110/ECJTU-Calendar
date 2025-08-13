@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.hjcalendar.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -8,23 +9,25 @@ import com.github.vipulasri.timelineview.TimelineView
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.databinding.ItemCourseBinding
 import com.lonx.ecjtu.hjcalendar.databinding.ItemCourseEmptyBinding
-import com.lonx.ecjtu.hjcalendar.utils.CourseData.CourseInfo
+import com.lonx.ecjtu.hjcalendar.data.model.Course
 import com.lonx.ecjtu.hjcalendar.utils.VectorDrawableUtils
 
 class CourseItemAdapter(
-    private val items: List<CourseInfo>,
+    private val items: List<Course>,
     private var onItemClickListener: OnItemClickListener?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val VIEW_TYPE_NORMAL = 0
-    private val VIEW_TYPE_EMPTY = 1
+    companion object {
+        private const val VIEW_TYPE_NORMAL = 0
+        private const val VIEW_TYPE_EMPTY = 1
+    }
 
     interface OnItemClickListener {
-        fun onItemClick(course: CourseInfo, position: Int)
+        fun onItemClick(course: Course, position: Int)
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (items[position].courseName == "课表为空" || items[position].courseName == "课表加载错误") {
+        return if (items[position].name == "课表为空" || items[position].name == "课表加载错误") {
             VIEW_TYPE_EMPTY
         } else {
             VIEW_TYPE_NORMAL
@@ -32,16 +35,14 @@ class CourseItemAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == VIEW_TYPE_EMPTY) {
-            val binding = ItemCourseEmptyBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
+        val inflater = LayoutInflater.from(parent.context)
+        return when (viewType) {
+            VIEW_TYPE_EMPTY -> EmptyCourseItemViewHolder(
+                ItemCourseEmptyBinding.inflate(inflater, parent, false)
             )
-            EmptyCourseItemViewHolder(binding)
-        } else {
-            val binding = ItemCourseBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
+            else -> CourseItemViewHolder(
+                ItemCourseBinding.inflate(inflater, parent, false)
             )
-            CourseItemViewHolder(binding)
         }
     }
 
@@ -64,21 +65,24 @@ class CourseItemAdapter(
         val binding: ItemCourseBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(course: CourseInfo) {
+        @SuppressLint("SetTextI18n")
+        fun bind(course: Course) {
             // 设置时间线样式
             setMarker(R.drawable.ic_marker, R.color.primary)
             binding.timeline.lineStyle = TimelineView.LineStyle.NORMAL
 
             // 绑定课程数据
-            binding.courseName.text = course.courseName
-            binding.courseTime.text = course.courseTime
-            binding.courseWeek.text = course.courseWeek
-            binding.courseLocation.text = course.courseLocation
-            binding.courseTeacher.text = course.courseTeacher
+            binding.apply {
+                courseName.text = course.name
+                courseTime.text = "节次：${course.time}"
+                courseWeek.text = "上课周：${course.week}"
+                courseLocation.text = "地点：${course.location}"
+                courseTeacher.text = "教师：${course.teacher}"
 
-            // 设置点击事件
-            binding.courseItem.setOnClickListener {
-                onItemClickListener?.onItemClick(course, adapterPosition)
+                // 设置点击事件
+                courseItem.setOnClickListener {
+                    onItemClickListener?.onItemClick(course, adapterPosition)
+                }
             }
         }
 
@@ -95,13 +99,18 @@ class CourseItemAdapter(
         private val binding: ItemCourseEmptyBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(course: CourseInfo) {
-            if (course.courseName.contains("课表为空")) {
-                binding.emptyCourseTitle.text = itemView.context.getString(R.string.empty_course_title)
-                binding.emptyCourseMessage.text = course.courseLocation
-            } else if (course.courseName.contains("课表加载错误")) {
-                binding.emptyCourseTitle.text = itemView.context.getString(R.string.error_course_title)
-                binding.emptyCourseMessage.text = course.courseLocation
+        fun bind(course: Course) {
+            binding.apply {
+                when (course.name) {
+                    "课表为空" -> {
+                        emptyCourseTitle.text = itemView.context.getString(R.string.empty_course_title)
+                        emptyCourseMessage.text = course.location
+                    }
+                    "课表加载错误" -> {
+                        emptyCourseTitle.text = itemView.context.getString(R.string.error_course_title)
+                        emptyCourseMessage.text = course.location
+                    }
+                }
             }
         }
     }

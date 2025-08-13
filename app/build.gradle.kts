@@ -5,6 +5,7 @@ import java.util.TimeZone.getDefault
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-parcelize")
 }
 
 fun gitVersionCode(): Int {

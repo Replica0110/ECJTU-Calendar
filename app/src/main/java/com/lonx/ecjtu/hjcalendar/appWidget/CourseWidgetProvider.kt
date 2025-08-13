@@ -8,23 +8,22 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.MainActivity
 import com.lonx.ecjtu.hjcalendar.R
+import com.lonx.ecjtu.hjcalendar.data.model.Course
+import com.lonx.ecjtu.hjcalendar.data.model.DailySchedule
+import com.lonx.ecjtu.hjcalendar.data.model.ScheduleResult
+import com.lonx.ecjtu.hjcalendar.data.repository.CalendarRepository
+import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
 import com.lonx.ecjtu.hjcalendar.service.CourseRemoteViewsService
-import com.lonx.ecjtu.hjcalendar.utils.CourseData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import androidx.core.net.toUri
-import com.lonx.ecjtu.hjcalendar.data.parser.InvalidWeiXinIdException
-import com.lonx.ecjtu.hjcalendar.data.repository.CalendarRepository
-import com.lonx.ecjtu.hjcalendar.logic.DataStoreManager
+import java.util.*
 
 const val ACTION_MANUAL_REFRESH = "com.lonx.ecjtu.hjcalendar.widget.MANUAL_REFRESH"
 
@@ -72,72 +71,105 @@ class CourseWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         if (appWidgetIds.isEmpty()) return
-        val calendarRepository = CalendarRepository()
+        val repository = CalendarRepository()
         val todayStr = getFormatDate()
         val tomorrowStr = getFormatDate(true)
         val weiXinID = DataStoreManager.getWeiXinId()
 
         CoroutineScope(Dispatchers.IO).launch {
-            val todayResult = calendarRepository.getDailyCourses(weiXinID, todayStr)
-            val tomorrowResult = calendarRepository.getDailyCourses(weiXinID, tomorrowStr)
+            val todayResult = repository.getDailyCourses(weiXinID, todayStr)
+            val tomorrowResult = repository.getDailyCourses(weiXinID, tomorrowStr)
 
-            val rawTodayCourses = todayResult.getOrNull()
-            val rawTomorrowCourses = tomorrowResult.getOrNull()
-
-            val todayCourses = processCourseData(context, rawTodayCourses, todayStr, todayResult.exceptionOrNull())
-            val tomorrowCourses = processCourseData(context, rawTomorrowCourses, tomorrowStr, tomorrowResult.exceptionOrNull())
+            val todaySchedule = processScheduleResult(context, todayResult, todayStr)
+            val tomorrowSchedule = processScheduleResult(context, tomorrowResult, tomorrowStr)
 
             withContext(Dispatchers.Main) {
                 appWidgetIds.forEach { appWidgetId ->
-                    updateAppWidget(context, appWidgetManager, appWidgetId, todayCourses, tomorrowCourses)
+                    updateAppWidget(context, appWidgetManager, appWidgetId, todaySchedule, tomorrowSchedule)
                 }
             }
         }
     }
+
     /**
-     * 用于处理空/错误课程数据的辅助方法，现在也接收一个异常参数
+     * 处理课程数据结果
      */
-    private fun processCourseData(context: Context, dayCourses: CourseData.DayCourses?, dateStr: String, exception: Throwable?): CourseData.DayCourses {
-        // 成功获取数据
-        if (dayCourses != null) {
-            // 当天无课
-            if (dayCourses.courses.isEmpty()) {
+    private fun processScheduleResult(
+        context: Context,
+        result: ScheduleResult,
+        dateStr: String
+    ): DailySchedule {
+        return when (result) {
+            is ScheduleResult.Success -> {
+                if (result.schedule.courses.isEmpty()) {
+                    // 当天无课
+                    val defaultText = context.getString(R.string.empty_course)
+                    val customText = DataStoreManager.getNoCourseText(defaultText)
+                    result.schedule.copy(
+                        courses = listOf(
+                            Course(
+                                name = "课表为空",
+                                time = "",
+                                week = "",
+                                location = customText,
+                                teacher = ""
+                            )
+                        )
+                    )
+                } else {
+                    result.schedule
+                }
+            }
+            is ScheduleResult.Empty -> {
                 val defaultText = context.getString(R.string.empty_course)
                 val customText = DataStoreManager.getNoCourseText(defaultText)
-                val emptyInfoCourse = CourseData.CourseInfo(courseName = "课表为空", courseLocation = customText)
-                return dayCourses.copy(courses = listOf(emptyInfoCourse))
+                DailySchedule(
+                    dateInfo = result.dateInfo,
+                    courses = listOf(
+                        Course(
+                            name = "课表为空",
+                            time = "",
+                            week = "",
+                            location = customText,
+                            teacher = ""
+                        )
+                    )
+                )
             }
-            // 当天有课
-            return dayCourses
-        }
+            is ScheduleResult.Error -> {
+                // 构造错误信息的日期标题
+                val calendar = Calendar.getInstance()
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                try {
+                    calendar.time = inputFormat.parse(dateStr) ?: Date()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                val weekDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(calendar.time)
+                val errorDateString = "$dateStr $weekDay (加载失败)"
 
-        val errorMessage = when (exception) {
-            is InvalidWeiXinIdException -> "无效的weiXinID"
-            is java.io.IOException -> "请检查网络连接"
-            else -> "未知错误"
+                DailySchedule(
+                    dateInfo = errorDateString,
+                    courses = listOf(
+                        Course(
+                            name = "课表加载错误",
+                            time = "",
+                            week = "",
+                            location = result.message,
+                            teacher = ""
+                        )
+                    )
+                )
+            }
         }
-        val errorCourse = CourseData.CourseInfo(courseName = "课表加载错误", courseLocation = errorMessage)
-
-        // 构造一个包含错误信息的日期标题
-        val calendar = Calendar.getInstance()
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        try {
-            calendar.time = inputFormat.parse(dateStr) ?: Date()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        val weekDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(calendar.time)
-        val errorDateString = "$dateStr $weekDay (加载失败)"
-
-        return CourseData.DayCourses(errorDateString, listOf(errorCourse))
     }
 
     private fun updateAppWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
-        todayCourses: CourseData.DayCourses,
-        tomorrowCourses: CourseData.DayCourses
+        todaySchedule: DailySchedule,
+        tomorrowSchedule: DailySchedule
     ) {
         val now = System.currentTimeMillis()
         if (now - lastUpdateTime < 1000) { // 小于1秒的更新直接跳过
@@ -145,33 +177,39 @@ class CourseWidgetProvider : AppWidgetProvider() {
             return
         }
         lastUpdateTime = now
-        val randomNumber = System.currentTimeMillis() // Use a unique value for each update
+
+        val randomNumber = System.currentTimeMillis() // 用于生成唯一的URI
+
+        // 设置点击课程项时的模板Intent
         val itemClickIntent = Intent(context, MainActivity::class.java).apply {
             action = "com.lonx.ecjtu.pda.action.VIEW_COURSE_DETAIL"
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             data = "widget://item_click_template/$appWidgetId".toUri()
         }
 
-        val flags =
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         val itemClickPendingIntentTemplate = PendingIntent.getActivity(
             context,
             appWidgetId,
             itemClickIntent,
             flags
         )
+
+        // 设置今天的课程列表Intent
         val intentToday = Intent(context, CourseRemoteViewsService::class.java).apply {
-            putExtra("dayCourses", Gson().toJson(todayCourses))
+            putExtra("schedule", Gson().toJson(todaySchedule))
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             data = "widget://${context.packageName}/$appWidgetId/today/$randomNumber".toUri()
         }
 
+        // 设置明天的课程列表Intent
         val intentTomorrow = Intent(context, CourseRemoteViewsService::class.java).apply {
-            putExtra("dayCourses", Gson().toJson(tomorrowCourses))
+            putExtra("schedule", Gson().toJson(tomorrowSchedule))
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             data = "widget://${context.packageName}/$appWidgetId/tomorrow/$randomNumber".toUri()
         }
-        // 点击刷新按钮
+
+        // 设置刷新按钮Intent
         val refreshIntent = Intent(context, CourseWidgetProvider::class.java).apply {
             action = ACTION_MANUAL_REFRESH
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -183,30 +221,42 @@ class CourseWidgetProvider : AppWidgetProvider() {
             refreshIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val (date, weekDay, weekNumber) = getToday(todayCourses.date)
-        val todayEmptyText = todayCourses.courses.firstOrNull()?.courseLocation ?: context.getString(R.string.empty_course)
-        val tomorrowEmptyText = tomorrowCourses.courses.firstOrNull()?.courseLocation ?: context.getString(R.string.empty_course)
+
+        // 解析日期信息
+        val (date, weekDay, weekNumber) = getToday(todaySchedule.dateInfo)
+
+        // 获取空视图的文本
+        val todayEmptyText = todaySchedule.courses.firstOrNull()?.location 
+            ?: context.getString(R.string.empty_course)
+        val tomorrowEmptyText = tomorrowSchedule.courses.firstOrNull()?.location 
+            ?: context.getString(R.string.empty_course)
+
+        // 创建和配置RemoteViews
         val views = RemoteViews(context.packageName, R.layout.widget_course).apply {
-            // 更新标题栏，这一步现在总是能获取到有效数据
+            // 更新标题栏
             setTextViewText(R.id.tv_date, date)
             setTextViewText(R.id.tv_week, weekDay)
             setTextViewText(R.id.tv_week_number, weekNumber)
 
-            // 设置 Adapter
+            // 设置适配器
+            @Suppress("DEPRECATION")
             setRemoteAdapter(R.id.lv_course_today, intentToday)
+            @Suppress("DEPRECATION")
             setRemoteAdapter(R.id.lv_course_next_day, intentTomorrow)
 
+            // 设置空视图
             setEmptyView(R.id.lv_course_today, R.id.empty_today)
             setEmptyView(R.id.lv_course_next_day, R.id.empty_next_day)
-
             setTextViewText(R.id.empty_today, todayEmptyText)
             setTextViewText(R.id.empty_next_day, tomorrowEmptyText)
 
-            // 设置点击模板和刷新按钮
+            // 设置点击事件
             setPendingIntentTemplate(R.id.lv_course_today, itemClickPendingIntentTemplate)
             setPendingIntentTemplate(R.id.lv_course_next_day, itemClickPendingIntentTemplate)
             setOnClickPendingIntent(R.id.refresh_button, refreshPendingIntent)
         }
+
+        // 更新小组件
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 

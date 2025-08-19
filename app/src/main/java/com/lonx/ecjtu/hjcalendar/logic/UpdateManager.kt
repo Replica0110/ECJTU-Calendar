@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.flowOn
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.SocketTimeoutException
 import androidx.core.net.toUri
 import com.lonx.ecjtu.hjcalendar.R
 import com.lonx.ecjtu.hjcalendar.utils.NetworkModule
@@ -119,9 +120,21 @@ class UpdateManager {
                 UpdateCheckResult.NoUpdateAvailable
             }
 
-        } catch (e: IOException) {
-            Log.e(TAG, "Network error during update check", e)
-            return@withContext UpdateCheckResult.NetworkError(e)
+        } catch (e: Exception) {
+            when (e) {
+                is SocketTimeoutException -> {
+                    Log.e(TAG, "Connection timed out", e)
+                    return@withContext UpdateCheckResult.TimeoutError
+                }
+                is IOException -> {
+                    Log.e(TAG, "Network error during update check", e)
+                    return@withContext UpdateCheckResult.NetworkError(e)
+                }
+                else -> {
+                    Log.e(TAG, "Unexpected error during update check", e)
+                    throw e
+                }
+            }
         }
     }
 

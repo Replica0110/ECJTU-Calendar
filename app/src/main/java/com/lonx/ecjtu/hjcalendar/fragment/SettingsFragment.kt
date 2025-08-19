@@ -57,11 +57,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     viewModel.newVersionInfo = result.info
                     showUpdateDialog(result.info)
                 }
+                is UpdateCheckResult.TimeoutError -> ToastUtil.showToast(requireContext(), "检查更新失败: 网络连接超时")
                 is UpdateCheckResult.NoUpdateAvailable -> ToastUtil.showToast(requireContext(), "已经是最新版本")
                 is UpdateCheckResult.ApiError -> ToastUtil.showToast(requireContext(), "检查更新失败: API 错误 ${result.code}")
-                is UpdateCheckResult.NetworkError -> ToastUtil.showToast(requireContext(), "检查更新失败: 请检查网络连接")
+                is UpdateCheckResult.NetworkError -> ToastUtil.showToast(requireContext(), "检查更新失败: ${result.exception.message}")
                 is UpdateCheckResult.ParsingError -> ToastUtil.showToast(requireContext(), "检查更新失败: 无法解析服务器响应")
-                is UpdateCheckResult.VersionError -> ToastUtil.showToast(requireContext(), "检查更新失败: 应用内部错误")
             }
         }
 

@@ -19,7 +19,7 @@ class CalendarRepository {
      * 获取每日课程。
      * @param weiXinID 微信ID
      * @param date 日期字符串，格式为 yyyy-MM-dd
-     * @return ScheduleResult 封装了课程数据或错误信息
+     * @return [ScheduleResult] 封装了课程数据或错误信息
      */
     suspend fun getDailyCourses(weiXinID: String, date: String): ScheduleResult {
         return withContext(Dispatchers.IO) {

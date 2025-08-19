@@ -10,7 +10,6 @@ import com.google.gson.Gson
 import com.lonx.ecjtu.hjcalendar.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.flow.Flow
@@ -43,7 +42,20 @@ class UpdateManager {
         val body: String?,
         val assets: List<Asset>?
     ) {
-        data class Asset(val browser_download_url: String?)
+        data class Asset(
+            val browser_download_url: String?,
+            val name: String?
+        )
+    }
+
+    data class OutputMetadata(
+        val version: Int,
+        val elements: List<Element>
+    ) {
+        data class Element(
+            val versionCode: Int,
+            val versionName: String
+        )
     }
 
     /**
@@ -66,20 +78,43 @@ class UpdateManager {
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            val latestVersion = release?.tag_name
             val downloadUrl = release?.assets?.firstOrNull { it.browser_download_url?.endsWith(".apk") == true }?.browser_download_url
+            val metadataUrl = release?.assets?.firstOrNull { it.browser_download_url?.endsWith(".json") == true }?.browser_download_url
 
             val releaseNotes = release?.body?.trim()?.ifBlank { "没有提供具体的更新说明。" } ?: "没有提供具体的更新说明。"
 
-            if (latestVersion == null || downloadUrl == null) {
-                Log.e(TAG, "Required fields (tag_name, browser_download_url) are missing.")
+            if (downloadUrl == null || metadataUrl == null) {
+                Log.e(TAG, "Required assets (APK or metadata) are missing.")
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            val currentVersion = BuildConfig.VERSION_NAME
+            // 获取 metadata.json
+            val metadataRequest = Request.Builder().url(metadataUrl).build()
+            val metadataResponse = client.newCall(metadataRequest).execute()
+            
+            if (!metadataResponse.isSuccessful) {
+                return@withContext UpdateCheckResult.ApiError(metadataResponse.code, metadataResponse.message)
+            }
 
-            return@withContext if (isNewerVersion(currentVersion, latestVersion)) {
-                UpdateCheckResult.NewVersion(UpdateInfo(latestVersion, downloadUrl, releaseNotes))
+            val metadata: OutputMetadata = try {
+                gson.fromJson(metadataResponse.body.string(), OutputMetadata::class.java)
+            } catch (e: JsonSyntaxException) {
+                Log.e(TAG, "Metadata JSON parsing failed", e)
+                return@withContext UpdateCheckResult.ParsingError
+            }
+
+            val latestVersionCode = metadata.elements.firstOrNull()?.versionCode
+            val latestVersionName = metadata.elements.firstOrNull()?.versionName
+
+            if (latestVersionCode == null || latestVersionName == null) {
+                Log.e(TAG, "Version information is missing in metadata.")
+                return@withContext UpdateCheckResult.ParsingError
+            }
+
+            val currentVersionCode = BuildConfig.VERSION_CODE
+
+            return@withContext if (latestVersionCode > currentVersionCode) {
+                UpdateCheckResult.NewVersion(UpdateInfo(latestVersionName, downloadUrl, releaseNotes))
             } else {
                 UpdateCheckResult.NoUpdateAvailable
             }
@@ -179,18 +214,4 @@ class UpdateManager {
 
     }.flowOn(Dispatchers.IO)
 
-    private fun isNewerVersion(currentVersion: String, latestVersion: String): Boolean {
-        // 移除版本号中的 'v' 或其他非数字前缀
-        val current = currentVersion.replace("[^0-9.]".toRegex(), "").split(".").map { it.toIntOrNull() ?: 0 }
-        val latest = latestVersion.replace("[^0-9.]".toRegex(), "").split(".").map { it.toIntOrNull() ?: 0 }
-        val size = maxOf(current.size, latest.size)
-
-        for (i in 0 until size) {
-            val c = current.getOrNull(i) ?: 0
-            val l = latest.getOrNull(i) ?: 0
-            if (l > c) return true
-            if (l < c) return false
-        }
-        return false
-    }
 }

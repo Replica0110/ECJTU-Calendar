@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-
-    <!-- 特定域名的配置：覆盖默认设置 -->
-    <domain-config cleartextTrafficPermitted="true">
+    <domain-config>
         <domain includeSubdomains="true">ecjtu.edu.cn</domain>
-
-        <domain includeSubdomains="true">github.com</domain>
+        <trust-anchors>
+            <certificates src="@raw/ecjtu"/>
+            <certificates src="user"/>
+            <certificates src="system"/>
+        </trust-anchors>
     </domain-config>
 
+    <base-config>
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
 </network-security-config>

@@ -63,7 +63,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
 
         val weiXinID = DataStoreManager.getWeiXinId()
         if (weiXinID.isBlank()) {
-            handleScheduleResult(ScheduleResult.Error("", "请先在设置中配置 weiXinID"))
+            handleScheduleResult(ScheduleResult.Error(formattedDate, "请先在设置中配置 weiXinID"))
             return
         }
 

@@ -1,26 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- 基础配置，禁用明文传输以提高安全性 -->
-    <base-config cleartextTrafficPermitted="false">
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </base-config>
 
-    <!-- 校园域名配置，启用明文传输 -->
+    <!-- 特定域名的配置：覆盖默认设置 -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">jwxt.ecjtu.edu.cn</domain>
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </domain-config>
-    
-    <!-- GitHub域名配置，使用默认安全策略 -->
-    <domain-config>
+        <domain includeSubdomains="true">ecjtu.edu.cn</domain>
+
         <domain includeSubdomains="true">github.com</domain>
-        <domain includeSubdomains="true">api.github.com</domain>
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
     </domain-config>
+
 </network-security-config>

@@ -20,12 +20,8 @@ class CourseDataSourceImpl : CourseDataSource {
         try {
             val response = request.toAwait<String>().await()
             return response
-        } catch (e: IOException) {
-            // 网络异常或IO异常
-            throw Exception("网络请求失败: $e", e)
         } catch (e: Exception) {
-            // 其他异常，如HTTP错误状态码
-            throw Exception("请求失败: $e", e)
+            throw e
         }
     }
 

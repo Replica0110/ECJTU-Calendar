@@ -1,8 +1,5 @@
 package com.lonx.ecjtu.calendar.ui.screen.settings
 
-import com.lonx.ecjtu.calendar.data.model.DownloadState
-import com.lonx.ecjtu.calendar.data.model.UpdateInfo
-
 // 定义 UI 状态
 data class ParseResult(
     val originalInput: String,

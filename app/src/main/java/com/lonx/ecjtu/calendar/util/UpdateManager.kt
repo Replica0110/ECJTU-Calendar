@@ -6,7 +6,6 @@ import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
 import com.lonx.ecjtu.calendar.data.model.UpdateInfo
 import com.lonx.ecjtu.calendar.domain.repository.UpdateRepository
 import com.lonx.ecjtu.calendar.domain.usecase.ApkInstallUseCase
-import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsEffect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow

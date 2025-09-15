@@ -1,15 +1,21 @@
 package com.lonx.ecjtu.calendar.data.repository
 
+import android.util.Log
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSource
 import com.lonx.ecjtu.calendar.data.model.CourseItem
 import com.lonx.ecjtu.calendar.data.model.Schedule
 import com.lonx.ecjtu.calendar.data.network.HtmlParser
+import com.lonx.ecjtu.calendar.domain.model.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import org.jsoup.Jsoup
+import rxhttp.wrapper.exception.HttpStatusCodeException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -23,7 +29,7 @@ class CalendarRepositoryImpl(
         return try {
             val weiXinId = localDataSource.getWeiXinID().first()
             if (weiXinId.isBlank()) {
-                return Result.failure(Exception("请先在设置中配置微信ID"))
+                return Result.failure(CalendarError.NoWeiXinId())
             }
 
             val formattedDate = date.format(DateTimeFormatter.ISO_LOCAL_DATE) // YYYY-MM-DD
@@ -36,6 +42,12 @@ class CalendarRepositoryImpl(
                     "date" to formattedDate
                 )
             )
+            val document = Jsoup.parse(htmlContent)
+
+            val title = document.select("title").first()?.text() ?: "未知标题"
+            if (title =="教务处微信平台绑定"){
+                return Result.failure(CalendarError.WeiXinIdInvalid())
+            }
 
             val schedulePageDTO = htmlParser.parseSchedulePage(htmlContent)
 
@@ -44,7 +56,16 @@ class CalendarRepositoryImpl(
 
             Result.success(schedulePage)
         } catch (e: Exception) {
-            Result.failure(e)
+            Log.e("CourseDataSource", "Error fetching calendar html: $e")
+            val error = when (e) {
+                is CalendarError -> e
+                is UnknownHostException,
+                is SocketTimeoutException,
+                is HttpStatusCodeException,
+                is java.io.IOException -> CalendarError.NetworkError(e)
+                else -> CalendarError.UnknownError(e)
+            }
+            Result.failure(error)
         }
     }
 

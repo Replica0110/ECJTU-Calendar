@@ -38,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import com.lonx.ecjtu.calendar.domain.model.CalendarError
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ItemButton
 import com.moriafly.salt.ui.RoundedColumn
@@ -95,14 +96,14 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
                     }
                 }
 
-                // "选择日期" 按钮
-                IconButton(
-                    onClick = {
-                        showDatePicker = true
-                    }
-                ) {
-                    Icon(painterResource(R.drawable.ic_date_24dp), contentDescription = "选择日期")
-                }
+                // "选择日期" 按钮，功能和DateHeaderCard重复了，移除
+//                IconButton(
+//                    onClick = {
+//                        showDatePicker = true
+//                    }
+//                ) {
+//                    Icon(painterResource(R.drawable.ic_date_24dp), contentDescription = "选择日期")
+//                }
 
                 // "设置" 按钮
                 IconButton(onClick = onNavigateToSettings) {
@@ -137,12 +138,13 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
                             }
                         )
                         ErrorState(
-                            message = uiState.error!!,
+                            error = uiState.error!!,
                             onRetry = { viewModel.onEvent(CalendarEvent.Refresh) },
                             onBackToday = {
                                 Toast.makeText(context, "已返回当天", Toast.LENGTH_SHORT).show()
                                 viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
-                            }
+                            },
+                            onOpenSettings = onNavigateToSettings
                         )
                     }
                 }
@@ -206,25 +208,44 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
 
 @OptIn(UnstableSaltUiApi::class)
 @Composable
-private fun ErrorState(message: String, onRetry: () -> Unit, onBackToday: () -> Unit) {
+private fun ErrorState(error: CalendarError, onRetry: () -> Unit, onBackToday: () -> Unit, onOpenSettings: () -> Unit) {
     RoundedColumn(modifier = Modifier.padding(top = 16.dp)) {
         Text(
-            modifier = Modifier.padding(16.dp),
-            text = message,
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            text = error.message?: "未知错误",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                modifier = Modifier.weight(1f),
-                onClick = onRetry,
-                text = "重试"
-            )
-            Button(
-                modifier = Modifier.weight(1f),
-                onClick = onBackToday,
-                text = "回到今天",)
+            when (error) {
+                is CalendarError.NoWeiXinId, is CalendarError.WeiXinIdInvalid -> {
+                    Button(
+                        onClick = onRetry,
+                        text = "重试",
+                        modifier = Modifier.weight(1f)
+                        )
+                    Button(
+                        onClick = onOpenSettings,
+                        text = "前往设置",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                else -> {
+                    Button(
+                        onClick = onRetry,
+                        text = "重试",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Button(
+                        onClick = onBackToday,
+                        text = "回到今天",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
+
     }
 }
 
@@ -232,7 +253,9 @@ private fun ErrorState(message: String, onRetry: () -> Unit, onBackToday: () -> 
 private fun EmptyState(message: String) {
     RoundedColumn(modifier = Modifier.padding(top = 16.dp)) {
         Text(
-            modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             text = message,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center

@@ -1,8 +1,10 @@
 package com.lonx.ecjtu.calendar.data.network
 
+import androidx.compose.runtime.remember
 import com.lonx.ecjtu.calendar.data.model.CourseItem
 import com.lonx.ecjtu.calendar.data.model.Schedule
 import org.jsoup.Jsoup
+import java.time.LocalDate
 
 
 class HtmlParser {
@@ -10,8 +12,15 @@ class HtmlParser {
     fun parseSchedulePage(htmlContent: String): Schedule {
         val document = Jsoup.parse(htmlContent)
 
-
+        val title = document.select("title").first()?.text() ?: "未知标题"
         val dateInfo = document.select("div.center").first()?.text() ?: "未知日期"
+
+        val dateRegex = Regex("(\\d{4}-\\d{2}-\\d{2})\\s+([^（]+)（第(\\d+)周）")
+
+        val (date, weekDay, weekNum) = dateRegex.find(dateInfo)
+            ?.let { Triple(it.groupValues[1], it.groupValues[2], it.groupValues[3]) }
+            ?: Triple(LocalDate.now().toString(), LocalDate.now().dayOfWeek.name, "")
+
         val dayOfWeek =dateInfo.split(" ")[1]
 
         val courseList = mutableListOf<CourseItem>()
@@ -64,6 +73,6 @@ class HtmlParser {
             }
         }
 
-        return Schedule(dateInfo = dateInfo, courses = courseList)
+        return Schedule(dateInfo = Triple(date, weekDay, weekNum), courses = courseList, title = title)
     }
 }

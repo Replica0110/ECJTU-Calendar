@@ -17,16 +17,13 @@ import com.moriafly.salt.ui.SaltTheme
 
 @Composable
 fun DateHeaderCard(
-    dateInfo: String,
+    dateInfo: Triple<String, String, String>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
-    val dateRegex = remember { Regex("(\\d{4}-\\d{2}-\\d{2})\\s+([^（]+)（第(\\d+)周）") }
 
-    val (date, weekDay, weekNum) = dateRegex.find(dateInfo)
-        ?.let { Triple(it.groupValues[1], it.groupValues[2], it.groupValues[3]) }
-        ?: Triple(dateInfo, "", "")
+    val (date, weekDay, weekNum) = dateInfo
 
     Card(
         modifier = modifier
@@ -53,9 +50,15 @@ fun DateHeaderCard(
                 color = SaltTheme.colors.onHighlight
             )
             // 星期和周次信息
-            if (weekDay.isNotBlank()) {
+            if (weekNum.isNotBlank()) {
                 Text(
                     text = "$weekDay · 第${weekNum}周",
+                    fontSize = 14.sp,
+                    color = SaltTheme.colors.onHighlight.copy(alpha = 0.8f)
+                )
+            } else {
+                Text(
+                    text = weekDay,
                     fontSize = 14.sp,
                     color = SaltTheme.colors.onHighlight.copy(alpha = 0.8f)
                 )
@@ -69,14 +72,8 @@ fun DateHeaderCard(
 @Composable
 fun DateHeaderCardPreview() {
     CalendarTheme {
-        DateHeaderCard(dateInfo = "2023-05-24 星期三（第14周）")
+        DateHeaderCard(dateInfo = Triple("2023-09-01", "星期一", "1"))
     }
 }
 
-@Preview
-@Composable
-fun DateHeaderCardPreview2() {
-    CalendarTheme {
-        DateHeaderCard(dateInfo = "2025-08-22 星期五（第26周）")
-    }
-}
+

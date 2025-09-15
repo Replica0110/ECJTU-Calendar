@@ -1,29 +1,15 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone.getDefault
+import kotlin.apply
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    id("kotlin-parcelize")
-}
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 
-fun gitVersionCode(): Int {
-    val cmd = "git rev-list HEAD --first-parent --count"
-    val process = ProcessBuilder(cmd.split(" "))
-        .redirectErrorStream(true)
-        .start()
-    return try {
-        process.waitFor()
-        process.inputStream.bufferedReader().readText().trim().toInt()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        0
-    } finally {
-        process.destroy()
-    }
 }
-
 fun gitVersionTag(): String {
     val cmd = "git describe --tags --match v*.*.*"
     val process = ProcessBuilder(cmd.split(" "))
@@ -53,14 +39,30 @@ fun gitVersionTag(): String {
     }
 }
 
+fun gitVersionCode(): Int {
+    val cmd = "git rev-list HEAD --first-parent --count"
+    val process = ProcessBuilder(cmd.split(" "))
+        .redirectErrorStream(true)
+        .start()
+    return try {
+        process.waitFor()
+        process.inputStream.bufferedReader().readText().trim().toInt()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        0
+    } finally {
+        process.destroy()
+    }
+}
+
 
 android {
-    namespace = "com.lonx.ecjtu.hjcalendar"
+    namespace = "com.lonx.ecjtu.calendar"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.lonx.ecjtu.hjcalendar"
-        minSdk = 26
+        applicationId = "com.lonx.ecjtu.calendar"
+        minSdk = 28
         targetSdk = 36
         versionCode = gitVersionCode()
         versionName = gitVersionTag()
@@ -87,8 +89,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            versionNameSuffix = ""
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -113,31 +114,55 @@ android {
 
     buildFeatures {
         buildConfig = true
-        viewBinding = true
+        compose = true
     }
 }
 
 dependencies {
-    implementation(libs.gson)
-    implementation(libs.timelineview)
-    implementation(libs.jsoup.jsoup)
-    implementation(libs.mmkv)
-    implementation(libs.okhttp)
-    implementation(libs.kotlinx.serialization.json)
+    // Core & Compose - 核心与UI框架
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.preference.ktx)
-    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.material3)
+    // ViewModel & Lifecycle for Compose - MVVM 架构支持
+    implementation(libs.androidx.lifecycle.viewmodel.ktx) // 提供 viewModelScope
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // 提供 viewModel() Composable
+
+    // Koin - 依赖注入
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    // Coroutines - 协程支持
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // DataStore - 轻量级数据存储 (替代 SharedPreferences 和 Room)
+    implementation(libs.androidx.datastore.preferences)
+
+    // Network - 网络请求
+    implementation(libs.rxhttp)
+
+//    implementation(libs.rxhttp.coroutines)
+    ksp(libs.rxhttp.compiler)
+    implementation(libs.okhttp)
+    // saltui库
+    implementation(libs.salt.ui.android)
+
+    // HTML Parsing - HTML 解析
+    implementation(libs.jsoup)
+
+    // Testing - 测试依赖
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
-
-
-

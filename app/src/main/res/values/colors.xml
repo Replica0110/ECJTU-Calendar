@@ -19,4 +19,5 @@
     <color name="md_theme_light_primary">#ff3271F1</color>
     <color name="secondary_text">#757575</color>
     <color name="light_grey">#E0E0E0</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>

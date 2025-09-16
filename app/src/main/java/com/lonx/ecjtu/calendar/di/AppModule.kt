@@ -1,7 +1,8 @@
 package com.lonx.ecjtu.calendar.di
 
-import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarViewModel
-import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsViewModel
+import MainViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodels.CalendarViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodels.SettingsViewModel
 import com.lonx.ecjtu.calendar.ui.util.AppUpdateInstaller
 import com.lonx.ecjtu.calendar.ui.util.AppUpdateInstallerImpl
 import com.lonx.ecjtu.calendar.util.UpdateManager
@@ -15,8 +16,6 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    // 提供 SettingsViewModel
-    // Koin 会自动注入它所依赖的 UseCases
     viewModel {
         SettingsViewModel(
             app = androidApplication(),
@@ -29,7 +28,15 @@ val appModule = module {
             getCacheSizeUseCase = get()
         )
     }
-
+    viewModel {
+        MainViewModel(
+            app = androidApplication(),
+            getUpdateSettingUseCase = get(),
+            saveUserConfigUseCase = get(),
+            updateManager = get(),
+            cleanUpApksUseCase = get()
+        )
+    }
     // 提供 CalendarViewModel
     viewModel {
         CalendarViewModel(

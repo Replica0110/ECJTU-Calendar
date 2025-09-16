@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.calendar.util
 
 import android.content.Context
+import android.util.Log
 import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
 import com.lonx.ecjtu.calendar.data.model.UpdateInfo
@@ -33,7 +34,6 @@ interface UpdateManager {
     val effect: Flow<UpdateEffect>
     fun checkForUpdate()
 
-    fun showUpdateDialogIfAvailable()
     fun startDownload(context: Context)
     fun cancelDownload()
     fun installUpdate(context: Context)
@@ -55,6 +55,7 @@ class UpdateManagerImpl(
     private var downloadJob: Job? = null
 
     override fun checkForUpdate() {
+
         if (_state.value.isChecking) return
 
         appScope.launch {
@@ -104,14 +105,7 @@ class UpdateManagerImpl(
                 }
         }
     }
-    override fun showUpdateDialogIfAvailable() {
-        // 只在有“记忆”的情况下，才去更新 state 来显示对话框
-        lastValidUpdateResult?.let {
-            _state.update { currentState ->
-                currentState.copy(updateInfo = it.info)
-            }
-        }
-    }
+
     override fun cancelDownload() {
         downloadJob?.cancel()
         _state.update { it.copy(downloadState = DownloadState.Idle) }

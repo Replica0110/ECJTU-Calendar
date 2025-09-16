@@ -1,13 +1,17 @@
-package com.lonx.ecjtu.calendar.ui.screen.calendar
+package com.lonx.ecjtu.calendar.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.domain.model.CalendarError
 import com.lonx.ecjtu.calendar.domain.usecase.GetCoursesUseCase
-import kotlinx.coroutines.flow.*
+import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarEvent
+import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-
 
 class CalendarViewModel(
     private val getCoursesUseCase: GetCoursesUseCase
@@ -66,7 +70,7 @@ class CalendarViewModel(
                     is CalendarError -> throwable
                     else -> CalendarError.UnknownError(Exception(throwable.message ?: "未知错误", throwable))
                 }
-                
+
                 _uiState.update {
                     it.copy(isLoading = false, error = error)
                 }

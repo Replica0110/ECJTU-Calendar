@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.calendar.di
 
 import com.lonx.ecjtu.calendar.domain.usecase.ApkInstallUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.CleanUpApksUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.ClearCacheUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.GetCacheSizeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.GetCoursesUseCase
@@ -34,4 +35,5 @@ val domainModule = module {
     factory { GetCacheSizeUseCase() }
 
     factory { ApkInstallUseCase(appUpdateInstaller = get()) }
+    factory { CleanUpApksUseCase() }
 }

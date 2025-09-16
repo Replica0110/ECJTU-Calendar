@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,12 +21,10 @@ import com.lonx.ecjtu.calendar.BuildConfig
 import org.koin.androidx.compose.koinViewModel
 import androidx.core.net.toUri
 import com.lonx.ecjtu.calendar.R
-import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.ui.component.InputDialog
 import com.lonx.ecjtu.calendar.ui.component.YesNoDialog
+import com.lonx.ecjtu.calendar.ui.viewmodels.SettingsViewModel
 import com.lonx.ecjtu.calendar.util.UpdateManager
-import com.moriafly.salt.ui.Button
-import com.moriafly.salt.ui.ButtonType
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemArrowType
 import com.moriafly.salt.ui.ItemSwitcher
@@ -56,7 +51,7 @@ fun SettingsScreen(
 
     val updateManager: UpdateManager = koinInject()
 
-    val updateState by updateManager.state.collectAsStateWithLifecycle()
+//    val updateState by updateManager.state.collectAsStateWithLifecycle()
 
     // 收集并显示UI效果
     LaunchedEffect(Unit) {
@@ -201,7 +196,7 @@ fun SettingsScreen(
     if (showClearCacheDialog) {
         YesNoDialog(
             title = "确认操作",
-            content = "您确定要清理所有应用缓存吗？这将永久删除已下载的安装包和其他临时文件",
+            content = "您确定要清理所有应用缓存吗？\n这将永久删除已下载的安装包和其他临时文件",
             onConfirm = {
                 onEvent(SettingsEvent.OnClearCacheClick)
                 showClearCacheDialog = false
@@ -211,63 +206,63 @@ fun SettingsScreen(
             confirmText = "清理"
         )
     }
-    if (updateState.updateInfo != null) {
-        val updateInfo = updateState.updateInfo!!
-
-        YesNoDialog(
-            title = "发现新版本 ${updateInfo.versionName}",
-
-            onDismiss = { }, //不允许通过点击空白处关闭
-
-            onConfirm = { },
-
-            content = null,
-
-            drawContent = {
-                RoundedColumn(modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 300.dp)
-                    .verticalScroll(rememberScrollState())
-                ) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = updateInfo.releaseNotes
-                    )
-                }
-            },
-
-            cancelText = "稍后",
-            dismissButton =  {
-                val (buttonText, onClickAction) = when (val state = updateState.downloadState) {
-                    is DownloadState.InProgress -> Pair("取消下载") {
-                        onEvent(SettingsEvent.DismissUpdateDialog)
-                        onEvent(SettingsEvent.CancelDownload)
-                    }
-                    else -> Pair("稍后") { onEvent(SettingsEvent.DismissUpdateDialog) }
-                }
-                Button(
-                    onClick = onClickAction,
-                    text = buttonText,
-                    modifier = Modifier.weight(1f),
-                    type = ButtonType.Sub,
-                )
-            },
-            confirmButton = {
-                val (buttonText, onClickAction) = when (val state = updateState.downloadState) {
-                    is DownloadState.Success -> Pair("安装") { onEvent(SettingsEvent.InstallUpdate) }
-                    is DownloadState.InProgress -> Pair("下载中 ${state.progress}%") {onEvent(SettingsEvent.CancelDownload)}
-                    is DownloadState.Error -> Pair("重试") { onEvent(SettingsEvent.StartDownload) }
-                    else -> Pair("下载") { onEvent(SettingsEvent.StartDownload) }
-                }
-
-                Button(
-                    onClick = onClickAction,
-                    text = buttonText,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        )
-    }
+//    if (updateState.updateInfo != null) {
+//        val updateInfo = updateState.updateInfo!!
+//
+//        YesNoDialog(
+//            title = "发现新版本 ${updateInfo.versionName}",
+//
+//            onDismiss = { }, //不允许通过点击空白处关闭
+//
+//            onConfirm = { },
+//
+//            content = null,
+//
+//            drawContent = {
+//                RoundedColumn(modifier = Modifier
+//                    .fillMaxWidth()
+//                    .heightIn(max = 300.dp)
+//                    .verticalScroll(rememberScrollState())
+//                ) {
+//                    Text(
+//                        modifier = Modifier.padding(8.dp),
+//                        text = updateInfo.releaseNotes
+//                    )
+//                }
+//            },
+//
+//            cancelText = "稍后",
+//            dismissButton =  {
+//                val (buttonText, onClickAction) = when (val state = updateState.downloadState) {
+//                    is DownloadState.InProgress -> Pair("取消下载") {
+//                        onEvent(SettingsEvent.DismissUpdateDialog)
+//                        onEvent(SettingsEvent.CancelDownload)
+//                    }
+//                    else -> Pair("稍后") { onEvent(SettingsEvent.DismissUpdateDialog) }
+//                }
+//                Button(
+//                    onClick = onClickAction,
+//                    text = buttonText,
+//                    modifier = Modifier.weight(1f),
+//                    type = ButtonType.Sub,
+//                )
+//            },
+//            confirmButton = {
+//                val (buttonText, onClickAction) = when (val state = updateState.downloadState) {
+//                    is DownloadState.Success -> Pair("安装") { onEvent(SettingsEvent.InstallUpdate) }
+//                    is DownloadState.InProgress -> Pair("下载中 ${state.progress}%") {onEvent(SettingsEvent.CancelDownload)}
+//                    is DownloadState.Error -> Pair("重试") { onEvent(SettingsEvent.StartDownload) }
+//                    else -> Pair("下载") { onEvent(SettingsEvent.StartDownload) }
+//                }
+//
+//                Button(
+//                    onClick = onClickAction,
+//                    text = buttonText,
+//                    modifier = Modifier.weight(1f)
+//                )
+//            }
+//        )
+//    }
 }
 
 // 帮助函数，用于打开网页

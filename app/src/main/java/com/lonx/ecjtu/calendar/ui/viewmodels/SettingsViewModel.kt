@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.screen.settings
+package com.lonx.ecjtu.calendar.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -10,11 +10,20 @@ import com.lonx.ecjtu.calendar.domain.usecase.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.SaveUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.SaveUserConfigUseCase
+import com.lonx.ecjtu.calendar.ui.screen.settings.ParseResult
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsEffect
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsEvent
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsUiState
 import com.lonx.ecjtu.calendar.util.UpdateEffect
 import com.lonx.ecjtu.calendar.util.UpdateManager
-import java.net.URL
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.net.URL
 
 class SettingsViewModel(
     private val app: Application,
@@ -31,7 +40,7 @@ class SettingsViewModel(
     private val _uiState = MutableStateFlow(SettingsUiState())
     // 公开的、只读的状态流，供 UI 层订阅
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
-    
+
     private val _effect = MutableSharedFlow<SettingsEffect>()
     val effect = _effect.asSharedFlow()
 
@@ -78,7 +87,7 @@ class SettingsViewModel(
     private fun parseWeiXinID(input: String): ParseResult {
         val trimmedInput = input.trim()
         val isUrl = trimmedInput.startsWith("http://") || trimmedInput.startsWith("https://")
-        
+
         return if (isUrl) {
             try {
                 val url = URL(trimmedInput)
@@ -124,7 +133,7 @@ class SettingsViewModel(
         when (event) {
             is SettingsEvent.OnIdChange -> {
                 val result = parseWeiXinID(event.id)
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         weiXinId = result.parsedId,
                         parseResult = result
@@ -186,7 +195,7 @@ class SettingsViewModel(
             _uiState.update { it.copy(isLoading = true) } // 开始加载
             saveUserConfigUseCase(uiState.value.weiXinId)
             _uiState.update { it.copy(isLoading = false) } // 结束加载
-            
+
             // 发送保存成功的通知，包含解析信息
             val message = uiState.value.parseResult?.let { result ->
                 if (result.isUrl) {
@@ -199,7 +208,7 @@ class SettingsViewModel(
                     "保存成功"
                 }
             } ?: "保存成功"
-            
+
             _effect.emit(SettingsEffect.ShowToast(message))
         }
     }

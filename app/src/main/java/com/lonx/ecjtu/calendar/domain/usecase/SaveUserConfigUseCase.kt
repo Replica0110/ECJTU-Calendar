@@ -5,9 +5,6 @@ import java.net.URL
 
 class SaveUserConfigUseCase(private val repository: CalendarRepository) {
     suspend operator fun invoke(weiXinID: String) {
-        if (weiXinID.isBlank()) {
-            return
-        }
         repository.saveWeiXinID(weiXinID)
     }
 }

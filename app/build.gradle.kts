@@ -64,7 +64,7 @@ android {
         applicationId = "com.lonx.ecjtu.calendar"
         minSdk = 28
         targetSdk = 36
-        versionCode = gitVersionCode()
+        versionCode = 1
         versionName = gitVersionTag()
 
         val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
@@ -89,7 +89,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

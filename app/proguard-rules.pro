@@ -19,3 +19,81 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# JSOUP HTML 解析库
+-keep class org.jsoup.** { *; }
+
+# RxHttp 网络请求库
+-dontwarn rxhttp.**
+-keep class rxhttp.** { *; }
+-keep class androidx.lifecycle.** { *; }
+-keepclassmembers class * {
+    @rxhttp.wrapper.annotation.DefaultDomain <fields>;
+}
+
+# OkHttp 网络库
+-dontwarn okhttp3.**
+-keep class okhttp3.** { *; }
+-dontwarn okio.**
+
+# Kotlin 协程
+-keep class kotlin.coroutines.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
+-keepclassmembers class kotlinx.coroutines.android.AndroidDispatcherFactory {*;}
+
+# DataStore
+-keep class androidx.datastore.** {*;}
+-keep class androidx.datastore.preferences.** {*;}
+
+# Compose
+-keep class androidx.compose.** { *; }
+-keep class kotlin.jvm.functions.** { *; }
+-dontwarn androidx.compose.**
+-dontwarn kotlin.jvm.functions.**
+
+# Lifecycle
+-keep class androidx.lifecycle.** { *; }
+
+# Navigation
+-keep class androidx.navigation.** { *; }
+
+# Koin 依赖注入
+-keep class org.koin.** { *; }
+-dontwarn org.koin.**
+
+# Material3
+-keep class com.google.android.material.** { *; }
+
+# Salt UI
+-keep class com.salt.ui.** { *; }
+
+# ViewModel
+-keep class androidx.lifecycle.ViewModel { *; }
+-keep class androidx.lifecycle.ViewModelProvider { *; }
+-keep class androidx.lifecycle.viewmodel.** { *; }
+
+# 保持自定义的 ViewModel 类
+-keep class com.lonx.ecjtu.calendar.** extends androidx.lifecycle.ViewModel { *; }
+
+# 保持 BuildConfig 类
+-keep class com.lonx.ecjtu.calendar.BuildConfig { *; }
+
+# 保持所有数据类
+-keep class com.lonx.ecjtu.calendar.**.model.** { *; }
+
+# 保持所有网络请求相关的类
+-keep class com.lonx.ecjtu.calendar.**.data.** { *; }
+-keep class com.lonx.ecjtu.calendar.**.network.** { *; }
+-keep class com.lonx.ecjtu.calendar.**.repository.** { *; }
+
+# 保持枚举类
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# 保持注解
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses

@@ -43,6 +43,7 @@ import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import com.moriafly.salt.ui.dialog.BasicDialog
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -208,6 +209,27 @@ fun SettingsScreen(
                     )
                 }
 
+                RoundedColumn {
+                    ItemTip(text = "使用教程")
+                    Item(
+                        onClick = {
+                            // TODO(添加教程)
+                        },
+                        iconPaddingValues = PaddingValues(2.dp),
+                        text = "获取WeiXinID",
+                        sub = "如何获取WeiXinID",
+                        iconPainter = painterResource(R.drawable.ic_tutorial_24dp)
+                    )
+                    Item(
+                        onClick = {
+                            // TODO(添加教程)
+                        },
+                        iconPaddingValues = PaddingValues(2.dp),
+                        text = "常见问题",
+                        iconPainter = painterResource(R.drawable.ic_tutorial_24dp),
+                        sub = "常见问题解决方法"
+                    )
+                }
 
                 RoundedColumn {
                     ItemTip(text = "关于")
@@ -278,6 +300,9 @@ fun SettingsScreen(
             onDismiss = { showClearCacheDialog = false },
             confirmText = "清理"
         )
+    }
+    if (showWeiXinIdDialog){
+
     }
 //    if (updateState.updateInfo != null) {
 //        val updateInfo = updateState.updateInfo!!

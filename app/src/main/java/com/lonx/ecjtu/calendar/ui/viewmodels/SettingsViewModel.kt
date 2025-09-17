@@ -171,6 +171,11 @@ class SettingsViewModel(
             is SettingsEvent.OnClearCacheClick -> {
                 clearCache()
             }
+            is SettingsEvent.RequestPinAppWidgetClick -> {
+                viewModelScope.launch{
+                    _effect.emit(SettingsEffect.RequestPinAppWidgetClick)
+                }
+            }
         }
     }
     @SuppressLint("DefaultLocale")

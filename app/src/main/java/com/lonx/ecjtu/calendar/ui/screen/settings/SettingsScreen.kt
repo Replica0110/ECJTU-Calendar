@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.calendar.ui.screen.settings
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -15,15 +16,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.BuildConfig
 import org.koin.androidx.compose.koinViewModel
 import androidx.core.net.toUri
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.lonx.ecjtu.calendar.R
+import com.lonx.ecjtu.calendar.domain.model.Course
+import com.lonx.ecjtu.calendar.domain.model.DateInfo
+import com.lonx.ecjtu.calendar.domain.model.SchedulePage
 import com.lonx.ecjtu.calendar.ui.component.InputDialog
 import com.lonx.ecjtu.calendar.ui.component.YesNoDialog
 import com.lonx.ecjtu.calendar.ui.viewmodels.SettingsViewModel
+import com.lonx.ecjtu.calendar.ui.widget.CourseGlanceWidget
+import com.lonx.ecjtu.calendar.ui.widget.CourseUiState
+import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetReceiver
+import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetState
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemArrowType
@@ -33,6 +43,7 @@ import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, UnstableSaltUiApi::class)
@@ -49,9 +60,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val onEvent = viewModel::onEvent
 
-    val updateManager: UpdateManager = koinInject()
-
-//    val updateState by updateManager.state.collectAsStateWithLifecycle()
+    val coroutineScope = rememberCoroutineScope()
 
     // 收集并显示UI效果
     LaunchedEffect(Unit) {
@@ -59,6 +68,70 @@ fun SettingsScreen(
             when (effect) {
                 is SettingsEffect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                }
+                is SettingsEffect.RequestPinAppWidgetClick -> {
+                    try {
+                        coroutineScope.launch {
+                            val previewDateInfo = DateInfo(
+                                date = "2025-09-17",
+                                weekNumber = "第2周",
+                                dayOfWeek = "星期三"
+                            )
+
+                            val todayPreviewCourses = listOf(
+                                Course(
+                                    name = "计算机网络",
+                                    time = "1,2",
+                                    location = "教10-101",
+                                    teacher = "张老师",
+                                    duration = "1-16",
+                                    dayOfWeek = "2"
+                                ),
+                                Course(
+                                    name = "操作系统",
+                                    time = "3,4",
+                                    location = "实验楼203",
+                                    teacher = "李老师",
+                                    duration = "1-16",
+                                    dayOfWeek = "2"
+                                )
+                            )
+
+                            val tomorrowPreviewCourses = listOf(
+                                Course(
+                                    name = "数据结构",
+                                    time = "5,6",
+                                    location = "教9-302",
+                                    teacher = "王老师",
+                                    duration = "1-16",
+                                    dayOfWeek = "2"
+                                )
+                            )
+
+                            val previewState = CourseWidgetState(
+                                today = CourseUiState.Success(
+                                    SchedulePage(
+                                        dateInfo = previewDateInfo,
+                                        courses = todayPreviewCourses
+                                    )
+                                ),
+                                tomorrow = CourseUiState.Success(
+                                    SchedulePage(
+                                        dateInfo = previewDateInfo,
+                                        courses = tomorrowPreviewCourses
+                                    )
+                                )
+                            )
+
+                            GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                                receiver = CourseWidgetReceiver::class.java,
+                                preview = CourseGlanceWidget(),
+                                previewState = previewState
+                            )
+                        }
+                    } catch (e: Exception){
+                        Toast.makeText(context, "添加失败: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
@@ -100,7 +173,7 @@ fun SettingsScreen(
                     Item(
                         iconPaddingValues = PaddingValues(2.dp),
                         onClick = {
-                            Toast.makeText(context, "请长按桌面进行添加", Toast.LENGTH_LONG).show()
+                            viewModel.onEvent(SettingsEvent.RequestPinAppWidgetClick)
                         },
                         text = "桌面小组件",
                         iconPainter = painterResource(R.drawable.ic_pin_appwidget),
@@ -119,7 +192,7 @@ fun SettingsScreen(
                     Item(
                         onClick = {
                             Toast.makeText(context, "正在检查更新...", Toast.LENGTH_SHORT).show()
-                            updateManager.checkForUpdate()
+                            viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
                         },
                         iconPaddingValues = PaddingValues(2.dp),
                         text = "立即检查更新",

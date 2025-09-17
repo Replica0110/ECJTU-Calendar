@@ -134,7 +134,8 @@ private fun TitleBar(dateInfo: DateInfo?) {
             provider = ImageProvider(R.drawable.ic_refresh_button),
             contentDescription = "Refresh",
             modifier = GlanceModifier
-                .size(18.dp)
+                .padding(start = 6.dp)
+                .size(20.dp)
                 .clickable(actionRunCallback<UpdateAction>())
         )
         Spacer(modifier = GlanceModifier.defaultWeight())
@@ -163,8 +164,8 @@ private fun CourseList(state: CourseUiState, modifier: GlanceModifier) {
         contentAlignment = Alignment.Center
     ) {
         when (state) {
-            is CourseUiState.Loading -> CircularProgressIndicator()
-            is CourseUiState.Error -> Text(text = "加载失败: ${state.message}")
+            is CourseUiState.Loading -> CircularProgressIndicator(color = ColorProvider(R.color.primary_lite))
+            is CourseUiState.Error -> Text(text = state.message)
             is CourseUiState.Success -> {
                 if (state.page.courses.isEmpty()) {
                     Text(

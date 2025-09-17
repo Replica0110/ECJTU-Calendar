@@ -62,7 +62,6 @@ class UpdateManagerImpl(
             _state.update { it.copy(isChecking = true) }
             val result = updateRepository.checkForUpdate()
 
-            _state.update { it.copy(isChecking = false) }
 
             when (result) {
                 is UpdateCheckResult.NewVersion -> {
@@ -90,6 +89,7 @@ class UpdateManagerImpl(
                     _effect.emit(UpdateEffect.ShowToast("检查更新超时"))
                 }
             }
+            _state.update { it.copy(isChecking = false) }
         }
     }
 

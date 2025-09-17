@@ -87,6 +87,25 @@
 -keep class com.lonx.ecjtu.calendar.**.network.** { *; }
 -keep class com.lonx.ecjtu.calendar.**.repository.** { *; }
 
+# Glance App Widget
+-keep class androidx.glance.** { *; }
+-dontwarn androidx.glance.**
+
+# Kotlin 序列化库
+-keep class kotlinx.serialization.** { *; }
+-keepclassmembers class kotlinx.serialization.** {
+    *** Companion;
+}
+-dontwarn kotlinx.serialization.**
+
+# 保持使用@Serializable注解的类
+-keep class com.lonx.ecjtu.calendar.domain.model.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.lonx.ecjtu.calendar.domain.model.** {
+    *** Companion;
+}
+
 # 保持枚举类
 -keepclassmembers enum * {
     public static **[] values();

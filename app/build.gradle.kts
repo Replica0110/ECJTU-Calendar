@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 
 }
@@ -64,7 +65,7 @@ android {
         applicationId = "com.lonx.ecjtu.calendar"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
+        versionCode = gitVersionCode()
         versionName = gitVersionTag()
 
         val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
@@ -145,6 +146,9 @@ dependencies {
     // DataStore - 轻量级数据存储 (替代 SharedPreferences 和 Room)
     implementation(libs.androidx.datastore.preferences)
 
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+
     // Network - 网络请求
     implementation(libs.rxhttp)
 
@@ -156,7 +160,8 @@ dependencies {
 
     // HTML Parsing - HTML 解析
     implementation(libs.jsoup)
-
+    // 序列化
+    implementation(libs.kotlinx.serialization.json)
     // Testing - 测试依赖
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

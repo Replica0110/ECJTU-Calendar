@@ -8,6 +8,7 @@ import com.lonx.ecjtu.calendar.data.model.Schedule
 import com.lonx.ecjtu.calendar.data.network.HtmlParser
 import com.lonx.ecjtu.calendar.domain.model.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.Course
+import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
 import kotlinx.coroutines.flow.Flow
@@ -87,7 +88,12 @@ class CalendarRepositoryImpl(
 
 private fun Schedule.toDomainModel(): SchedulePage {
     return SchedulePage(
-        dateInfo = this.dateInfo,
+        // 将 Triple 转换为 DateInfo 对象
+        dateInfo = DateInfo(
+            date = this.dateInfo.first,
+            weekNumber = this.dateInfo.second,
+            dayOfWeek = this.dateInfo.third
+        ),
         courses = this.courses.map { it.toDomainModel() }
     )
 }

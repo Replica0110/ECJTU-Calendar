@@ -1,5 +1,9 @@
 package com.lonx.ecjtu.calendar.domain.model
 
+import com.lonx.ecjtu.calendar.data.model.CourseItem
+import com.lonx.ecjtu.calendar.data.model.Schedule
+import kotlinx.serialization.Serializable
+
 
 /**
  * Domain model for a course.
@@ -11,6 +15,7 @@ package com.lonx.ecjtu.calendar.domain.model
  * @param teacher 老师
  * @param dayOfWeek 星期几 (e.g., "星期一")
  */
+@Serializable
 data class Course(
     val duration: String,
     val time: String,

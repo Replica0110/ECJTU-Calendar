@@ -11,13 +11,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.moriafly.salt.ui.SaltTheme
 
 
 @Composable
 fun DateHeaderCard(
-    dateInfo: Triple<String, String, String>,
+    dateInfo: DateInfo,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
@@ -72,7 +73,7 @@ fun DateHeaderCard(
 @Composable
 fun DateHeaderCardPreview() {
     CalendarTheme {
-        DateHeaderCard(dateInfo = Triple("2023-09-01", "星期一", "1"))
+        DateHeaderCard(dateInfo = DateInfo("2023-09-01", "星期一", "1"))
     }
 }
 

@@ -2,6 +2,7 @@ package com.lonx.ecjtu.calendar.ui.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -15,6 +16,7 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
@@ -27,6 +29,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import com.lonx.ecjtu.calendar.MainActivity
 import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
@@ -56,12 +59,14 @@ class CourseGlanceWidget : GlanceAppWidget() {
     @SuppressLint("RestrictedApi")
     @Composable
     private fun WidgetContent(state: CourseWidgetState) {
+        val openAppIntent = Intent(LocalContext.current, MainActivity::class.java)
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(SaltTheme.colors.background)
                 .padding(8.dp)
                 .cornerRadius(16.dp)
+                .clickable(actionStartActivity(openAppIntent))
         ) {
             // 标题栏
             TitleBar(dateInfo = (state.today as? CourseUiState.Success)?.page?.dateInfo)

@@ -14,6 +14,7 @@ import com.lonx.ecjtu.calendar.util.UpdateState
 import com.moriafly.salt.ui.Button
 import com.moriafly.salt.ui.ButtonType
 import com.moriafly.salt.ui.RoundedColumn
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 // 我们使用之前在 SettingsScreen 中创建的 YesNoDialog 作为基础
 @Composable
@@ -38,10 +39,11 @@ fun UpdateDialog(
                     .heightIn(max = 300.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    modifier = Modifier.padding(8.dp),
-                    text = updateInfo.releaseNotes
-                )
+//                Text(
+//                    modifier = Modifier.padding(8.dp),
+//                    text = updateInfo.releaseNotes
+//                )
+                MarkdownText(modifier = Modifier.padding(8.dp),markdown = updateInfo.releaseNotes)
             }
         },
         cancelText = "稍后",

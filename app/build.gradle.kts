@@ -157,6 +157,8 @@ dependencies {
     implementation(libs.okhttp)
     // saltui库
     implementation(libs.salt.ui.android)
+    // markdown 渲染库
+    implementation(libs.compose.markdown)
 
     // HTML Parsing - HTML 解析
     implementation(libs.jsoup)

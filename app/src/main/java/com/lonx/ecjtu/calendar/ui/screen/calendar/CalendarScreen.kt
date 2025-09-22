@@ -171,9 +171,10 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
                         items(uiState.courses) { course ->
                             CourseCard(
                                 course = course,
-                                modifier = Modifier
-                                    .padding(horizontal = 12.dp)
-                                    .clickable { selectedCourse = course }
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                onClick = {
+                                    selectedCourse = course
+                                }
                             )
                         }
                     }

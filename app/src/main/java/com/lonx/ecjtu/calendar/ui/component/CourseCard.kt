@@ -21,8 +21,13 @@ import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.moriafly.salt.ui.SaltTheme
 
 @Composable
-fun CourseCard(course: Course, modifier: Modifier = Modifier) {
+fun CourseCard(
+    course: Course,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = SaltTheme.colors.subBackground),
@@ -127,7 +132,10 @@ fun CourseCardPreview() {
                     location = "14-408",
                     teacher = "温旭琼",
                     dayOfWeek = "星期一"
-                )
+                ),
+                onClick = {
+                    // 点击事件的响应逻辑
+                }
             )
         }
     }

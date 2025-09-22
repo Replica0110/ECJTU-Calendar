@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,16 +25,18 @@ fun DateHeaderCard(
 ) {
 
     val (date, weekDay, weekNum) = dateInfo
+    val cardShape = RoundedCornerShape(12.dp)
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
+            .clip(cardShape)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = cardShape,
         colors = CardDefaults.cardColors(
             containerColor = SaltTheme.colors.highlight
         )
@@ -73,8 +75,10 @@ fun DateHeaderCard(
 @Composable
 fun DateHeaderCardPreview() {
     CalendarTheme {
-        DateHeaderCard(dateInfo = DateInfo("2023-09-01", "星期一", "1"))
+        DateHeaderCard(
+            dateInfo = DateInfo("2023-09-01", "星期一", "1"),
+            onClick = {},
+            onLongClick = {}
+        )
     }
 }
-
-

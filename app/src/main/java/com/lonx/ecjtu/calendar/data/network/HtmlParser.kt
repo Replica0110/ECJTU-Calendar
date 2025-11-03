@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.calendar.data.network
 
+import android.util.Log
 import androidx.compose.runtime.remember
 import com.lonx.ecjtu.calendar.data.model.CourseItem
 import com.lonx.ecjtu.calendar.data.model.Schedule
@@ -74,5 +75,21 @@ class HtmlParser {
         }
 
         return Schedule(dateInfo = Triple(date, weekDay, weekNum), courses = courseList, title = title)
+    }
+    
+    /**
+     * 解析校历网页，获取图片链接
+     */
+    fun parseAcademicCalendarImageUrl(htmlContent: String): String? {
+        return try {
+            val document = Jsoup.parse(htmlContent)
+            val imgElement = document.select("img").first()
+            val src = imgElement?.attr("src")
+            Log.d("HtmlParser", "从网页中解析到图片链接: $src")
+            src
+        } catch (e: Exception) {
+            Log.e("HtmlParser", "解析校历图片链接失败", e)
+            null
+        }
     }
 }

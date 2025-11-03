@@ -25,7 +25,7 @@ val dataModule = module {
 
     // 提供 AcademicCalendarRemoteDataSource 的单例
     single<AcademicCalendar> {
-        AcademicCalendarRemoteDataSource()
+        AcademicCalendarRemoteDataSource(htmlParser = get())
     }
 
     // 提供 LocalDataSource 的单例，它需要 Android Context

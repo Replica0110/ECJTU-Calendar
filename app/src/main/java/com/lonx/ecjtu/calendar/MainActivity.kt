@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.lonx.ecjtu.calendar.ui.animations.NavigationAnimationTransitions
 import com.lonx.ecjtu.calendar.ui.component.UpdateDialog
+import com.lonx.ecjtu.calendar.ui.screen.academiccalendar.AcademicCalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
@@ -98,6 +99,14 @@ class MainActivity : ComponentActivity() {
                                 route = "settings"
                             ) {
                                 SettingsScreen(
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToAcademicCalendar = { navController.navigate("academic_calendar") }
+                                )
+                            }
+                            composable(
+                                route = "academic_calendar"
+                            ) {
+                                AcademicCalendarScreen(
                                     onNavigateBack = { navController.popBackStack() }
                                 )
                             }

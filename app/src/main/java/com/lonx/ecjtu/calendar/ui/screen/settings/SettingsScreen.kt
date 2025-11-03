@@ -50,7 +50,8 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, UnstableSaltUiApi::class)
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToAcademicCalendar: () -> Unit
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
 
@@ -208,7 +209,17 @@ fun SettingsScreen(
                         sub = "缓存大小：${screenState.cacheSize}"
                     )
                 }
+                RoundedColumn {
+                    ItemTip(text = "功能")
 
+                    Item(
+                        iconPaddingValues = PaddingValues(2.dp),
+                        onClick = { onNavigateToAcademicCalendar() },
+                        text = "查看校历",
+                        iconPainter = painterResource(R.drawable.ic_date_24dp),
+                        sub = "查看学校教学日历"
+                    )
+                }
                 RoundedColumn {
                     ItemTip(text = "使用教程")
                     Item(

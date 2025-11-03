@@ -159,7 +159,10 @@ dependencies {
     implementation(libs.salt.ui.android)
     // markdown 渲染库
     implementation(libs.compose.markdown)
-
+    // 图片加载库
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.zoomable.image.coil3)
     // HTML Parsing - HTML 解析
     implementation(libs.jsoup)
     // 序列化

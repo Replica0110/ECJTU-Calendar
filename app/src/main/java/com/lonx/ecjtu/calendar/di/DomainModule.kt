@@ -3,6 +3,7 @@ package com.lonx.ecjtu.calendar.di
 import com.lonx.ecjtu.calendar.domain.usecase.ApkInstallUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.CleanUpApksUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.ClearCacheUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.GetCacheSizeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.GetCoursesUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.GetUpdateSettingUseCase
@@ -36,4 +37,9 @@ val domainModule = module {
 
     factory { ApkInstallUseCase(appUpdateInstaller = get()) }
     factory { CleanUpApksUseCase() }
+    
+    // 提供 GetAcademicCalendarUseCase 的实例工厂
+    factory {
+        GetAcademicCalendarUseCase(academicCalendar = get())
+    }
 }

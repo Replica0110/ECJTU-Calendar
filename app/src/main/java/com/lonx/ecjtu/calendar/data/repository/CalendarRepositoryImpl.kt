@@ -2,12 +2,13 @@ package com.lonx.ecjtu.calendar.data.repository
 
 import android.util.Log
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
-import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSource
+import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSource
 import com.lonx.ecjtu.calendar.data.mapper.ScheduleMapper
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
+import com.lonx.ecjtu.calendar.data.network.Constants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import org.jsoup.Jsoup
@@ -18,11 +19,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class CalendarRepositoryImpl(
-    private val courseDataSource: CourseDataSource,
+    private val jwxtDataSource: JwxtDataSource,
     private val localDataSource: LocalDataSource,
     private val htmlParser: HtmlParser
 ) : CalendarRepository {
-    private val calendarUrl = "https://jwxt.ecjtu.edu.cn/weixin/CalendarServlet"
     override suspend fun getCourses(date: LocalDate): Result<SchedulePage> {
         return try {
             val weiXinId = localDataSource.getWeiXinID().first()
@@ -33,12 +33,24 @@ class CalendarRepositoryImpl(
             val formattedDate = date.format(DateTimeFormatter.ISO_LOCAL_DATE) // YYYY-MM-DD
 
 
-            val htmlContent = courseDataSource.fetchCalendarHtml(
-                url = calendarUrl,
+            val htmlContent = jwxtDataSource.fetchHtml(
+                url = Constants.CALENDAR_URL,
                 params = mapOf(
                     "weiXinID" to weiXinId,
                     "date" to formattedDate
                 )
+            ).fold(
+                onSuccess = { it },
+                onFailure = { throwable ->
+                    val error = when (throwable) {
+                        is UnknownHostException,
+                        is SocketTimeoutException,
+                        is HttpStatusCodeException,
+                        is java.io.IOException -> CalendarError.NetworkError(throwable)
+                        else -> CalendarError.UnknownError(Exception(throwable.message ?: "未知错误", throwable))
+                    }
+                    return Result.failure(error)
+                }
             )
             val document = Jsoup.parse(htmlContent)
 

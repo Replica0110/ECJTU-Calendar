@@ -2,10 +2,8 @@ package com.lonx.ecjtu.calendar.di
 
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSourceImpl
-import com.lonx.ecjtu.calendar.data.datasource.remote.AcademicCalendarDataSource
-import com.lonx.ecjtu.calendar.data.datasource.remote.AcademicCalendarDataSourceImpl
-import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSource
-import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSourceImpl
+import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSource
+import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSourceImpl
 import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSourceImpl
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
@@ -19,14 +17,14 @@ import org.koin.dsl.module
 val dataModule = module {
 
     // 提供 CourseDataSource 的单例
-    single<CourseDataSource> {
-        CourseDataSourceImpl()
+    single<JwxtDataSource> {
+        JwxtDataSourceImpl()
     }
 
     // 提供 AcademicCalendarDataSource 的单例
-    single<AcademicCalendarDataSource> {
-        AcademicCalendarDataSourceImpl(htmlParser = get())
-    }
+//    single<AcademicCalendarDataSource> {
+//        AcademicCalendarDataSourceImpl(htmlParser = get())
+//    }
 
     // 提供 LocalDataSource 的单例，它需要 Android Context
     single<LocalDataSource> {
@@ -41,7 +39,7 @@ val dataModule = module {
     // 将 CalendarRepository 接口与其实现 CalendarRepositoryImpl 绑定为单例。
     single<CalendarRepository> {
         CalendarRepositoryImpl(
-            courseDataSource = get(),
+            jwxtDataSource = get(),
             localDataSource = get(),
             htmlParser = get()
         )

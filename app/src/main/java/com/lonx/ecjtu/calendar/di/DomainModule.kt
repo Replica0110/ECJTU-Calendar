@@ -40,6 +40,6 @@ val domainModule = module {
     
     // 提供 GetAcademicCalendarUseCase 的实例工厂
     factory {
-        GetAcademicCalendarUseCase(repository = get())
+        GetAcademicCalendarUseCase(repository = get(), parser = get())
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.lonx.ecjtu.calendar.data.network.Constants
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.TitleBar
@@ -49,10 +50,8 @@ fun AcademicCalendarScreen(
     val haptics = LocalHapticFeedback.current
 
     LaunchedEffect(Unit) {
-        Log.d("AcademicCalendar", "开始获取校历图片URL")
-        getAcademicCalendarUseCase().fold(
+        getAcademicCalendarUseCase(url = Constants.ACADEMIC_CALENDAR_URL).fold(
             onSuccess = { url ->
-                Log.d("AcademicCalendar", "获取校历图片URL成功: $url")
                 imageUrl = url
                 loading = false
             },

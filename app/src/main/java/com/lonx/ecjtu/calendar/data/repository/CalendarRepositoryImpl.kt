@@ -4,12 +4,8 @@ import android.util.Log
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSource
 import com.lonx.ecjtu.calendar.data.mapper.ScheduleMapper
-import com.lonx.ecjtu.calendar.data.model.CourseItem
-import com.lonx.ecjtu.calendar.data.model.Schedule
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.domain.error.CalendarError
-import com.lonx.ecjtu.calendar.domain.model.Course
-import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
 import kotlinx.coroutines.flow.Flow

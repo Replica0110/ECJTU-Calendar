@@ -1,7 +1,6 @@
 package com.lonx.ecjtu.calendar.data.datasource.remote
 
 import android.util.Log
-import com.lonx.ecjtu.calendar.domain.repository.AcademicCalendar
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import rxhttp.toAwait
 import rxhttp.wrapper.param.RxHttp

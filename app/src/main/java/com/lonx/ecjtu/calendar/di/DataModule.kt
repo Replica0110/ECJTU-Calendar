@@ -11,7 +11,6 @@ import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSourceImpl
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.data.repository.CalendarRepositoryImpl
 import com.lonx.ecjtu.calendar.data.repository.UpdateRepositoryImpl
-import com.lonx.ecjtu.calendar.domain.repository.AcademicCalendar
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
 import com.lonx.ecjtu.calendar.domain.repository.UpdateRepository
 import org.koin.android.ext.koin.androidContext

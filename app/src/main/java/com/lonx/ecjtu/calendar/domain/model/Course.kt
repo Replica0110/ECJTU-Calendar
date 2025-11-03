@@ -1,7 +1,5 @@
 package com.lonx.ecjtu.calendar.domain.model
 
-import com.lonx.ecjtu.calendar.data.model.CourseItem
-import com.lonx.ecjtu.calendar.data.model.Schedule
 import kotlinx.serialization.Serializable
 
 

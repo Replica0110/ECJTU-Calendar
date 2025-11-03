@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.domain.usecase
+package com.lonx.ecjtu.calendar.domain.usecase.cache
 
 import android.content.Context
 import android.util.Log
@@ -31,7 +31,8 @@ class CleanUpApksUseCase {
                 .filter { it.isFile && it.name.startsWith(appName) && it.name.endsWith(".apk") }
                 .mapNotNull { file ->
                     try {
-                        val version = file.name.removePrefix(appName).removePrefix("-").removeSuffix(".apk")
+                        val version =
+                            file.name.removePrefix(appName).removePrefix("-").removeSuffix(".apk")
                         if (isNewerVersion(currentVersion, version)) {
                             Pair(file, version)
                         } else {

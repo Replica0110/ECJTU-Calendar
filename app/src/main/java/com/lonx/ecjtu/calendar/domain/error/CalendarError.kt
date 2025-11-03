@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.domain.model
+package com.lonx.ecjtu.calendar.domain.error
 
 sealed class CalendarError(message: String = "") : Exception(message) {
     class NoWeiXinId : CalendarError("请先在设置中配置微信ID")

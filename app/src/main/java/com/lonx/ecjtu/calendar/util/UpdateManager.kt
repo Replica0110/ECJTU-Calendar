@@ -1,12 +1,11 @@
 package com.lonx.ecjtu.calendar.util
 
 import android.content.Context
-import android.util.Log
 import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
-import com.lonx.ecjtu.calendar.data.model.UpdateInfo
+import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import com.lonx.ecjtu.calendar.domain.repository.UpdateRepository
-import com.lonx.ecjtu.calendar.domain.usecase.ApkInstallUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.update.ApkInstallUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +21,7 @@ import kotlinx.coroutines.launch
 
 data class UpdateState(
     val isChecking: Boolean = false,
-    val updateInfo: UpdateInfo? = null,
+    val updateDTO: UpdateDTO? = null,
     val downloadState: DownloadState = DownloadState.Idle
 )
 sealed interface UpdateEffect {
@@ -66,7 +65,7 @@ class UpdateManagerImpl(
             when (result) {
                 is UpdateCheckResult.NewVersion -> {
                     lastValidUpdateResult = result
-                    _state.update { it.copy(updateInfo = result.info) }
+                    _state.update { it.copy(updateDTO = result.info) }
                 }
                 is UpdateCheckResult.NoUpdateAvailable -> {
                     lastValidUpdateResult = null
@@ -94,10 +93,10 @@ class UpdateManagerImpl(
     }
 
     override fun startDownload(context: Context) {
-        if (downloadJob?.isActive == true || state.value.updateInfo == null) return
+        if (downloadJob?.isActive == true || state.value.updateDTO == null) return
 
         downloadJob = appScope.launch {
-            updateRepository.downloadUpdate(context, state.value.updateInfo!!)
+            updateRepository.downloadUpdate(context, state.value.updateDTO!!)
                 .onStart { _state.update { it.copy(downloadState = DownloadState.InProgress(0)) } }
                 .catch { e -> _state.update { it.copy(downloadState = DownloadState.Error(e)) } }
                 .collect { downloadState ->
@@ -120,7 +119,7 @@ class UpdateManagerImpl(
 
     override fun dismissUpdateDialog() {
         _state.update { it.copy(
-            updateInfo = null,
+            updateDTO = null,
 //            downloadState = DownloadState.Idle
         ) }
 //        cancelDownload()
@@ -131,7 +130,7 @@ class UpdateManagerImpl(
         _state.update {
             it.copy(
                 isChecking = false,
-                updateInfo = null,
+                updateDTO = null,
                 downloadState = DownloadState.Idle
             )
         }

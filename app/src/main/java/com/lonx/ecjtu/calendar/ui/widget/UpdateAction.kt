@@ -5,7 +5,7 @@ import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
-import com.lonx.ecjtu.calendar.domain.usecase.GetCoursesUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

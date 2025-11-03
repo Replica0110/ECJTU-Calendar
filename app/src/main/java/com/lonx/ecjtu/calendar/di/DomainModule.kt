@@ -1,15 +1,15 @@
 package com.lonx.ecjtu.calendar.di
 
-import com.lonx.ecjtu.calendar.domain.usecase.ApkInstallUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.CleanUpApksUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.ClearCacheUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.GetAcademicCalendarUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.GetCacheSizeUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.GetCoursesUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.GetUpdateSettingUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.GetUserConfigUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.SaveUpdateSettingUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.SaveUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.cache.CleanUpApksUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.cache.ClearCacheUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.cache.GetCacheSizeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUpdateSettingUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.update.ApkInstallUseCase
 import org.koin.dsl.module
 
 val domainModule = module {
@@ -40,6 +40,6 @@ val domainModule = module {
     
     // 提供 GetAcademicCalendarUseCase 的实例工厂
     factory {
-        GetAcademicCalendarUseCase(academicCalendar = get())
+        GetAcademicCalendarUseCase(repository = get())
     }
 }

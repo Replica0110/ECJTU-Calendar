@@ -2,8 +2,8 @@ package com.lonx.ecjtu.calendar.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.calendar.domain.model.CalendarError
-import com.lonx.ecjtu.calendar.domain.usecase.GetCoursesUseCase
+import com.lonx.ecjtu.calendar.domain.error.CalendarError
+import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarEvent
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarUiState
 import kotlinx.coroutines.flow.MutableStateFlow

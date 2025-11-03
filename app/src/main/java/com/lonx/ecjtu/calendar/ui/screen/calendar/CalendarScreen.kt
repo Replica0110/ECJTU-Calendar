@@ -36,9 +36,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import com.lonx.ecjtu.calendar.domain.model.CalendarError
+import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.ui.viewmodels.CalendarViewModel
 import com.moriafly.salt.ui.Button
+import com.moriafly.salt.ui.ItemButton
+import com.moriafly.salt.ui.ItemInfo
+import com.moriafly.salt.ui.ItemInfoType
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Text
@@ -47,7 +50,7 @@ import com.moriafly.salt.ui.UnstableSaltUiApi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(onNavigateToSettings: () -> Unit) {
+fun CalendarScreen() {
     val viewModel: CalendarViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -104,9 +107,9 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
 //                }
 
                 // "设置" 按钮
-                IconButton(onClick = onNavigateToSettings) {
-                    Icon(painterResource(R.drawable.ic_settings_24dp), contentDescription = "设置")
-                }
+//                IconButton(onClick = onNavigateToSettings) {
+//                    Icon(painterResource(R.drawable.ic_settings_24dp), contentDescription = "设置")
+//                }
             }
         }
         PullToRefreshBox(
@@ -141,8 +144,7 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
                             onBackToday = {
                                 Toast.makeText(context, "已返回当天", Toast.LENGTH_SHORT).show()
                                 viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
-                            },
-                            onOpenSettings = onNavigateToSettings
+                            }
                         )
                     }
                 }
@@ -207,57 +209,43 @@ fun CalendarScreen(onNavigateToSettings: () -> Unit) {
 
 @OptIn(UnstableSaltUiApi::class)
 @Composable
-private fun ErrorState(error: CalendarError, onRetry: () -> Unit, onBackToday: () -> Unit, onOpenSettings: () -> Unit) {
-    RoundedColumn(modifier = Modifier.padding(top = 16.dp)) {
-        Text(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            text = error.message?: "未知错误",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+private fun ErrorState(error: CalendarError, onRetry: () -> Unit, onBackToday: () -> Unit) {
+    RoundedColumn(Modifier.fillMaxWidth()) {
+        ItemInfo(
+            text = error.message ?: "未知错误",
+            infoType = ItemInfoType.Error
         )
-        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            when (error) {
-                is CalendarError.NoWeiXinId, is CalendarError.WeiXinIdInvalid -> {
-                    Button(
-                        onClick = onRetry,
-                        text = "重试",
-                        modifier = Modifier.weight(1f)
-                        )
-                    Button(
-                        onClick = onOpenSettings,
-                        text = "前往设置",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+        when (error) {
+            is CalendarError.NoWeiXinId, is CalendarError.WeiXinIdInvalid -> {
+                ItemButton(
+                    onClick = onRetry,
+                    text = "重试"
+                )
+            }
 
-                else -> {
-                    Button(
-                        onClick = onRetry,
-                        text = "重试",
-                        modifier = Modifier.weight(1f)
-                    )
-                    Button(
-                        onClick = onBackToday,
-                        text = "回到今天",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+            else -> {
+                ItemButton(
+                    onClick = onRetry,
+                    text = "重试"
+                )
+                ItemButton(
+                    onClick = onBackToday,
+                    text = "回到今天"
+                )
             }
         }
+
 
     }
 }
 
+@OptIn(UnstableSaltUiApi::class)
 @Composable
 private fun EmptyState(message: String) {
-    RoundedColumn(modifier = Modifier.padding(top = 16.dp)) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+    RoundedColumn(Modifier.fillMaxWidth()) {
+        ItemInfo(
             text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+            infoType = ItemInfoType.Success
         )
     }
 }

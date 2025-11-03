@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.domain.usecase
+package com.lonx.ecjtu.calendar.domain.usecase.update
 
 import android.content.Context
 import com.lonx.ecjtu.calendar.ui.util.AppUpdateInstaller

@@ -1,6 +1,6 @@
 package com.lonx.ecjtu.calendar.ui.screen.calendar
 
-import com.lonx.ecjtu.calendar.domain.model.CalendarError
+import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import java.time.LocalDate

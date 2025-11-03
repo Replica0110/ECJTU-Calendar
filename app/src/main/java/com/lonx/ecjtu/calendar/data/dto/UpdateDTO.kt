@@ -1,27 +1,27 @@
-package com.lonx.ecjtu.calendar.data.model
+package com.lonx.ecjtu.calendar.data.dto
 
-data class UpdateInfo(
+data class UpdateDTO(
     val versionName: String,
     val downloadUrl: String,
     val releaseNotes: String
 )
 
-data class GitHubRelease(
+data class GitHubReleaseDTO(
     val tag_name: String?,
     val body: String?,
-    val assets: List<Asset>?
+    val assetDTOS: List<AssetDTO>?
 ) {
-    data class Asset(
+    data class AssetDTO(
         val browser_download_url: String?,
         val name: String?
     )
 }
 
-data class OutputMetadata(
+data class OutputMetadataDTO(
     val version: Int,
-    val elements: List<Element>
+    val elementDTOS: List<ElementDTO>
 ) {
-    data class Element(
+    data class ElementDTO(
         val versionCode: Int,
         val versionName: String
     )

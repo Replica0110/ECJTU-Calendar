@@ -7,10 +7,10 @@ import com.google.gson.JsonSyntaxException
 import com.lonx.ecjtu.calendar.BuildConfig
 import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.data.model.DownloadState
-import com.lonx.ecjtu.calendar.data.model.GitHubRelease
-import com.lonx.ecjtu.calendar.data.model.OutputMetadata
+import com.lonx.ecjtu.calendar.data.dto.GitHubReleaseDTO
+import com.lonx.ecjtu.calendar.data.dto.OutputMetadataDTO
 import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
-import com.lonx.ecjtu.calendar.data.model.UpdateInfo
+import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -18,14 +18,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import okhttp3.Request
 import rxhttp.wrapper.param.RxHttp
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.SocketTimeoutException
-import kotlin.let
 
 class UpdateDataSourceImpl: UpdateDataSource {
     private val gson = Gson()
@@ -42,15 +40,15 @@ class UpdateDataSourceImpl: UpdateDataSource {
             }
 
             val responseBody = response.body?.string()
-            val release: GitHubRelease? = try {
-                gson.fromJson(responseBody, GitHubRelease::class.java)
+            val release: GitHubReleaseDTO? = try {
+                gson.fromJson(responseBody, GitHubReleaseDTO::class.java)
             } catch (e: JsonSyntaxException) {
                 Log.e(TAG, "JSON parsing failed", e)
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            val downloadUrl = release?.assets?.firstOrNull { it.browser_download_url?.endsWith(".apk") == true }?.browser_download_url
-            val metadataUrl = release?.assets?.firstOrNull { it.browser_download_url?.endsWith(".json") == true }?.browser_download_url
+            val downloadUrl = release?.assetDTOS?.firstOrNull { it.browser_download_url?.endsWith(".apk") == true }?.browser_download_url
+            val metadataUrl = release?.assetDTOS?.firstOrNull { it.browser_download_url?.endsWith(".json") == true }?.browser_download_url
 
             val releaseNotes = release?.body?.trim()?.ifBlank { "没有提供具体的更新说明。" } ?: "没有提供具体的更新说明。"
 
@@ -66,15 +64,15 @@ class UpdateDataSourceImpl: UpdateDataSource {
                 return@withContext UpdateCheckResult.ApiError(metadataResponse.code, metadataResponse.message)
             }
 
-            val metadata: OutputMetadata = try {
-                gson.fromJson(metadataResponse.body?.string(), OutputMetadata::class.java)
+            val metadata: OutputMetadataDTO = try {
+                gson.fromJson(metadataResponse.body?.string(), OutputMetadataDTO::class.java)
             } catch (e: JsonSyntaxException) {
                 Log.e(TAG, "Metadata JSON parsing failed", e)
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            val latestVersionCode = metadata.elements.firstOrNull()?.versionCode
-            val latestVersionName = metadata.elements.firstOrNull()?.versionName
+            val latestVersionCode = metadata.elementDTOS.firstOrNull()?.versionCode
+            val latestVersionName = metadata.elementDTOS.firstOrNull()?.versionName
 
             if (latestVersionCode == null || latestVersionName == null) {
                 Log.e(TAG, "Version information is missing in metadata.")
@@ -85,7 +83,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
 
             return@withContext if (latestVersionCode > currentVersionCode) {
                 UpdateCheckResult.NewVersion(
-                    UpdateInfo(
+                    UpdateDTO(
                         latestVersionName,
                         downloadUrl,
                         releaseNotes
@@ -112,7 +110,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             }
         }
     }
-    override fun downloadUpdate(context: Context, info:UpdateInfo): Flow<DownloadState> = flow {
+    override fun downloadUpdate(context: Context, info:UpdateDTO): Flow<DownloadState> = flow {
         val appName = context.getString(R.string.app_name)
         val finalFile = File(context.cacheDir, "${appName}-${info.versionName}.apk")
         val tempFile = File(context.cacheDir, "${appName}-${info.versionName}.apk.tmp")

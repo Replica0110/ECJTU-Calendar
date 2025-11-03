@@ -1,11 +1,12 @@
 package com.lonx.ecjtu.calendar.data.model
 
+import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import java.io.File
 import java.io.IOException
 
 sealed class UpdateCheckResult {
     /** 成功：发现了新版本 */
-    data class NewVersion(val info: UpdateInfo) : UpdateCheckResult()
+    data class NewVersion(val info: UpdateDTO) : UpdateCheckResult()
 
     /** 成功：当前已是最新版本 */
     object NoUpdateAvailable : UpdateCheckResult()

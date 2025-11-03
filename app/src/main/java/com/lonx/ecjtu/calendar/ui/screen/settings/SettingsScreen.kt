@@ -1,6 +1,5 @@
 package com.lonx.ecjtu.calendar.ui.screen.settings
 
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -16,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.BuildConfig
@@ -34,7 +32,6 @@ import com.lonx.ecjtu.calendar.ui.widget.CourseGlanceWidget
 import com.lonx.ecjtu.calendar.ui.widget.CourseUiState
 import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetReceiver
 import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetState
-import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemArrowType
 import com.moriafly.salt.ui.ItemSwitcher
@@ -43,14 +40,11 @@ import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltUiApi
-import com.moriafly.salt.ui.dialog.BasicDialog
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, UnstableSaltUiApi::class)
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit,
     onNavigateToAcademicCalendar: () -> Unit
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
@@ -149,9 +143,9 @@ fun SettingsScreen(
             .background(color = SaltTheme.colors.background)
     ) {
         TitleBar(
-            onBack = onNavigateBack,
+            onBack = { },
             text = "设置",
-            showBackBtn = true
+            showBackBtn = false
         )
 
         Box {

@@ -1,5 +1,4 @@
-package com.lonx.ecjtu.calendar.domain.usecase
-
+package com.lonx.ecjtu.calendar.domain.usecase.settings
 
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
 import kotlinx.coroutines.flow.Flow

@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.domain.usecase
+package com.lonx.ecjtu.calendar.domain.usecase.cache
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class GetCacheSizeUseCase {
-
     /**
      * Calculates the size of the application's cache directory and returns it as a formatted string.
      * @param context The application context.
@@ -23,11 +22,10 @@ class GetCacheSizeUseCase {
             if (totalBytes == 0L) {
                 "0.00 MB"
             } else {
-                val sizeInMB = totalBytes / (1024.0 * 1024.0)
-                String.format("%.2f MB", sizeInMB)
+                val mb = totalBytes.toDouble() / (1024 * 1024)
+                String.format("%.2f MB", mb)
             }
         } catch (e: Exception) {
-            // Log the exception in a real app
             "计算失败"
         }
     }

@@ -2,9 +2,9 @@ import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.calendar.domain.usecase.CleanUpApksUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.GetUpdateSettingUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.SaveUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.cache.CleanUpApksUseCase
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

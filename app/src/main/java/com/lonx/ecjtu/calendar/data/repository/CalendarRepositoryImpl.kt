@@ -3,10 +3,11 @@ package com.lonx.ecjtu.calendar.data.repository
 import android.util.Log
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSource
+import com.lonx.ecjtu.calendar.data.mapper.ScheduleMapper
 import com.lonx.ecjtu.calendar.data.model.CourseItem
 import com.lonx.ecjtu.calendar.data.model.Schedule
-import com.lonx.ecjtu.calendar.data.network.HtmlParser
-import com.lonx.ecjtu.calendar.domain.model.CalendarError
+import com.lonx.ecjtu.calendar.data.parser.HtmlParser
+import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
@@ -50,10 +51,10 @@ class CalendarRepositoryImpl(
                 return Result.failure(CalendarError.WeiXinIdInvalid())
             }
 
-            val schedulePageDTO = htmlParser.parseSchedulePage(htmlContent)
+            val scheduleDto = htmlParser.parseSchedulePage(htmlContent)
 
             // 将 DTO 映射为 Domain Model
-            val schedulePage = schedulePageDTO.toDomainModel()
+            val schedulePage = ScheduleMapper.toDomain( scheduleDto)
 
             Result.success(schedulePage)
         } catch (e: Exception) {
@@ -84,27 +85,4 @@ class CalendarRepositoryImpl(
     override suspend fun saveAutoUpdateCheckSetting(enabled: Boolean) {
         localDataSource.setAutoUpdateCheckEnabled(enabled)
     }
-}
-
-private fun Schedule.toDomainModel(): SchedulePage {
-    return SchedulePage(
-        // 将 Triple 转换为 DateInfo 对象
-        dateInfo = DateInfo(
-            date = this.dateInfo.first,
-            weekNumber = this.dateInfo.second,
-            dayOfWeek = this.dateInfo.third
-        ),
-        courses = this.courses.map { it.toDomainModel() }
-    )
-}
-
-private fun CourseItem.toDomainModel(): Course {
-    return Course(
-        time = this.time,
-        name = this.name,
-        location = this.location,
-        teacher = this.teacher,
-        duration = this.courseWeek,
-        dayOfWeek = this.dayOfWeek
-    )
 }

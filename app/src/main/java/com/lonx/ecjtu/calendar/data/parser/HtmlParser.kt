@@ -1,16 +1,13 @@
-package com.lonx.ecjtu.calendar.data.network
+package com.lonx.ecjtu.calendar.data.parser
 
 import android.util.Log
-import androidx.compose.runtime.remember
-import com.lonx.ecjtu.calendar.data.model.CourseItem
-import com.lonx.ecjtu.calendar.data.model.Schedule
+import com.lonx.ecjtu.calendar.data.dto.CourseItemDTO
+import com.lonx.ecjtu.calendar.data.dto.ScheduleDTO
 import org.jsoup.Jsoup
 import java.time.LocalDate
 
-
 class HtmlParser {
-
-    fun parseSchedulePage(htmlContent: String): Schedule {
+    fun parseSchedulePage(htmlContent: String): ScheduleDTO {
         val document = Jsoup.parse(htmlContent)
 
         val title = document.select("title").first()?.text() ?: "未知标题"
@@ -24,7 +21,7 @@ class HtmlParser {
 
         val dayOfWeek =dateInfo.split(" ")[1]
 
-        val courseList = mutableListOf<CourseItem>()
+        val courseList = mutableListOf<CourseItemDTO>()
 
         val listItems = document.select("ul.rl_info li:not(:has(img))")
 
@@ -59,7 +56,7 @@ class HtmlParser {
                 val parts = timeLine.split(" ")
                 val courseTime = parts.getOrNull(1) ?: ""
                 val courseWeek = parts.getOrNull(0) ?: ""
-                val course = CourseItem(
+                val course = CourseItemDTO(
                     time = courseTime,
                     name = courseName,
                     courseWeek = courseWeek,
@@ -73,10 +70,13 @@ class HtmlParser {
                 continue
             }
         }
-
-        return Schedule(dateInfo = Triple(date, weekDay, weekNum), courses = courseList, title = title)
+        return ScheduleDTO(
+            title = title,
+            dateInfo = Triple(date, weekDay, weekNum),
+            courses = courseList
+        )
     }
-    
+
     /**
      * 解析校历网页，获取图片链接
      */

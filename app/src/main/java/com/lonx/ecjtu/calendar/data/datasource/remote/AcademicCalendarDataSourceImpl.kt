@@ -2,12 +2,12 @@ package com.lonx.ecjtu.calendar.data.datasource.remote
 
 import android.util.Log
 import com.lonx.ecjtu.calendar.domain.repository.AcademicCalendar
-import com.lonx.ecjtu.calendar.data.network.HtmlParser
+import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import rxhttp.toAwait
 import rxhttp.wrapper.param.RxHttp
 import java.net.URL
 
-class AcademicCalendarRemoteDataSource(private val htmlParser: HtmlParser) : AcademicCalendar {
+class AcademicCalendarDataSourceImpl(private val htmlParser: HtmlParser) : AcademicCalendarDataSource {
     private val calendarUrl = "https://jwxt.ecjtu.edu.cn/weixin/xiaoli.html"
     
     override suspend fun getAcademicCalendar(): Result<String> {

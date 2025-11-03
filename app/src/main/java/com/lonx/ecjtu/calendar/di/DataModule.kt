@@ -2,12 +2,13 @@ package com.lonx.ecjtu.calendar.di
 
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSourceImpl
-import com.lonx.ecjtu.calendar.data.datasource.remote.AcademicCalendarRemoteDataSource
+import com.lonx.ecjtu.calendar.data.datasource.remote.AcademicCalendarDataSource
+import com.lonx.ecjtu.calendar.data.datasource.remote.AcademicCalendarDataSourceImpl
 import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.CourseDataSourceImpl
 import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSourceImpl
-import com.lonx.ecjtu.calendar.data.network.HtmlParser
+import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.data.repository.CalendarRepositoryImpl
 import com.lonx.ecjtu.calendar.data.repository.UpdateRepositoryImpl
 import com.lonx.ecjtu.calendar.domain.repository.AcademicCalendar
@@ -23,9 +24,9 @@ val dataModule = module {
         CourseDataSourceImpl()
     }
 
-    // 提供 AcademicCalendarRemoteDataSource 的单例
-    single<AcademicCalendar> {
-        AcademicCalendarRemoteDataSource(htmlParser = get())
+    // 提供 AcademicCalendarDataSource 的单例
+    single<AcademicCalendarDataSource> {
+        AcademicCalendarDataSourceImpl(htmlParser = get())
     }
 
     // 提供 LocalDataSource 的单例，它需要 Android Context

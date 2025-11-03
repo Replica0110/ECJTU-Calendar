@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.domain.usecase
+package com.lonx.ecjtu.calendar.domain.usecase.cache
 
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class ClearCacheUseCase {
-
     /**
      * Clears the application's cache directory.
      * @param context The application context.

@@ -11,23 +11,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lonx.ecjtu.calendar.domain.model.Score
 import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
-import com.moriafly.salt.ui.Button
-import com.moriafly.salt.ui.Item
-import com.moriafly.salt.ui.ItemArrowType
 import com.moriafly.salt.ui.ItemDropdown
 import com.moriafly.salt.ui.ItemInfo
 import com.moriafly.salt.ui.ItemInfoType
+import com.moriafly.salt.ui.ItemOuterTextButton
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltUiApi
-import com.moriafly.salt.ui.popup.PopupState
-import com.moriafly.salt.ui.popup.rememberPopupState
+import com.moriafly.salt.ui.popup.PopupMenuItem
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, UnstableSaltUiApi::class)
@@ -36,7 +32,6 @@ fun ScoreScreen(
     viewModel: ScoreViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val popupState = rememberPopupState(false)
     // 只有当没有数据时才加载，避免重复请求
     LaunchedEffect(uiState.scores) {
         if (uiState.scores.isEmpty() && uiState.error == null && !uiState.isLoading) {
@@ -59,14 +54,20 @@ fun ScoreScreen(
                 ScoreContent(
                     uiState = uiState,
                     onTermSelected = { newTerm ->
-                        viewModel.onTermSelected(newTerm)
-                        popupState.dismiss()
-                    },
-                    popupState = popupState
+                        if (uiState.currentTerm != newTerm){
+                            viewModel.onTermSelected(newTerm)
+                        }
+                    }
                 )
 
                 if (uiState.isLoading) {
-                    CircularProgressIndicator()
+                    RoundedColumn {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            color = SaltTheme.colors.highlight,
+                            trackColor = SaltTheme.colors.subBackground
+                        )
+                    }
                 }
 
                 uiState.error?.let { errorMessage ->
@@ -75,7 +76,7 @@ fun ScoreScreen(
                             text = errorMessage,
                             infoType = ItemInfoType.Error
                         )
-                        Button(text = "重试", onClick = { viewModel.loadScores() })
+                        ItemOuterTextButton(text = "重试", onClick = { viewModel.loadScores() })
                     }
                 }
             }
@@ -88,20 +89,18 @@ fun ScoreScreen(
 @Composable
 private fun ScoreContent(
     uiState: ScoreScreenState,
-    onTermSelected: (String) -> Unit,
-    popupState: PopupState = rememberPopupState()
+    onTermSelected: (String) -> Unit
 ) {
     if (!uiState.isLoading && uiState.error == null) {
         RoundedColumn {
             if (uiState.availableTerms.isNotEmpty()) {
 
                 ItemDropdown(
-                    state = popupState,
                     text = "选择学期",
                     value = uiState.currentTerm
                 ) {
                     for (term in uiState.availableTerms) {
-                        Item(text = term, onClick = { onTermSelected(term) }, arrowType = ItemArrowType.None)
+                        PopupMenuItem(text = term, selected = term == uiState.currentTerm, onClick = { onTermSelected(term) })
                     }
                 }
             }
@@ -150,7 +149,7 @@ private fun ScoreItem(score: Score, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ScoreTag(text = "学分:${score.credit}")
+                    ScoreTag(text = "学分: ${score.credit}")
                     ScoreTag(text = score.courseType)
                 }
 

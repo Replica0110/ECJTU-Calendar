@@ -1,10 +1,17 @@
 package com.lonx.ecjtu.calendar
 
 import MainViewModel
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -113,27 +121,60 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) { innerPadding ->
+                        val navBackStackEntry by navController.currentBackStackEntryAsState()
+                        val currentRoute = navBackStackEntry?.destination?.route
+                        val context = LocalContext.current
+
+                        // 定义哪些页面是顶层页面，但不是起始页面
+                        val topLevelRoutes = listOf(Screen.MyScore.route, Screen.Settings.route)
+
+                        // 当我们在非起始的顶层页面时，拦截返回事件
+                        BackHandler(enabled = currentRoute in topLevelRoutes) {
+                            // 执行退出应用的操作，而不是返回上一页
+                            (context as? Activity)?.finish()
+                        }
                         NavHost(
                             navController = navController,
                             startDestination = Screen.Calendar.route,
-                            modifier = Modifier.padding(innerPadding),
-                            enterTransition = { NavigationAnimationTransitions.enterTransition },
-                            exitTransition = { NavigationAnimationTransitions.exitTransition },
-                            popEnterTransition = { NavigationAnimationTransitions.popEnterTransition },
-                            popExitTransition = { NavigationAnimationTransitions.popExitTransition },
+                            modifier = Modifier.padding(innerPadding)
                         ) {
-                            composable(route = Screen.Calendar.route) {
+                            // 课表页
+                            composable(
+                                route = Screen.Calendar.route,
+                                enterTransition = { enterTransition(bottomBarScreens) },
+                                exitTransition = { exitTransition(bottomBarScreens) }
+                            ) {
                                 CalendarScreen()
                             }
-                            composable(route = Screen.Settings.route) {
+
+                            // 设置页
+                            composable(
+                                route = Screen.Settings.route,
+                                enterTransition = { enterTransition(bottomBarScreens) },
+                                exitTransition = { exitTransition(bottomBarScreens) }
+                            ) {
                                 SettingsScreen(
                                     onNavigateToAcademicCalendar = { navController.navigate(Screen.AcademicCalendar.route) }
                                 )
                             }
-                            composable(route = Screen.MyScore.route) {
+
+                            // 我的成绩页
+                            composable(
+                                route = Screen.MyScore.route,
+                                enterTransition = { enterTransition(bottomBarScreens) },
+                                exitTransition = { exitTransition(bottomBarScreens) }
+                            ) {
                                 ScoreScreen()
                             }
-                            composable(route = Screen.AcademicCalendar.route) {
+
+                            // 非底部导航栏页面，可以继续使用默认或全局动画
+                            composable(
+                                route = Screen.AcademicCalendar.route,
+                                enterTransition = { NavigationAnimationTransitions.enterTransition },
+                                exitTransition = { NavigationAnimationTransitions.exitTransition },
+                                popEnterTransition = { NavigationAnimationTransitions.popEnterTransition },
+                                popExitTransition = { NavigationAnimationTransitions.popExitTransition }
+                            ) {
                                 AcademicCalendarScreen(onNavigateBack = { navController.popBackStack() })
                             }
                         }
@@ -157,5 +198,53 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         mainViewModel.handleIntent(intent)
+    }
+}
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.enterTransition(
+    screens: List<Screen>
+): EnterTransition? {
+    val initialRoute = initialState.destination.route ?: return null
+    val targetRoute = targetState.destination.route ?: return null
+
+    // 只处理底部导航栏页面之间的切换
+    val initialIndex = screens.indexOfFirst { it.route == initialRoute }
+    val targetIndex = screens.indexOfFirst { it.route == targetRoute }
+
+    if (initialIndex == -1 || targetIndex == -1) {
+        // 如果有一个页面不是底部导航栏页面，使用默认动画
+        return slideInHorizontally(initialOffsetX = { it })
+    }
+
+    // 根据索引判断方向
+    return if (targetIndex > initialIndex) {
+        // 目标在右边，从右边滑入
+        slideInHorizontally(initialOffsetX = { it })
+    } else {
+        // 目标在左边，从左边滑入
+        slideInHorizontally(initialOffsetX = { -it })
+    }
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.exitTransition(
+    screens: List<Screen>
+): ExitTransition? {
+    val initialRoute = initialState.destination.route ?: return null
+    val targetRoute = targetState.destination.route ?: return null
+
+    // 只处理底部导航栏页面之间的切换
+    val initialIndex = screens.indexOfFirst { it.route == initialRoute }
+    val targetIndex = screens.indexOfFirst { it.route == targetRoute }
+
+    if (initialIndex == -1 || targetIndex == -1) {
+        return slideOutHorizontally(targetOffsetX = { -it })
+    }
+
+    // 根据索引判断方向
+    return if (targetIndex > initialIndex) {
+        // 目标在右边，向左边滑出
+        slideOutHorizontally(targetOffsetX = { -it })
+    } else {
+        // 目标在左边，向右边滑出
+        slideOutHorizontally(targetOffsetX = { it })
     }
 }

@@ -3,6 +3,8 @@ package com.lonx.ecjtu.calendar.data.parser
 import android.util.Log
 import com.lonx.ecjtu.calendar.data.dto.CourseItemDTO
 import com.lonx.ecjtu.calendar.data.dto.ScheduleDTO
+import com.lonx.ecjtu.calendar.data.dto.ScoreDTO
+import com.lonx.ecjtu.calendar.data.dto.ScorePageData
 import org.jsoup.Jsoup
 import java.time.LocalDate
 
@@ -89,6 +91,76 @@ class HtmlParser {
             src
         } catch (e: Exception) {
             Log.e("HtmlParser", "解析校历图片链接失败", e)
+            null
+        }
+    }
+
+    fun parseScorePage(htmlContent: String): ScorePageData? {
+        return try {
+            val document = Jsoup.parse(htmlContent)
+
+            val noScoreElement = document.select("a.btn-info:contains(对不起,该学期你暂无成绩！)")
+            if (noScoreElement.isNotEmpty()) {
+                return ScorePageData(
+                    scores = emptyList(),
+                    availableTerms = emptyList(),
+                    currentTerm = "",
+                    error = "对不起,该学期你暂无成绩！"
+                )
+            }
+
+            val termElements = document.select("ul.dropdown-menu li a")
+            val availableTerms = termElements.map { it.text().trim() }
+
+            val currentTerm = document.select("div.right span").last()?.text()?.trim() ?: ""
+
+            // 3. Parse the list of scores
+            val scoreList = mutableListOf<ScoreDTO>()
+            val scoreRows = document.select("div.row")
+
+            for (row in scoreRows) {
+                try {
+                    val courseFullName = row.select("span.course").first()?.text() ?: continue
+                    val gradeDiv = row.select("div.grade").first()
+                    val scores = gradeDiv?.select("span.score")?.map { it.text() } ?: listOf("", "", "")
+                    val finalScore = scores.getOrElse(0) { "" }
+                    val retakeScore = scores.getOrElse(1) { "" }
+                    val relearnScore = scores.getOrElse(2) { "" }
+                    val courseType = row.select("span.require mark").first()?.text() ?: ""
+                    val courseCodeRegex = Regex("【(\\d+)】")
+                    val courseNameRegex = Regex("】[^】]*】(.+?)(?:（|\\(|$)")
+                    val creditRegex = Regex("学分:([\\d.]+)")
+                    val courseCode = courseCodeRegex.find(courseFullName)?.groupValues?.get(1) ?: ""
+                    val courseName = courseNameRegex.find(courseFullName)?.groupValues?.get(1)?.trim() ?: ""
+                    val credit = creditRegex.find(courseFullName)?.groupValues?.get(1)?.toDoubleOrNull() ?: 0.0
+
+                    Log.d("HtmlParser", "Course Code: $courseCode")
+                    Log.d("HtmlParser", "Course Name: $courseName")
+                    Log.d("HtmlParser", "Credit: $credit")
+                    scoreList.add(
+                        ScoreDTO(
+                            courseName = courseName,
+                            courseCode = courseCode,
+                            credit = credit,
+                            finalScore = finalScore,
+                            retakeScore = retakeScore,
+                            relearnScore = relearnScore,
+                            courseType = courseType
+                        )
+                    )
+                } catch (e: Exception) {
+                    Log.w("HtmlParser", "Failed to parse a single score item.", e)
+                    continue
+                }
+            }
+
+            ScorePageData(
+                scores = scoreList,
+                availableTerms = availableTerms,
+                currentTerm = currentTerm
+            )
+        } catch (e: Exception) {
+            Log.e("HtmlParser", "Failed to parse score page HTML.", e)
             null
         }
     }

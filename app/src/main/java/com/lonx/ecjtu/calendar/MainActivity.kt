@@ -26,6 +26,7 @@ import com.lonx.ecjtu.calendar.ui.animations.NavigationAnimationTransitions
 import com.lonx.ecjtu.calendar.ui.component.UpdateDialog
 import com.lonx.ecjtu.calendar.ui.screen.academiccalendar.AcademicCalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
+import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
 import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.util.UpdateManager
@@ -77,7 +78,7 @@ class MainActivity : ComponentActivity() {
 
                 val navController = rememberNavController()
                 // 定义顶层页面，用于判断是否显示底部导航栏
-                val bottomBarScreens = listOf(Screen.Calendar, Screen.Settings)
+                val bottomBarScreens = listOf(Screen.Calendar,Screen.MyScore, Screen.Settings)
 
                 CompositionLocalProvider(LocalNavController provides navController) {
                     Scaffold(
@@ -128,6 +129,9 @@ class MainActivity : ComponentActivity() {
                                 SettingsScreen(
                                     onNavigateToAcademicCalendar = { navController.navigate(Screen.AcademicCalendar.route) }
                                 )
+                            }
+                            composable(route = Screen.MyScore.route) {
+                                ScoreScreen()
                             }
                             composable(route = Screen.AcademicCalendar.route) {
                                 AcademicCalendarScreen(onNavigateBack = { navController.popBackStack() })

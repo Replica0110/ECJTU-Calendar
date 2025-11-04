@@ -3,7 +3,7 @@ package com.lonx.ecjtu.calendar.data.repository
 import android.util.Log
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSource
-import com.lonx.ecjtu.calendar.data.mapper.ScheduleMapper
+import com.lonx.ecjtu.calendar.data.mapper.toDomain
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
@@ -62,7 +62,7 @@ class CalendarRepositoryImpl(
             val scheduleDto = htmlParser.parseSchedulePage(htmlContent)
 
             // 将 DTO 映射为 Domain Model
-            val schedulePage = ScheduleMapper.toDomain( scheduleDto)
+            val schedulePage = scheduleDto.toDomain()
 
             Result.success(schedulePage)
         } catch (e: Exception) {

@@ -27,7 +27,7 @@ import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
 import com.lonx.ecjtu.calendar.ui.component.InputDialog
 import com.lonx.ecjtu.calendar.ui.component.YesNoDialog
-import com.lonx.ecjtu.calendar.ui.viewmodels.SettingsViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
 import com.lonx.ecjtu.calendar.ui.widget.CourseGlanceWidget
 import com.lonx.ecjtu.calendar.ui.widget.CourseUiState
 import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetReceiver

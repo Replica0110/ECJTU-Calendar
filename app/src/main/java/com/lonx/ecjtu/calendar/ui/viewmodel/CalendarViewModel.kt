@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.viewmodels
+package com.lonx.ecjtu.calendar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

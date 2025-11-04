@@ -1,10 +1,11 @@
 package com.lonx.ecjtu.calendar.di
 
 import MainViewModel
-import com.lonx.ecjtu.calendar.ui.viewmodels.CalendarViewModel
-import com.lonx.ecjtu.calendar.ui.viewmodels.SettingsViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
 import com.lonx.ecjtu.calendar.ui.util.AppUpdateInstaller
 import com.lonx.ecjtu.calendar.ui.util.AppUpdateInstallerImpl
+import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.lonx.ecjtu.calendar.util.UpdateManagerImpl
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +42,12 @@ val appModule = module {
     viewModel {
         CalendarViewModel(
             getCoursesUseCase = get()
+        )
+    }
+    viewModel {
+        ScoreViewModel(
+            getScoreUseCase = get(),
+            getUserConfigUseCase = get()
         )
     }
     single<AppUpdateInstaller> {

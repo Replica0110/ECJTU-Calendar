@@ -2,7 +2,6 @@ package com.lonx.ecjtu.calendar.ui.screen.calendar
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,12 +32,10 @@ import com.lonx.ecjtu.calendar.ui.component.CourseDetailBottomSheet
 import com.lonx.ecjtu.calendar.ui.component.CustomDatePickerDialog
 import java.time.LocalDate
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.lonx.ecjtu.calendar.domain.error.CalendarError
-import com.lonx.ecjtu.calendar.ui.viewmodels.CalendarViewModel
-import com.moriafly.salt.ui.Button
+import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
 import com.moriafly.salt.ui.ItemButton
 import com.moriafly.salt.ui.ItemInfo
 import com.moriafly.salt.ui.ItemInfoType

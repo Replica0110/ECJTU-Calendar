@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.viewmodels
+package com.lonx.ecjtu.calendar.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application

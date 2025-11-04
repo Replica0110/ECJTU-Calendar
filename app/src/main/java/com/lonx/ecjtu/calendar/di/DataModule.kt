@@ -8,8 +8,10 @@ import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSourceImpl
 import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.data.repository.CalendarRepositoryImpl
+import com.lonx.ecjtu.calendar.data.repository.ScoreRepositoryImpl
 import com.lonx.ecjtu.calendar.data.repository.UpdateRepositoryImpl
 import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
+import com.lonx.ecjtu.calendar.domain.repository.ScoreRepository
 import com.lonx.ecjtu.calendar.domain.repository.UpdateRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -42,6 +44,12 @@ val dataModule = module {
             jwxtDataSource = get(),
             localDataSource = get(),
             htmlParser = get()
+        )
+    }
+    single<ScoreRepository> {
+        ScoreRepositoryImpl(
+            jwxtDataSource = get(),
+            parser = get()
         )
     }
 

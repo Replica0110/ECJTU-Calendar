@@ -71,7 +71,7 @@ fun ScoreScreen(
                     )
                 }
 
-                uiState.scores.forEach { it ->
+                uiState.scores.forEach {
                     ScoreItem(score = it)
                     Spacer(modifier = Modifier.height(12.dp))
                 }

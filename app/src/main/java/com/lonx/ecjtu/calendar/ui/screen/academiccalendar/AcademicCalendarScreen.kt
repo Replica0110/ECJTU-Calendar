@@ -10,14 +10,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lonx.ecjtu.calendar.data.network.Constants
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
+import com.lonx.ecjtu.calendar.ui.component.MessageCard
+import com.lonx.ecjtu.calendar.ui.component.MessageType
+import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarEvent
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -37,6 +42,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperDialog
@@ -44,6 +50,9 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.icons.useful.Save
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.utils.getWindowSize
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import java.io.IOException
 import java.net.URL
 
@@ -61,6 +70,7 @@ fun AcademicCalendarScreen(
     var error by remember { mutableStateOf<String?>(null) }
     val scrollBehavior = MiuixScrollBehavior()
     val showSaveDialog = remember { mutableStateOf(false) }
+    val windowSize = getWindowSize()
     LaunchedEffect(Unit) {
         getAcademicCalendarUseCase(url = Constants.ACADEMIC_CALENDAR_URL).fold(
             onSuccess = { url ->
@@ -80,7 +90,7 @@ fun AcademicCalendarScreen(
         modifier = Modifier.padding(bottom = 16.dp),
         show = showSaveDialog,
         title = "保存到相册",
-        onDismissRequest =  {
+        onDismissRequest = {
             showSaveDialog.value = false
         }
     ) {
@@ -110,7 +120,7 @@ fun AcademicCalendarScreen(
             )
         }
     }
-    Scaffold (
+    Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
@@ -135,7 +145,7 @@ fun AcademicCalendarScreen(
             )
         },
         floatingActionButton = {
-            if (imageUrl != null){
+            if (imageUrl != null) {
                 FloatingActionButton(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
@@ -150,22 +160,37 @@ fun AcademicCalendarScreen(
                 }
             }
         }
-    ) {
-        Column {
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .padding(contentPadding)
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .height(windowSize.height.dp)
+        ) {
             when {
                 loading -> {
-                    Box(modifier = Modifier.fillMaxSize()){
+                    Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator()
                     }
                 }
 
                 error != null -> {
-                    Text(
-                        text = "加载失败: $error",
-                        textAlign = TextAlign.Center,
+                    Box(
                         modifier = Modifier
-                            .padding(16.dp)
-                    )
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        MessageCard(
+                            message = error.orEmpty(),
+                            type = MessageType.Info,
+                            onClick = {
+
+                            }
+                        )
+                    }
                 }
 
                 imageUrl != null -> {
@@ -206,7 +231,10 @@ private fun downloadImage(context: Context, imageUrl: String, scope: CoroutineSc
                         put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures")
                     }
 
-                    val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                    val uri = context.contentResolver.insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        values
+                    )
                     uri?.let {
                         context.contentResolver.openOutputStream(it).use { outputStream ->
                             inputStream.copyTo(outputStream!!)
@@ -217,7 +245,11 @@ private fun downloadImage(context: Context, imageUrl: String, scope: CoroutineSc
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "请在设置中授予存储权限以保存图片", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            "请在设置中授予存储权限以保存图片",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
                 inputStream.close()

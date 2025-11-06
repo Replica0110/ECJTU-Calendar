@@ -1,6 +1,5 @@
 package com.lonx.ecjtu.calendar.ui.screen.calendar
 
-import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import java.time.LocalDate
@@ -11,7 +10,7 @@ data class CalendarUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val dateInfo: DateInfo = DateInfo("", "", ""),
     val courses: List<Course> = emptyList(),
-    val error: CalendarError? = null
+    val error: String? = null
 )
 
 sealed interface CalendarEvent {

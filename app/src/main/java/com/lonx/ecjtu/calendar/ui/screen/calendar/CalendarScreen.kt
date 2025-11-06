@@ -1,193 +1,178 @@
 package com.lonx.ecjtu.calendar.ui.screen.calendar
 
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import com.lonx.ecjtu.calendar.domain.model.Course
-import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.lonx.ecjtu.calendar.ui.component.CourseCard
-import com.lonx.ecjtu.calendar.ui.component.DateHeaderCard
 import org.koin.androidx.compose.koinViewModel
-import com.lonx.ecjtu.calendar.R
-import com.lonx.ecjtu.calendar.ui.component.CourseDetailBottomSheet
 import com.lonx.ecjtu.calendar.ui.component.CustomDatePickerDialog
 import java.time.LocalDate
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.lonx.ecjtu.calendar.domain.error.CalendarError
+import com.lonx.ecjtu.calendar.ui.component.CourseCard
+import com.lonx.ecjtu.calendar.ui.component.DateHeaderCard
+import com.lonx.ecjtu.calendar.ui.component.MessageCard
+import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
 import com.moriafly.salt.ui.ItemButton
 import com.moriafly.salt.ui.ItemInfo
 import com.moriafly.salt.ui.ItemInfoType
 import com.moriafly.salt.ui.RoundedColumn
-import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.utils.getWindowSize
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen() {
+@Destination<RootGraph>(label = "日历")
+fun CalendarScreen(
+    topAppBarScrollBehavior: ScrollBehavior
+) {
     val viewModel: CalendarViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val isViewingToday = uiState.selectedDate == LocalDate.now()
 
+    val showBottomSheet = remember { mutableStateOf(false) }
+    val windowSize = getWindowSize()
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedCourse: Course? by remember { mutableStateOf(null) }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = SaltTheme.colors.background)
+            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
     ) {
-
-        Box(
+        DateHeaderCard(
+            modifier = Modifier.padding(top = 12.dp),
+            dateInfo = uiState.dateInfo,
+            onClick = {
+                showDatePicker = true
+            },
+            onLongClick = {
+                viewModel.onEvent(CalendarEvent.OnDateChange(LocalDate.now()))
+            }
+        )
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .height(windowSize.height.dp)
+                .weight(1f),
+            overscrollEffect = null
         ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .padding(horizontal = 56.dp),
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-            Row(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // "回到今天" 按钮
-                if (!isViewingToday) {
-                    IconButton(
+            if (uiState.courses.isNotEmpty()) {
+                items(uiState.courses.size) { index ->
+                    val course = uiState.courses[index]
+
+                    CourseCard(
+                        course = course,
                         onClick = {
-                            Toast.makeText(context, "已返回今天", Toast.LENGTH_SHORT).show()
-                            viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
+                            selectedCourse = course
+                            showBottomSheet.value = true
                         }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
+            if (uiState.courses.isEmpty() && uiState.error == null && !uiState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillParentMaxWidth()
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "回到今天")
-                    }
-                }
-
-                // "选择日期" 按钮，功能和DateHeaderCard重复了，移除
-//                IconButton(
-//                    onClick = {
-//                        showDatePicker = true
-//                    }
-//                ) {
-//                    Icon(painterResource(R.drawable.ic_date_24dp), contentDescription = "选择日期")
-//                }
-
-                // "设置" 按钮
-//                IconButton(onClick = onNavigateToSettings) {
-//                    Icon(painterResource(R.drawable.ic_settings_24dp), contentDescription = "设置")
-//                }
-            }
-        }
-        PullToRefreshBox(
-            isRefreshing = uiState.isLoading,
-            onRefresh = { viewModel.onEvent(CalendarEvent.Refresh) },
-            modifier = Modifier
-                .fillMaxSize()
-                .background(SaltTheme.colors.background)
-        )
-        {
-            // 当内容为空或者有错误时，显示居中的状态信息
-            if (uiState.error != null) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        val haptic = LocalHapticFeedback.current
-                        DateHeaderCard(
-                            dateInfo = uiState.dateInfo,
-                            onClick = { showDatePicker = true },
-                            onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                Toast.makeText(context, "已返回当天", Toast.LENGTH_SHORT).show()
-                                viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
-                            }
-                        )
-                        ErrorState(
-                            error = uiState.error!!,
-                            onRetry = { viewModel.onEvent(CalendarEvent.Refresh) },
-                            onBackToday = {
-                                Toast.makeText(context, "已返回当天", Toast.LENGTH_SHORT).show()
-                                viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
-                            }
-                        )
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        val haptic = LocalHapticFeedback.current
-                        DateHeaderCard(
-                            dateInfo = uiState.dateInfo,
-                            onClick = { showDatePicker = true },
-                            onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                Toast.makeText(context, "已返回当天", Toast.LENGTH_SHORT).show()
-                                viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
-                            }
-                        )
-                    }
-
-                    if (uiState.courses.isEmpty() && !uiState.isLoading) {
-                        item { EmptyState(message = "今天没有课程安排哦！") }
-                    } else {
-                        items(uiState.courses) { course ->
-                            CourseCard(
-                                course = course,
-                                modifier = Modifier.padding(horizontal = 12.dp),
-                                onClick = {
-                                    selectedCourse = course
+                        MessageCard(
+                            message = "今天没有课啦~",
+                            type = MessageType.Info,
+                            onClick = {
+                                if (!isViewingToday) {
+                                    viewModel.onEvent(CalendarEvent.GoToTodayAndRefresh)
                                 }
-                            )
-                        }
+                            }
+                        )
+                    }
+                }
+            }
+            item {
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                uiState.error?.let { errorMessage ->
+                    Box(
+                        modifier = Modifier
+                            .fillParentMaxWidth()
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        MessageCard(
+                            message = errorMessage,
+                            type = MessageType.Warning,
+                            onClick = {
+                                viewModel.onEvent(CalendarEvent.Refresh)
+                            }
+                        )
                     }
                 }
             }
         }
+
     }
-    // 显示课程详情底部表
-    selectedCourse?.let { course ->
-        CourseDetailBottomSheet(
-            course = course,
-            onDismiss = { selectedCourse = null }
-        )
-    }
+    SuperBottomSheet(
+        onDismissRequest = {
+            showBottomSheet.value = false
+        },
+        show = showBottomSheet,
+        title = selectedCourse?.name,
+        content = {
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BasicComponent(
+                    title = "教师",
+                    summary = selectedCourse?.teacher
+                )
+                BasicComponent(
+                    title = "地点",
+                    summary = selectedCourse?.location
+                )
+                BasicComponent(
+                    title = "节次",
+                    summary = selectedCourse?.time
+                )
+                BasicComponent(
+                    title = "上课周",
+                    summary = selectedCourse?.duration
+                )
+            }
+        }
+    )
+
+
 
     if (showDatePicker) {
         CustomDatePickerDialog(

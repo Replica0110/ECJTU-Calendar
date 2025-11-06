@@ -26,9 +26,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -45,6 +42,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +58,9 @@ import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.noRippleClickable
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -188,7 +189,7 @@ private fun CalendarView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { onMonthChange(displayedMonth.minusMonths(1)) }) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "上个月")
+                Icon(MiuixIcons.Basic.ArrowRight, modifier = Modifier.rotate(180f), contentDescription = "上个月")
             }
             Text(
                 text = "${displayedMonth.year}年${displayedMonth.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}",
@@ -197,7 +198,7 @@ private fun CalendarView(
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = { onMonthChange(displayedMonth.plusMonths(1)) }) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "下一个月")
+                Icon(MiuixIcons.Basic.ArrowRight, contentDescription = "下一个月")
             }
         }
         Spacer(modifier = Modifier.height(8.dp))

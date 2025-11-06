@@ -6,24 +6,23 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lonx.ecjtu.calendar.data.network.Constants
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
-import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.TitleBar
+import com.lonx.ecjtu.calendar.ui.screen.setting.SettingsEvent
 import com.moriafly.salt.ui.UnstableSaltUiApi
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,13 +31,28 @@ import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import org.koin.compose.koinInject
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.icons.useful.Save
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import java.io.IOException
 import java.net.URL
 
 @OptIn(UnstableSaltUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
+@Destination<RootGraph>()
 fun AcademicCalendarScreen(
-    onNavigateBack: () -> Unit
+    navigator: DestinationsNavigator
 ) {
     val getAcademicCalendarUseCase: GetAcademicCalendarUseCase = koinInject()
     val context = LocalContext.current
@@ -46,9 +60,8 @@ fun AcademicCalendarScreen(
     var imageUrl by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
-
-    val haptics = LocalHapticFeedback.current
-
+    val scrollBehavior = MiuixScrollBehavior()
+    val showSaveDialog = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         getAcademicCalendarUseCase(url = Constants.ACADEMIC_CALENDAR_URL).fold(
             onSuccess = { url ->
@@ -64,23 +77,87 @@ fun AcademicCalendarScreen(
             }
         )
     }
-
-    Box(
+    SuperDialog(
+        modifier = Modifier.padding(bottom = 16.dp),
+        show = showSaveDialog,
+        title = "保存到相册",
+        onDismissRequest =  {
+            showSaveDialog.value = false
+        }
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(
+                text = "取消",
+                onClick = {
+                    showSaveDialog.value = false
+                },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(20.dp))
+            TextButton(
+                text = "确定",
+                onClick = {
+                    imageUrl?.let { url ->
+                        scope.launch {
+                            downloadImage(context, url, scope)
+                        }
+                    }
+                    showSaveDialog.value = false
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+    Scaffold (
         modifier = Modifier
-            .fillMaxSize()
-            .background(SaltTheme.colors.background)
+            .fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = "教学校历",
+                navigationIcon = {
+                    IconButton(
+                        modifier = Modifier.padding(start = 16.dp),
+                        onClick = {
+                            navigator.popBackStack()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = MiuixIcons.Basic.ArrowRight,
+                            contentDescription = "返回",
+                            tint = colorScheme.onBackground,
+                            modifier = Modifier.rotate(180f)
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        },
+        floatingActionButton = {
+            if (imageUrl != null){
+                FloatingActionButton(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = {
+                        showSaveDialog.value = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = MiuixIcons.Useful.Save,
+                        contentDescription = "保存到相册",
+                        tint = colorScheme.onBackground
+                    )
+                }
+            }
+        }
     ) {
         Column {
-            TitleBar(
-                text = "校历",
-                onBack = {
-                    onNavigateBack()
-                },
-                showBackBtn = true
-            )
             when {
                 loading -> {
-                    CircularProgressIndicator()
+                    Box(modifier = Modifier.fillMaxSize()){
+                        CircularProgressIndicator()
+                    }
                 }
 
                 error != null -> {
@@ -102,14 +179,6 @@ fun AcademicCalendarScreen(
                         state = imageState,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit,
-                        onLongClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            imageUrl?.let { url ->
-                                scope.launch {
-                                    downloadImage(context, url, scope)
-                                }
-                            }
-                        }
                     )
 
                 }

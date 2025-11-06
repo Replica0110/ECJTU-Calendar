@@ -71,8 +71,8 @@ class UpdateDataSourceImpl: UpdateDataSource {
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            val latestVersionCode = metadata.elementDTOS.firstOrNull()?.versionCode
-            val latestVersionName = metadata.elementDTOS.firstOrNull()?.versionName
+            val latestVersionCode = metadata.elementsDTO.firstOrNull()?.versionCode
+            val latestVersionName = metadata.elementsDTO.firstOrNull()?.versionName
 
             if (latestVersionCode == null || latestVersionName == null) {
                 Log.e(TAG, "Version information is missing in metadata.")

@@ -1,24 +1,26 @@
 package com.lonx.ecjtu.calendar.ui.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
-import com.moriafly.salt.ui.SaltTheme
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Info
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 @Composable
 fun CourseCard(
@@ -27,27 +29,28 @@ fun CourseCard(
     onClick: () -> Unit = {}
 ) {
     Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SaltTheme.colors.subBackground),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        onClick = { onClick() },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        pressFeedbackType = PressFeedbackType.Sink,
+        insideMargin = PaddingValues(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = SaltTheme.colors.highlight.copy(alpha = 0.1f, blue = 1f),
+                Box(
+                    modifier = modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MiuixTheme.colorScheme.primary)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "节次：${course.time}",
-                        color = SaltTheme.colors.highlight.copy(alpha = 0.8f),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        color = MiuixTheme.colorScheme.onPrimary,
+                        style = MiuixTheme.textStyles.body2,
+                        maxLines = 1,
                     )
                 }
 
@@ -56,28 +59,28 @@ fun CourseCard(
                 // 课程名称
                 Text(
                     text = course.name,
-                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
+                    style = MiuixTheme.textStyles.title4,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MiuixTheme.colorScheme.onSurface
                 )
             }
 
-            // --- 详情部分 ---
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 CourseDetailRow(
-                    icon = Icons.Outlined.LocationOn,
+                    // TODO(更新图标)
+                    icon = MiuixIcons.Useful.Info,
                     text = "地点：${course.location.ifBlank { "N/A" }}"
                 )
                 CourseDetailRow(
-                    icon = Icons.Outlined.Person,
+                    icon = MiuixIcons.Useful.Info,
                     text = "教师：${course.teacher.ifBlank { "N/A" }}"
                 )
                 CourseDetailRow(
-                    icon = Icons.Outlined.DateRange,
+                    icon = MiuixIcons.Useful.Info,
                     text = "上课周：${course.duration.ifBlank { "N/A" }}"
                 )
             }
@@ -104,21 +107,20 @@ private fun CourseDetailRow(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null, // decorative icon
+            contentDescription = null,
             modifier = Modifier.size(18.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant // 相当于 secondary_text
+            tint = MiuixTheme.colorScheme.onSecondaryVariant
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MiuixTheme.textStyles.body2,
+            color = MiuixTheme.colorScheme.onSecondaryVariant
         )
     }
 }
 
 
-// --- 预览功能，方便调试 ---
 @Preview(showBackground = true)
 @Composable
 fun CourseCardPreview() {

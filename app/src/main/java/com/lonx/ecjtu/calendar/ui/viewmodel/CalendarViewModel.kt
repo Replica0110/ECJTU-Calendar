@@ -72,7 +72,7 @@ class CalendarViewModel(
                 }
 
                 _uiState.update {
-                    it.copy(isLoading = false, error = error)
+                    it.copy(isLoading = false, error = error.message)
                 }
             }
         }

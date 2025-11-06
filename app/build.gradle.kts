@@ -129,7 +129,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.material3)
     // ViewModel & Lifecycle for Compose - MVVM 架构支持
     implementation(libs.androidx.lifecycle.viewmodel.ktx) // 提供 viewModelScope
@@ -157,7 +156,12 @@ dependencies {
     implementation(libs.okhttp)
     // saltui库
     implementation(libs.salt.ui.android)
+    // miuix库
+    implementation(libs.miuix.android)
 
+    // 导航
+    implementation(libs.core)
+    ksp(libs.ksp)
     // markdown 渲染库
     implementation(libs.compose.markdown)
     // 图片加载库

@@ -241,7 +241,7 @@ fun SettingScreen(
         overscrollEffect = null
     ) {
         item {
-            SmallTitle(text = "配置", modifier = Modifier.padding(top = 12.dp))
+            SmallTitle(text = "配置")
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
@@ -306,9 +306,10 @@ fun SettingScreen(
                     }
                 )
             }
+            Spacer(Modifier.height(12.dp))
         }
         item {
-            SmallTitle(text = "功能", modifier = Modifier.padding(top = 12.dp))
+            SmallTitle(text = "功能")
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
@@ -344,9 +345,10 @@ fun SettingScreen(
                     rightText = uiState.cacheSize
                 )
             }
+            Spacer(Modifier.height(12.dp))
         }
         item {
-            SmallTitle(text = "教程", modifier = Modifier.padding(top = 12.dp))
+            SmallTitle(text = "教程")
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
@@ -366,9 +368,10 @@ fun SettingScreen(
                     }
                 )
             }
+            Spacer(Modifier.height(12.dp))
         }
         item {
-            SmallTitle(text = "关于", modifier = Modifier.padding(top = 12.dp))
+            SmallTitle(text = "关于")
             Card(
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
@@ -415,6 +418,7 @@ fun SettingScreen(
                     }
                 )
             }
+            Spacer(Modifier.height(12.dp))
         }
     }
 }

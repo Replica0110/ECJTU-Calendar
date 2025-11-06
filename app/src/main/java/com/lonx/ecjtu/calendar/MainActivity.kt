@@ -156,7 +156,6 @@ fun MainScreen(
     ){
         Scaffold(
             modifier = Modifier
-                .padding(end = 6.dp)
                 .fillMaxSize(),
             topBar = {
                 AnimatedVisibility(

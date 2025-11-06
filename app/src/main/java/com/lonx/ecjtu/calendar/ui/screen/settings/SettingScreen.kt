@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.screen.setting
+package com.lonx.ecjtu.calendar.ui.screen.settings
 
 import android.content.Context
 import android.content.Intent

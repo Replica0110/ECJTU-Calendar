@@ -18,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lonx.ecjtu.calendar.data.network.Constants
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
-import com.lonx.ecjtu.calendar.ui.screen.setting.SettingsEvent
 import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph

@@ -10,10 +10,10 @@ import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
-import com.lonx.ecjtu.calendar.ui.screen.setting.ParseResult
-import com.lonx.ecjtu.calendar.ui.screen.setting.SettingsEffect
-import com.lonx.ecjtu.calendar.ui.screen.setting.SettingsEvent
-import com.lonx.ecjtu.calendar.ui.screen.setting.SettingsUiState
+import com.lonx.ecjtu.calendar.ui.screen.settings.ParseResult
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsEffect
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsEvent
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingsUiState
 import com.lonx.ecjtu.calendar.util.UpdateEffect
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.screen.setting
+package com.lonx.ecjtu.calendar.ui.screen.settings
 
 // 定义 UI 状态
 data class ParseResult(

@@ -38,7 +38,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
-import com.lonx.ecjtu.calendar.ui.screen.setting.SettingScreen
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -46,7 +46,6 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
-import com.ramcosta.composedestinations.generated.destinations.AcademicCalendarScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.getViewModel

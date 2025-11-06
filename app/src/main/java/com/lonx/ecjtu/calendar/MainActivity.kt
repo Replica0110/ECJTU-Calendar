@@ -5,11 +5,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -27,6 +34,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
@@ -34,6 +42,7 @@ import com.lonx.ecjtu.calendar.ui.screen.setting.SettingScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
@@ -69,7 +78,40 @@ class MainActivity: ComponentActivity() {
                     DestinationsNavHost(
                         modifier = Modifier,
                         navGraph = NavGraphs.root,
-                        navController = navController
+                        navController = navController,
+                        defaultTransitions = object : NavHostAnimatedDestinationStyle() {
+                            override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+                                {
+                                    slideInHorizontally(
+                                        initialOffsetX = { it },
+                                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    )
+                                }
+
+                            override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+                                {
+                                    slideOutHorizontally(
+                                        targetOffsetX = { -it / 5 },
+                                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    )
+                                }
+
+                            override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+                                {
+                                    slideInHorizontally(
+                                        initialOffsetX = { -it / 5 },
+                                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    )
+                                }
+
+                            override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+                                {
+                                    slideOutHorizontally(
+                                        targetOffsetX = { it },
+                                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    )
+                                }
+                        }
                     )
                 }
             }

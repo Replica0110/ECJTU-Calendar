@@ -61,7 +61,6 @@ fun CalendarScreen(
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
     ) {
         DateHeaderCard(
-            modifier = Modifier.padding(top = 12.dp),
             dateInfo = uiState.dateInfo,
             onClick = {
                 showDatePicker = true

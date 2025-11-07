@@ -74,7 +74,7 @@ fun UpdateBottomSheet(
                     is DownloadState.InProgress -> {
                         IconButton(
                             onClick = {
-                                onInstall()
+                                onCancelDownload()
                             }
                         ) {
                             Text(text = "取消下载")

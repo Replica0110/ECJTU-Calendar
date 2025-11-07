@@ -1,7 +1,6 @@
 package com.lonx.ecjtu.calendar.ui.component
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +13,7 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 // TODO(优化布局)
@@ -61,12 +61,12 @@ fun UpdateBottomSheet(
                 showSheet = false
             },
             leftAction = {
-                TextButton(onClick = {
-                    // 先隐藏 UI，再由 LaunchedEffect 触发 onDismiss()
-                    showSheet = false
-                }) {
-                    Text(text = "取消")
-                }
+                TextButton(
+                    onClick = {
+                        showSheet = false
+                    },
+                    text = "取消"
+                )
             },
             rightAction = {
                 val ds = updateState.downloadState
@@ -80,6 +80,7 @@ fun UpdateBottomSheet(
                             Text(text = "取消下载")
                         }
                     }
+
                     is DownloadState.Success -> {
                         IconButton(
                             onClick = {
@@ -89,6 +90,7 @@ fun UpdateBottomSheet(
                             Text(text = "安装更新")
                         }
                     }
+
                     else -> {
                         IconButton(
                             onClick = {
@@ -116,7 +118,7 @@ fun UpdateBottomSheet(
 //                }
 
                 // 更新日志
-                Card(modifier = Modifier.fillMaxWidth(), insideMargin = PaddingValues(16.dp)){
+                Card(modifier = Modifier.fillMaxWidth(), insideMargin = PaddingValues(16.dp)) {
                     MarkdownText(
                         markdown = updateState.updateDTO?.releaseNotes ?: "更新内容未提供",
                         style = MiuixTheme.textStyles.main
@@ -133,12 +135,27 @@ fun UpdateBottomSheet(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(text = "下载中：${ds2.progress}%")
                     }
+
                     is DownloadState.Error -> {
-                        Text(text = "下载失败：${ds2.exception}", color = MaterialTheme.colorScheme.error)
+                        MessageCard(
+                            message = "下载失败：${ds2.exception},点击重试",
+                            type = MessageType.Error,
+                            onClick = {
+                                onDownload()
+                            }
+                        )
                     }
+
                     is DownloadState.Success -> {
-                        Text(text = "下载已完成，准备安装")
+                        MessageCard(
+                            message = "下载完成",
+                            type = MessageType.Info,
+                            onClick = {
+                                onInstall()
+                            }
+                        )
                     }
+
                     DownloadState.Idle -> {
                         // nothing
                     }

@@ -128,8 +128,6 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.material3)
     // ViewModel & Lifecycle for Compose - MVVM 架构支持
     implementation(libs.androidx.lifecycle.viewmodel.ktx) // 提供 viewModelScope
     implementation(libs.androidx.lifecycle.viewmodel.compose) // 提供 viewModel() Composable
@@ -154,8 +152,6 @@ dependencies {
 //    implementation(libs.rxhttp.coroutines)
     ksp(libs.rxhttp.compiler)
     implementation(libs.okhttp)
-    // saltui库
-    implementation(libs.salt.ui.android)
     // miuix库
     implementation(libs.miuix.android)
 

@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,20 +26,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,21 +38,18 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.moriafly.salt.ui.Button
-import com.moriafly.salt.ui.ButtonType
-import com.moriafly.salt.ui.Icon
-import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.Text
-import com.moriafly.salt.ui.noRippleClickable
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -87,8 +76,7 @@ fun CustomDatePickerDialog(
 
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            insideMargin = PaddingValues(16.dp)
         ) {
             Column(
                 modifier = Modifier.width(320.dp),
@@ -148,13 +136,13 @@ private fun DatePickerHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SaltTheme.colors.highlight)
+            .background(MiuixTheme.colorScheme.primary)
             .padding(16.dp),
     ) {
         Text(
             text = selectedDate.format(yearFormatter),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onPrimary,
+            style = MiuixTheme.textStyles.title3,
+            color = MiuixTheme.colorScheme.onPrimary,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onYearClick)
@@ -162,8 +150,8 @@ private fun DatePickerHeader(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = selectedDate.format(dateFormatter),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onPrimary,
+            style = MiuixTheme.textStyles.title4,
+            color = MiuixTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth()
@@ -172,7 +160,6 @@ private fun DatePickerHeader(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun CalendarView(
     displayedMonth: YearMonth,
@@ -181,7 +168,7 @@ private fun CalendarView(
     onMonthChange: (YearMonth) -> Unit
 ) {
     Column(
-        modifier = Modifier.background(SaltTheme.colors.background).padding(start = 16.dp, end = 16.dp)
+        modifier = Modifier.background(MiuixTheme.colorScheme.background).padding(start = 16.dp, end = 16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -193,8 +180,8 @@ private fun CalendarView(
             }
             Text(
                 text = "${displayedMonth.year}年${displayedMonth.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = SaltTheme.colors.text,
+                style = MiuixTheme.textStyles.main,
+                color = MiuixTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = { onMonthChange(displayedMonth.plusMonths(1)) }) {
@@ -232,7 +219,7 @@ private fun CalendarGrid(month: YearMonth, selectedDate: LocalDate, onDateClick:
     val firstDayOfMonth = month.atDay(1)
     val startOffset = firstDayOfMonth.dayOfWeek.value % 7
 
-    Column(modifier = Modifier.background(SaltTheme.colors.background)) {
+    Column(modifier = Modifier.background(MiuixTheme.colorScheme.background)) {
         Row(modifier = Modifier.fillMaxWidth()) {
             val weekdays = listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
             weekdays.forEach { dayOfWeek ->
@@ -240,8 +227,8 @@ private fun CalendarGrid(month: YearMonth, selectedDate: LocalDate, onDateClick:
                     text = dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = SaltTheme.textStyles.paragraph,
-                    color = SaltTheme.colors.subText
+                    style = MiuixTheme.textStyles.paragraph,
+                    color = MiuixTheme.colorScheme.secondary
                 )
             }
         }
@@ -275,13 +262,13 @@ private fun DayCell(
 ) {
     val isToday = date == LocalDate.now()
     val backgroundColor = when {
-        isSelected -> SaltTheme.colors.highlight
+        isSelected -> MiuixTheme.colorScheme.primary
         else -> Color.Transparent
     }
     val contentColor = when {
-        isSelected -> SaltTheme.colors.onHighlight
-        isToday -> SaltTheme.colors.highlight
-        else -> MaterialTheme.colorScheme.onSurface
+        isSelected -> MiuixTheme.colorScheme.onPrimary
+        isToday -> MiuixTheme.colorScheme.primary
+        else -> MiuixTheme.colorScheme.onSurface
     }
 
     Box(
@@ -320,7 +307,7 @@ private fun YearPickerView(
         state = listState,
         modifier = Modifier
             .fillMaxSize()
-            .background(SaltTheme.colors.background)
+            .background(MiuixTheme.colorScheme.background)
     ) {
         items(yearRange) { year ->
             val isSelected = year == selectedYear
@@ -328,11 +315,10 @@ private fun YearPickerView(
                 text = year.toString(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .noRippleClickable { onYearSelected(year) }
                     .padding(vertical = 12.dp),
                 textAlign = TextAlign.Center,
                 fontSize = if (isSelected) 24.sp else 18.sp,
-                color = if (isSelected) SaltTheme.colors.highlight else MaterialTheme.colorScheme.onSurface,
+                color = if (isSelected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
         }
@@ -347,19 +333,16 @@ private fun ActionButtons(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SaltTheme.colors.background)
             .padding(16.dp),
         horizontalArrangement = Arrangement.End
     ) {
-        Button(
-            modifier = Modifier.padding(horizontal = 8.dp),
+        TextButton(
             onClick = onDismiss,
-            text = "取消",
-            type = ButtonType.Sub
+            text = "取消"
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Button(
-            modifier = Modifier.padding(horizontal = 8.dp),
+
+        TextButton(
             onClick = onConfirm,
             text = "确定"
         )

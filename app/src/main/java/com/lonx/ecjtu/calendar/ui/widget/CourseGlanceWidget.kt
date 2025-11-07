@@ -33,7 +33,7 @@ import com.lonx.ecjtu.calendar.MainActivity
 import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
-import com.moriafly.salt.ui.SaltTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -63,7 +63,7 @@ class CourseGlanceWidget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(SaltTheme.colors.background)
+                .background(MiuixTheme.colorScheme.background)
                 .padding(8.dp)
                 .cornerRadius(16.dp)
                 .clickable(actionStartActivity(openAppIntent))
@@ -196,7 +196,7 @@ private fun CourseItem(course: Course) {
     Row(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .background(SaltTheme.colors.background)
+            .background(MiuixTheme.colorScheme.background)
             .padding(horizontal = 1.dp, vertical = 2.dp)
     ) {
         Image(

@@ -11,7 +11,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,8 +40,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
@@ -76,7 +75,6 @@ fun CustomDatePickerDialog(
 
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
-            insideMargin = PaddingValues(16.dp)
         ) {
             Column(
                 modifier = Modifier.width(320.dp),
@@ -141,8 +139,9 @@ private fun DatePickerHeader(
     ) {
         Text(
             text = selectedDate.format(yearFormatter),
-            style = MiuixTheme.textStyles.title3,
+            style = MiuixTheme.textStyles.title2,
             color = MiuixTheme.colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onYearClick)
@@ -150,7 +149,7 @@ private fun DatePickerHeader(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = selectedDate.format(dateFormatter),
-            style = MiuixTheme.textStyles.title4,
+            style = MiuixTheme.textStyles.title3,
             color = MiuixTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -209,7 +208,6 @@ private fun CalendarView(
                 onDateClick = onDateClick
             )
         }
-        HorizontalDivider(color = Color.Gray)
     }
 }
 
@@ -315,6 +313,7 @@ private fun YearPickerView(
                 text = year.toString(),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { onYearSelected(year) }
                     .padding(vertical = 12.dp),
                 textAlign = TextAlign.Center,
                 fontSize = if (isSelected) 24.sp else 18.sp,
@@ -344,7 +343,8 @@ private fun ActionButtons(
 
         TextButton(
             onClick = onConfirm,
-            text = "确定"
+            text = "确定",
+            colors = ButtonDefaults.textButtonColorsPrimary()
         )
     }
 }

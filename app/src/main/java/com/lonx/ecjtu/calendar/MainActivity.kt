@@ -34,12 +34,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
-import com.lonx.ecjtu.calendar.ui.screen.settings.SettingScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -47,16 +47,20 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.SettingScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.compose.koinInject
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 
 
 class MainActivity: ComponentActivity() {
@@ -149,13 +153,8 @@ fun MainScreen(
         NavigationItem(
             label = "成绩",
             icon = ImageVector.vectorResource(R.drawable.ic_score_24dp)
-        ),
-        NavigationItem(
-            label = "设置",
-            icon = ImageVector.vectorResource(R.drawable.ic_settings_24dp)
         )
     )
-    val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { routes.size })
 
@@ -183,6 +182,19 @@ fun MainScreen(
                     TopAppBar(
                         title = routes[pagerState.currentPage].label,
                         scrollBehavior = currentScrollBehavior,
+                        navigationIcon = {
+                            IconButton(
+                                onClick = {
+                                    navigator.navigate(SettingScreenDestination())
+                                },
+                                modifier = Modifier.padding(start = 16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = MiuixIcons.Useful.Settings,
+                                    contentDescription = "设置"
+                                )
+                            }
+                        }
                     )
                 }
             },
@@ -208,11 +220,6 @@ fun MainScreen(
                     )
                     1 -> ScoreScreen(
                         topAppBarScrollBehavior = topAppBarScrollBehaviorList[it]
-                    )
-                    2 -> SettingScreen(
-                        topAppBarScrollBehavior = topAppBarScrollBehaviorList[it],
-                        navigator = navigator,
-                        focusManager = focusManager
                     )
                 }
             }

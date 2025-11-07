@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.util
+package com.lonx.ecjtu.calendar.util
 
 import android.content.Context
 import android.content.Intent

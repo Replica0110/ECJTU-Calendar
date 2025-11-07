@@ -31,11 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
+import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
 import com.lonx.ecjtu.calendar.ui.screen.settings.SettingScreen
@@ -55,25 +56,26 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 
 
 class MainActivity: ComponentActivity() {
-    private val mainViewModel: MainViewModel by lazy { getViewModel() }
+    private val viewModel: MainViewModel by lazy { getViewModel() }
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
 
-        mainViewModel.onStartup()
-        mainViewModel.handleIntent(intent)
+        viewModel.onStartup()
+        viewModel.handleIntent(intent)
 
         enableEdgeToEdge()
         setContent {
             CalendarTheme {
                 val navController = rememberNavController()
-
+                val context = LocalContext.current
                 val updateManager: UpdateManager = koinInject()
                 val updateState by updateManager.state.collectAsState()
 
-                Scaffold { contentPadding ->
+                Scaffold {
                     DestinationsNavHost(
                         modifier = Modifier,
                         navGraph = NavGraphs.root,
@@ -111,6 +113,21 @@ class MainActivity: ComponentActivity() {
                                     )
                                 }
                         }
+                    )
+                    UpdateBottomSheet(
+                        updateState = updateState,
+                        onDismiss = {
+                            updateManager.resetUpdateState()
+                        },
+                        onDownload = {
+                            updateManager.startDownload(context =  context)
+                        },
+                        onCancelDownload =  {
+                            updateManager.cancelDownload()
+                        },
+                        onInstall = {
+                            updateManager.installUpdate(context = context)
+                        },
                     )
                 }
             }

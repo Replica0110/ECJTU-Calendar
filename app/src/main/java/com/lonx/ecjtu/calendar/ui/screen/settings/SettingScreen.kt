@@ -31,6 +31,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.BuildConfig
 import com.lonx.ecjtu.calendar.R
+import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
@@ -39,12 +40,15 @@ import com.lonx.ecjtu.calendar.ui.widget.CourseGlanceWidget
 import com.lonx.ecjtu.calendar.ui.widget.CourseUiState
 import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetReceiver
 import com.lonx.ecjtu.calendar.ui.widget.CourseWidgetState
+import com.lonx.ecjtu.calendar.util.UpdateManager
+import com.lonx.ecjtu.calendar.util.UpdateState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AcademicCalendarScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -70,9 +74,9 @@ fun SettingScreen(
     focusManager: FocusManager
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
-
+    val updateManager: UpdateManager = koinInject()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    val updateState by updateManager.state.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val onEvent = viewModel::onEvent
@@ -291,10 +295,32 @@ fun SettingScreen(
                 )
                 SuperArrow(
                     title = "检查更新",
-                    summary = "立即检查是否有新版本",
+                    summary = when(updateState.downloadState){
+                        is DownloadState.Idle -> "点击检查更新"
+                        is DownloadState.InProgress -> "正在下载更新: ${(updateState.downloadState as DownloadState.InProgress).progress}%"
+                        is DownloadState.Success -> "点击安装更新"
+                        is DownloadState.Error -> "更新检查/下载失败：${(updateState.downloadState as DownloadState.Error).exception.message}"
+                    },
                     onClick = {
-                        Toast.makeText(context, "正在检查更新...", Toast.LENGTH_SHORT).show()
-                        viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
+                        when(updateState.downloadState){
+                            is DownloadState.Idle -> {
+                                Toast.makeText(context, "正在检查更新...", Toast.LENGTH_SHORT)
+                                    .show()
+                                viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
+                            }
+                            is DownloadState.InProgress -> {
+                                Toast.makeText(context, "正在下载更新，请稍等~", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                            is DownloadState.Success -> {
+                                updateManager.installUpdate(context)
+                            }
+                            is DownloadState.Error -> {
+                                Toast.makeText(context, "重新检查更新...", Toast.LENGTH_SHORT)
+                                    .show()
+                                viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
+                            }
+                        }
                     },
                     leftAction = {
                         Icon(

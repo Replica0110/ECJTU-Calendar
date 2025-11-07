@@ -27,6 +27,7 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -46,55 +47,65 @@ fun ScoreScreen(
         }
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
-            .scrollEndHaptic()
-            .overScrollVertical()
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-            .height(windowSize.height.dp),
-        overscrollEffect = null
     ) {
-        item {
-            if (!uiState.isLoading && uiState.error == null) {
-                Card(
-                    modifier = Modifier.padding(12.dp)
-                ) {
-                    SuperDropdown(
-                        title = "选择学期",
-                        items = uiState.availableTerms,
-                        selectedIndex = uiState.availableTerms.indexOf(uiState.currentTerm),
-                        onSelectedIndexChange = {
-                            if (uiState.availableTerms[it] != uiState.currentTerm) {
-                                viewModel.onTermSelected(uiState.availableTerms[it])
-                            }
+        if (!uiState.isLoading && uiState.error == null) {
+            Card(
+                modifier = Modifier.padding(12.dp)
+            ) {
+                SuperDropdown(
+                    title = "选择学期",
+                    items = uiState.availableTerms,
+                    selectedIndex = uiState.availableTerms.indexOf(uiState.currentTerm),
+                    onSelectedIndexChange = {
+                        if (uiState.availableTerms[it] != uiState.currentTerm) {
+                            viewModel.onTermSelected(uiState.availableTerms[it])
                         }
-                    )
-                }
+                    }
+                )
+            }
+        }
+        uiState.error?.let { errorMessage ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                MessageCard(
+                    message = errorMessage,
+                    type = MessageType.Warning,
+                    onClick = {
+                        viewModel.loadScores()
+                    }
+                )
+            }
+        }
+        LazyColumn(
+            modifier = Modifier
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .height(windowSize.height.dp)
+                .weight(1f),
+            overscrollEffect = null
+        ) {
+            item {
+                if (!uiState.isLoading && uiState.error == null) {
 
-                uiState.scores.forEach {
-                    ScoreItem(score = it)
-                    Spacer(modifier = Modifier.height(12.dp))
+
+                    uiState.scores.forEach {
+                        ScoreCard(score = it)
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
-            }
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            uiState.error?.let { errorMessage ->
-                Box(
-                    modifier = Modifier
-                        .fillParentMaxWidth()
-                        .padding(12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    MessageCard(
-                        message = errorMessage,
-                        type = MessageType.Warning,
-                        onClick = {
-                            viewModel.loadScores()
-                        }
-                    )
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }
@@ -104,12 +115,13 @@ fun ScoreScreen(
 
 
 @Composable
-private fun ScoreItem(score: Score, modifier: Modifier = Modifier) {
+private fun ScoreCard(score: Score, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp),
         insideMargin = PaddingValues(16.dp),
+        pressFeedbackType = PressFeedbackType.Sink
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -195,9 +207,9 @@ private fun ScoreTag(
 // 添加预览函数
 @Preview(showBackground = true)
 @Composable
-private fun ScoreItemPreview() {
+private fun ScoreCardPreview() {
     CalendarTheme {
-        ScoreItem(
+        ScoreCard(
             score = Score(
                 courseName = "高等数学",
                 courseCode = "MATH101",

@@ -45,16 +45,11 @@ class ScoreViewModel(
 
 
     fun loadScores(term: String? = null) {
-        val id = currentWeiXinID
-        if (id.isNullOrBlank()) {
-            _uiState.update { it.copy(error = "加载失败，未填写weiXinID") }
-            return
-        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val result = getScoreUseCase(id, term)
+            val result = getScoreUseCase(term)
 
             result.onSuccess { scorePage ->
                 _uiState.update {

@@ -49,7 +49,8 @@ val dataModule = module {
     single<ScoreRepository> {
         ScoreRepositoryImpl(
             jwxtDataSource = get(),
-            parser = get()
+            localDataSource = get(),
+            htmlParser = get()
         )
     }
 

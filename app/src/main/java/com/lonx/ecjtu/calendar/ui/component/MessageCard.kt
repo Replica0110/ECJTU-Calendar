@@ -1,6 +1,7 @@
 package com.lonx.ecjtu.calendar.ui.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ enum class MessageType {
  */
 @Composable
 fun MessageCard(
+    modifier: Modifier = Modifier,
     message: String,
     type: MessageType = MessageType.Info,
     onClick: (() -> Unit)? = null
@@ -47,6 +49,9 @@ fun MessageCard(
 
     Card(
         onClick = { onClick?.invoke() },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
         colors = CardDefaults.defaultColors(color = backgroundColor),
         showIndication = onClick != null,
         pressFeedbackType = PressFeedbackType.Sink

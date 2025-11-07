@@ -8,7 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,14 +15,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lonx.ecjtu.calendar.data.network.Constants
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
-import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarEvent
-import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -42,7 +38,6 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperDialog
@@ -56,7 +51,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import java.io.IOException
 import java.net.URL
 
-@OptIn(UnstableSaltUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Destination<RootGraph>()
 fun AcademicCalendarScreen(
@@ -86,6 +81,14 @@ fun AcademicCalendarScreen(
             }
         )
     }
+    // 设置topbar默认收起
+    LaunchedEffect(scrollBehavior.state.heightOffsetLimit) {
+        val limit = scrollBehavior.state.heightOffsetLimit
+        if (limit != -Float.MAX_VALUE && scrollBehavior.state.heightOffset == 0f) {
+            scrollBehavior.state.heightOffset = limit
+        }
+    }
+
     SuperDialog(
         modifier = Modifier.padding(bottom = 16.dp),
         show = showSaveDialog,
@@ -179,8 +182,7 @@ fun AcademicCalendarScreen(
                 error != null -> {
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         MessageCard(

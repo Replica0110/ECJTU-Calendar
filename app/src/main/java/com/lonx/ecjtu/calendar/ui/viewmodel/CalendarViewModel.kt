@@ -2,23 +2,27 @@ package com.lonx.ecjtu.calendar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarEvent
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class CalendarViewModel(
-    private val getCoursesUseCase: GetCoursesUseCase
+    private val getCoursesUseCase: GetCoursesUseCase,
+    private val getUserConfigUseCase: GetUserConfigUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalendarUiState())
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+    
+    private var currentWeiXinID: String? = null
 
     init {
         _uiState.update {
@@ -26,7 +30,21 @@ class CalendarViewModel(
                 selectedDate = LocalDate.now()
             )
         }
+        observeUserConfig()
         fetchCourses(LocalDate.now())
+    }
+
+    private fun observeUserConfig() {
+        viewModelScope.launch {
+            getUserConfigUseCase().distinctUntilChanged().collect { newWeiXinID ->
+                val oldWeiXinID = currentWeiXinID
+                currentWeiXinID = newWeiXinID
+                // 如果微信ID发生变化，刷新当前日期的课程数据
+                if (oldWeiXinID != newWeiXinID) {
+                    fetchCourses(uiState.value.selectedDate)
+                }
+            }
+        }
     }
 
     fun onEvent(event: CalendarEvent) {
@@ -66,13 +84,9 @@ class CalendarViewModel(
                     )
                 }
             }.onFailure { throwable ->
-                val error = when (throwable) {
-                    is CalendarError -> throwable
-                    else -> CalendarError.UnknownError(Exception(throwable.message ?: "未知错误", throwable))
-                }
 
                 _uiState.update {
-                    it.copy(isLoading = false, error = error.message)
+                    it.copy(isLoading = false, error = throwable.message)
                 }
             }
         }

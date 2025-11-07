@@ -5,7 +5,7 @@ import com.lonx.ecjtu.calendar.domain.repository.ScoreRepository
 
 
 class GetScoreUseCase(private val repository: ScoreRepository) {
-    suspend operator fun invoke(weiXinID: String, term: String?): Result<ScorePage> {
-        return repository.getScores(weiXinID, term)
+    suspend operator fun invoke(term: String?): Result<ScorePage> {
+        return repository.getScores(term)
     }
 }

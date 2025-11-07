@@ -18,17 +18,11 @@ import java.time.LocalDate
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import com.lonx.ecjtu.calendar.domain.error.CalendarError
 import com.lonx.ecjtu.calendar.ui.component.CourseCard
 import com.lonx.ecjtu.calendar.ui.component.DateHeaderCard
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
-import com.moriafly.salt.ui.ItemButton
-import com.moriafly.salt.ui.ItemInfo
-import com.moriafly.salt.ui.ItemInfoType
-import com.moriafly.salt.ui.RoundedColumn
-import com.moriafly.salt.ui.UnstableSaltUiApi
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -95,8 +89,7 @@ fun CalendarScreen(
                 item {
                     Box(
                         modifier = Modifier
-                            .fillParentMaxWidth()
-                            .padding(12.dp),
+                            .fillParentMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         MessageCard(
@@ -124,8 +117,7 @@ fun CalendarScreen(
                 uiState.error?.let { errorMessage ->
                     Box(
                         modifier = Modifier
-                            .fillParentMaxWidth()
-                            .padding(12.dp),
+                            .fillParentMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         MessageCard(
@@ -186,49 +178,6 @@ fun CalendarScreen(
         )
     }
 
-}
-
-@OptIn(UnstableSaltUiApi::class)
-@Composable
-private fun ErrorState(error: CalendarError, onRetry: () -> Unit, onBackToday: () -> Unit) {
-    RoundedColumn(Modifier.fillMaxWidth()) {
-        ItemInfo(
-            text = error.message ?: "未知错误",
-            infoType = ItemInfoType.Error
-        )
-        when (error) {
-            is CalendarError.NoWeiXinId, is CalendarError.WeiXinIdInvalid -> {
-                ItemButton(
-                    onClick = onRetry,
-                    text = "重试"
-                )
-            }
-
-            else -> {
-                ItemButton(
-                    onClick = onRetry,
-                    text = "重试"
-                )
-                ItemButton(
-                    onClick = onBackToday,
-                    text = "回到今天"
-                )
-            }
-        }
-
-
-    }
-}
-
-@OptIn(UnstableSaltUiApi::class)
-@Composable
-private fun EmptyState(message: String) {
-    RoundedColumn(Modifier.fillMaxWidth()) {
-        ItemInfo(
-            text = message,
-            infoType = ItemInfoType.Success
-        )
-    }
 }
 
 

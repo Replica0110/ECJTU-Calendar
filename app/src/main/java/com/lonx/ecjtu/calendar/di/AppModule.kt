@@ -41,7 +41,8 @@ val appModule = module {
     // 提供 CalendarViewModel
     viewModel {
         CalendarViewModel(
-            getCoursesUseCase = get()
+            getCoursesUseCase = get(),
+            getUserConfigUseCase = get()
         )
     }
     viewModel {

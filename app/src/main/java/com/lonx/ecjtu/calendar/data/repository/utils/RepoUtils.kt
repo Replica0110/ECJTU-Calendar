@@ -15,7 +15,7 @@ suspend inline fun <T> safeApiCall(
     return try {
         Result.success(withContext(Dispatchers.IO) { block() })
     } catch (e: Exception) {
-        Log.e("Repository", "Error during API call", e)
+        Log.e("Repository", "Error during API call: $e", e)
         Result.failure(e)
     }
 }

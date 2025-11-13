@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,8 +62,10 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.extra.SpinnerEntry
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
@@ -74,7 +77,8 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 @Destination<RootGraph>(label = "设置")
 fun SettingScreen(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    colorMode: MutableState<Int>
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
     val updateManager: UpdateManager = koinInject()
@@ -89,6 +93,12 @@ fun SettingScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val windowSize = getWindowSize()
+
+    val colorModeOptions: List<SpinnerEntry> = listOf(
+        SpinnerEntry(title = "跟随系统"),
+        SpinnerEntry(title = "浅色模式"),
+        SpinnerEntry(title = "深色模式")
+    )
     SuperDialog(
         modifier = Modifier.padding(bottom = 16.dp),
         show = showWeiXinIdDialog,
@@ -277,6 +287,21 @@ fun SettingScreen(
                 Card(
                     modifier = Modifier.padding(horizontal = 12.dp)
                 ) {
+                    SuperSpinner(
+                        title = "应用主题",
+                        items = colorModeOptions,
+                        summary = "应用主题色",
+                        selectedIndex = colorMode.value,
+                        onSelectedIndexChange = { colorMode.value = it },
+                        leftAction = {
+                            Icon(
+                                modifier = Modifier.padding(end = 16.dp),
+                                painter = painterResource(R.drawable.ic_theme_24dp),
+                                contentDescription = "应用主题",
+                                tint = colorScheme.onBackground
+                            )
+                        }
+                    )
                     SuperArrow(
                         title = "weiXinID设置",
                         summary = "华交教务weiXinID",

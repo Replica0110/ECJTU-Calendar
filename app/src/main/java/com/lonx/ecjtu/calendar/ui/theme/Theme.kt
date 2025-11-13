@@ -9,15 +9,16 @@ import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 @Composable
 fun CalendarTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    colorMode: Int = 0,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
-    }
+    val darkTheme = isSystemInDarkTheme()
     MiuixTheme(
-        colors = colorScheme,
+        colors = when (colorMode) {
+            1 -> lightColorScheme()
+            2 -> darkColorScheme()
+            else -> if (darkTheme) darkColorScheme() else lightColorScheme()
+        },
         content = {
             content()
         }

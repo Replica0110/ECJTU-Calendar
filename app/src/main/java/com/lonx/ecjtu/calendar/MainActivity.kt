@@ -1,8 +1,11 @@
 package com.lonx.ecjtu.calendar
 
 import MainViewModel
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -17,6 +20,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,9 +28,12 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -39,6 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
+import com.lonx.ecjtu.calendar.ui.screen.settings.SettingScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -48,6 +56,8 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.SettingScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.navigation.destination
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.compose.koinInject
@@ -72,7 +82,22 @@ class MainActivity: ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            CalendarTheme {
+            val colorMode = remember { mutableIntStateOf(0) }
+            val darkMode = colorMode.intValue == 2 || (isSystemInDarkTheme() && colorMode.intValue == 0)
+
+            DisposableEffect(darkMode) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { darkMode },
+                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { darkMode },
+                )
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false // Xiaomi moment, this code must be here
+                }
+
+                onDispose {}
+            }
+            CalendarTheme(colorMode = colorMode.intValue) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val updateManager: UpdateManager = koinInject()
@@ -83,6 +108,11 @@ class MainActivity: ComponentActivity() {
                         modifier = Modifier,
                         navGraph = NavGraphs.root,
                         navController = navController,
+                        dependenciesContainerBuilder =  {
+                            destination(SettingScreenDestination) {
+                                dependency(colorMode)
+                            }
+                        },
                         defaultTransitions = object : NavHostAnimatedDestinationStyle() {
                             override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
                                 {

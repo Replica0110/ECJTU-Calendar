@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.calendar.di
 
+import com.lonx.ecjtu.calendar.ui.viewmodel.AcademicCalendarViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
@@ -52,6 +53,12 @@ val appModule = module {
         ScoreViewModel(
             getScoreUseCase = get(),
             getUserConfigUseCase = get()
+        )
+    }
+    viewModel {
+        AcademicCalendarViewModel(
+            getColorModeUseCase = get(),
+            getAcademicCalendarUseCase = get()
         )
     }
     single<AppUpdateInstaller> {

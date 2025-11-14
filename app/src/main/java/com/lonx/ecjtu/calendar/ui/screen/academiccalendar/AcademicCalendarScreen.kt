@@ -16,8 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.lonx.ecjtu.calendar.data.network.Constants
-import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.viewmodel.AcademicCalendarViewModel
@@ -49,7 +47,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import java.io.File
 import java.net.URL
 
 @Composable
@@ -61,40 +58,10 @@ fun AcademicCalendarScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    val getAcademicCalendarUseCase: GetAcademicCalendarUseCase = koinInject()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var imageUrl by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var imageData by remember { mutableStateOf<ByteArray?>(null) }
     val showTopPopup = remember { mutableStateOf(false) }
     val windowSize = getWindowSize()
-
-    LaunchedEffect(Unit) {
-        getAcademicCalendarUseCase(url = Constants.ACADEMIC_CALENDAR_URL).fold(
-            onSuccess = { url ->
-                imageUrl = url
-                loading = false
-                // 异步下载一次图片到内存缓存
-                scope.launch(Dispatchers.IO) {
-                    try {
-                        val bytes = URL(url).openStream().use { it.readBytes() }
-                        imageData = bytes
-                    } catch (e: Exception) {
-                        Log.e("AcademicCalendar", "缓存图片失败: ${e.message}", e)
-                    }
-                }
-            },
-            onFailure = { throwable ->
-                val errorMsg = throwable.message ?: "未知错误"
-                Log.e("AcademicCalendar", "获取校历图片URL失败: $errorMsg", throwable)
-                error = errorMsg
-                loading = false
-                Toast.makeText(context, "加载校历失败: $errorMsg", Toast.LENGTH_LONG).show()
-            }
-        )
-    }
 
 
     Scaffold(
@@ -146,10 +113,8 @@ fun AcademicCalendarScreen(
                                 optionSize = 3,
                                 isSelected = false,
                                 onSelectedIndexChange = {
-                                    imageUrl?.let { url ->
-                                        scope.launch {
-                                            downloadImage(context, url, imageData, scope)
-                                        }
+                                    scope.launch {
+                                        downloadImage(context, uiState.imageUrl, uiState.imageData, scope)
                                     }
                                     showTopPopup.value = false
                                 },
@@ -157,10 +122,10 @@ fun AcademicCalendarScreen(
                             )
                             DropdownImpl(
                                 text = "在浏览器打开",
-                                optionSize = 2,
+                                optionSize = 3,
                                 isSelected = false,
                                 onSelectedIndexChange = {
-                                    imageUrl?.let { url ->
+                                    uiState.imageUrl?.let { url ->
                                         scope.launch {
                                             openUrl(context, url, scope)
                                         }
@@ -168,6 +133,16 @@ fun AcademicCalendarScreen(
                                     showTopPopup.value = false
                                 },
                                 index = 1
+                            )
+                            DropdownImpl(
+                                text = "刷新",
+                                optionSize = 3,
+                                isSelected = false,
+                                onSelectedIndexChange = {
+                                    viewModel.refresh()
+                                    showTopPopup.value = false
+                                },
+                                index = 2
                             )
                         }
                     }
@@ -183,7 +158,7 @@ fun AcademicCalendarScreen(
                 .height(windowSize.height.dp)
         ) {
             when {
-                loading -> {
+                uiState.isLoading -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -193,28 +168,28 @@ fun AcademicCalendarScreen(
                     }
                 }
 
-                error != null -> {
+                uiState.error != null -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         MessageCard(
-                            message = error.orEmpty(),
+                            message = uiState.error.orEmpty(),
                             type = MessageType.Error,
                             onClick = {
-
+                                viewModel.refresh()
                             }
                         )
                     }
                 }
 
-                imageUrl != null -> {
+                uiState.imageUrl != null -> {
                     val zoomableState = rememberZoomableState()
 
                     val imageState = rememberZoomableImageState(zoomableState)
                     ZoomableAsyncImage(
-                        model = imageUrl,
+                        model = uiState.imageUrl,
                         contentDescription = "校历图片",
                         state = imageState,
                         modifier = Modifier.fillMaxSize(),
@@ -229,7 +204,7 @@ fun AcademicCalendarScreen(
 
 private fun downloadImage(
     context: Context,
-    imageUrl: String,
+    imageUrl: String?,
     imageData: ByteArray?,
     scope: CoroutineScope
 ) {
@@ -239,28 +214,32 @@ private fun downloadImage(
                 Toast.makeText(context, "开始保存...", Toast.LENGTH_SHORT).show()
             }
 
-            val bytes = imageData ?: withContext(Dispatchers.IO) {
-                URL(imageUrl).openStream().use { it.readBytes() }
+            val bytes = imageData ?: imageUrl?.let {
+                withContext(Dispatchers.IO) {
+                    URL(it).openStream().use { stream -> stream.readBytes() }
+                }
             }
 
-            withContext(Dispatchers.IO) {
-                val fileName = "academic_calendar_${System.currentTimeMillis()}.png"
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val values = ContentValues().apply {
-                        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures")
-                    }
-                    val uri = context.contentResolver.insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        values
-                    )
-                    uri?.let {
-                        context.contentResolver.openOutputStream(it)?.use { output ->
-                            output.write(bytes)
+            bytes?.let {
+                withContext(Dispatchers.IO) {
+                    val fileName = "academic_calendar_${System.currentTimeMillis()}.png"
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val values = ContentValues().apply {
+                            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures")
                         }
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "图片已保存到相册", Toast.LENGTH_SHORT).show()
+                        val uri = context.contentResolver.insert(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            values
+                        )
+                        uri?.let { imageUri ->
+                            context.contentResolver.openOutputStream(imageUri)?.use { output ->
+                                output.write(it)
+                            }
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "图片已保存到相册", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }

@@ -1,75 +1,40 @@
 package com.lonx.ecjtu.calendar
 
-import MainViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
-import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
-import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
-import com.lonx.ecjtu.calendar.ui.screen.settings.SettingScreen
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
-import com.ramcosta.composedestinations.generated.destinations.SettingScreenDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.navigation.destination
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.compose.koinInject
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
 
 
 class MainActivity: ComponentActivity() {
@@ -82,9 +47,11 @@ class MainActivity: ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val colorMode = remember { mutableIntStateOf(0) }
-            val darkMode = colorMode.intValue == 2 || (isSystemInDarkTheme() && colorMode.intValue == 0)
-
+            val uiState by viewModel.uiState.collectAsState()
+            Log.d("MainActivity", "uiState: $uiState")
+//            val colorMode = remember { mutableIntStateOf(uiState.colorMode) }
+//            Log.d("MainActivity", "colorMode: $colorMode")
+            val darkMode = uiState.colorMode == 2 || (isSystemInDarkTheme() && uiState.colorMode == 0)
             DisposableEffect(darkMode) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { darkMode },
@@ -97,7 +64,7 @@ class MainActivity: ComponentActivity() {
 
                 onDispose {}
             }
-            CalendarTheme(colorMode = colorMode.intValue) {
+            CalendarTheme(colorMode = uiState.colorMode) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val updateManager: UpdateManager = koinInject()
@@ -108,11 +75,6 @@ class MainActivity: ComponentActivity() {
                         modifier = Modifier,
                         navGraph = NavGraphs.root,
                         navController = navController,
-                        dependenciesContainerBuilder =  {
-                            destination(SettingScreenDestination) {
-                                dependency(colorMode)
-                            }
-                        },
                         defaultTransitions = object : NavHostAnimatedDestinationStyle() {
                             override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
                                 {
@@ -166,93 +128,4 @@ class MainActivity: ComponentActivity() {
             }
         }
     }
-}
-val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
-val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
-@Composable
-@Destination<RootGraph>(start = true)
-fun MainScreen(
-    navigator: DestinationsNavigator
-){
-    val routes = listOf(
-        NavigationItem(
-            label = "日历",
-            icon = ImageVector.vectorResource(R.drawable.ic_course_24dp)
-        ),
-        NavigationItem(
-            label = "成绩",
-            icon = ImageVector.vectorResource(R.drawable.ic_score_24dp)
-        )
-    )
-    val coroutineScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { routes.size })
-
-    val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope) {
-        { page ->
-            coroutineScope.launch { pagerState.animateScrollToPage(page) }
-        }
-    }
-    val topAppBarScrollBehaviorList = List(routes.size) { MiuixScrollBehavior() }
-    val currentScrollBehavior = topAppBarScrollBehaviorList[pagerState.currentPage]
-
-    CompositionLocalProvider(
-        LocalPagerState provides pagerState,
-        LocalHandlePageChange provides handlePageChange
-    ){
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize(),
-            topBar = {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    TopAppBar(
-                        title = routes[pagerState.currentPage].label,
-                        scrollBehavior = currentScrollBehavior,
-                        navigationIcon = {
-                            IconButton(
-                                onClick = {
-                                    navigator.navigate(SettingScreenDestination())
-                                },
-                                modifier = Modifier.padding(start = 16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = MiuixIcons.Useful.Settings,
-                                    contentDescription = "设置"
-                                )
-                            }
-                        }
-                    )
-                }
-            },
-            bottomBar = {
-                val pagerState = LocalPagerState.current
-                val handlePageChange = LocalHandlePageChange.current
-                NavigationBar(
-                    items = routes,
-                    selected =  pagerState.currentPage,
-                    onClick = { index -> handlePageChange.invoke(index) }
-                )
-            }
-        ) { paddingValues ->
-            HorizontalPager(
-                modifier = Modifier.padding(paddingValues),
-                state = LocalPagerState.current,
-                userScrollEnabled = true,
-                overscrollEffect = null
-            ) {
-                when (it) {
-                    0 -> CalendarScreen(
-                        topAppBarScrollBehavior = topAppBarScrollBehaviorList[it]
-                    )
-                    1 -> ScoreScreen(
-                        topAppBarScrollBehavior = topAppBarScrollBehaviorList[it]
-                    )
-                }
-            }
-        }
-    }
-
 }

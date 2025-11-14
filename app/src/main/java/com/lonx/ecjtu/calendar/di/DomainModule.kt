@@ -6,8 +6,10 @@ import com.lonx.ecjtu.calendar.domain.usecase.cache.GetCacheSizeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.score.GetScoreUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveColorModeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.update.ApkInstallUseCase
@@ -38,7 +40,10 @@ val domainModule = module {
 
     factory { ApkInstallUseCase(appUpdateInstaller = get()) }
     factory { CleanUpApksUseCase() }
-    
+
+    factory { GetColorModeUseCase(repository = get()) }
+    factory { SaveColorModeUseCase(repository = get()) }
+
     // 提供 GetAcademicCalendarUseCase 的实例工厂
     factory {
         GetAcademicCalendarUseCase(repository = get(), parser = get())

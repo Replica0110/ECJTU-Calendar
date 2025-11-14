@@ -1,7 +1,6 @@
 package com.lonx.ecjtu.calendar.ui.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +13,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
+import com.lonx.ecjtu.calendar.ui.theme.LocalColorMode
 
 /**
  * 消息类型枚举
@@ -32,7 +32,16 @@ fun MessageCard(
     type: MessageType = MessageType.Info,
     onClick: (() -> Unit)? = null
 ) {
-    val isDark = isSystemInDarkTheme()
+    // 从 CompositionLocal 获取当前的颜色模式
+    val colorMode = LocalColorMode.current
+    
+    // 根据 colorMode 确定当前是否为深色主题
+    val isDark = when (colorMode) {
+        0 -> isSystemInDarkTheme() // 跟随系统
+        1 -> false // 浅色主题
+        2 -> true // 深色主题
+        else -> isSystemInDarkTheme() // 默认跟随系统
+    }
 
     // 根据类型选择背景和文字颜色
     val (backgroundColor, textColor) = when (type) {

@@ -16,5 +16,6 @@ data class ScoreScreenState(
     val scores: List<Score> = emptyList(),
     val availableTerms: List<String> = emptyList(),
     val currentTerm: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val colorMode: Int = 0
 )

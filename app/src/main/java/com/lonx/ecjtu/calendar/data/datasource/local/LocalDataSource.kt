@@ -9,4 +9,7 @@ interface LocalDataSource {
     fun getAutoUpdateCheckEnabled(): Flow<Boolean>
 
     suspend fun setAutoUpdateCheckEnabled(enabled: Boolean)
+
+    suspend fun saveColorModeSetting(mode: Int)
+    fun getColorModeSetting(): Flow<Int>
 }

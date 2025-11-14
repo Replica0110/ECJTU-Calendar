@@ -20,6 +20,7 @@ import com.lonx.ecjtu.calendar.data.network.Constants
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
+import com.lonx.ecjtu.calendar.ui.viewmodel.AcademicCalendarViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -56,6 +57,10 @@ import java.net.URL
 fun AcademicCalendarScreen(
     navigator: DestinationsNavigator
 ) {
+    val viewModel: AcademicCalendarViewModel = koinInject()
+
+    val uiState by viewModel.uiState.collectAsState()
+
     val getAcademicCalendarUseCase: GetAcademicCalendarUseCase = koinInject()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -65,6 +70,7 @@ fun AcademicCalendarScreen(
     var imageData by remember { mutableStateOf<ByteArray?>(null) }
     val showTopPopup = remember { mutableStateOf(false) }
     val windowSize = getWindowSize()
+
     LaunchedEffect(Unit) {
         getAcademicCalendarUseCase(url = Constants.ACADEMIC_CALENDAR_URL).fold(
             onSuccess = { url ->

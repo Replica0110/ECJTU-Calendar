@@ -1,6 +1,6 @@
 package com.lonx.ecjtu.calendar.di
 
-import MainViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
 import com.lonx.ecjtu.calendar.util.AppUpdateInstaller
@@ -26,7 +26,9 @@ val appModule = module {
             saveUpdateSettingUseCase = get(),
             updateManager = get(),
             clearCacheUseCase = get(),
-            getCacheSizeUseCase = get()
+            getCacheSizeUseCase = get(),
+            saveColorModeUseCase = get(),
+            getColorModeUseCase = get()
         )
     }
     viewModel {
@@ -35,7 +37,8 @@ val appModule = module {
             getUpdateSettingUseCase = get(),
             saveUserConfigUseCase = get(),
             updateManager = get(),
-            cleanUpApksUseCase = get()
+            cleanUpApksUseCase = get(),
+            getColorModeUseCase = get()
         )
     }
     // 提供 CalendarViewModel

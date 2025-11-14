@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,8 +76,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Composable
 @Destination<RootGraph>(label = "设置")
 fun SettingScreen(
-    navigator: DestinationsNavigator,
-    colorMode: MutableState<Int>
+    navigator: DestinationsNavigator
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
     val updateManager: UpdateManager = koinInject()
@@ -291,8 +289,9 @@ fun SettingScreen(
                         title = "应用主题",
                         items = colorModeOptions,
                         summary = "应用主题色",
-                        selectedIndex = colorMode.value,
-                        onSelectedIndexChange = { colorMode.value = it },
+                        selectedIndex = uiState.colorMode,
+                        onSelectedIndexChange = {
+                            viewModel.onEvent(SettingsEvent.OnColorModeChanged(it)) },
                         leftAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),

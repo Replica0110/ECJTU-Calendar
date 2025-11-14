@@ -15,4 +15,8 @@ interface CalendarRepository {
     fun getAutoUpdateCheckSetting(): Flow<Boolean>
 
     suspend fun saveAutoUpdateCheckSetting(enabled: Boolean)
+
+    suspend fun saveColorModeSetting( mode: Int)
+
+    fun getColorModeSetting(): Flow<Int>
 }

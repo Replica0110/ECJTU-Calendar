@@ -10,7 +10,8 @@ data class CalendarUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val dateInfo: DateInfo = DateInfo("", "", ""),
     val courses: List<Course> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val colorMode : Int = 0
 )
 
 sealed interface CalendarEvent {

@@ -2,12 +2,15 @@ package com.lonx.ecjtu.calendar.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.domain.usecase.cache.ClearCacheUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.cache.GetCacheSizeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveColorModeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.settings.ParseResult
@@ -33,7 +36,9 @@ class SettingsViewModel(
     private val saveUpdateSettingUseCase: SaveUpdateSettingUseCase,
     private val updateManager: UpdateManager,
     private val clearCacheUseCase: ClearCacheUseCase,
-    private val getCacheSizeUseCase: GetCacheSizeUseCase
+    private val getCacheSizeUseCase: GetCacheSizeUseCase,
+    private val saveColorModeUseCase: SaveColorModeUseCase,
+    private val getColorModeUseCase: GetColorModeUseCase
 ) : ViewModel() {
 
     // 私有的可变状态流，仅在 ViewModel 内部修改
@@ -57,17 +62,11 @@ class SettingsViewModel(
                 _uiState.update { it.copy(isAutoUpdateCheckEnabled = isEnabled) }
             }
         }
-//        viewModelScope.launch {
-//            updateManager.state.collect { updateState ->
-//                _uiState.update {
-//                    it.copy(
-//                        isCheckingForUpdate = updateState.isChecking,
-//                        availableUpdateInfo = updateState.updateInfo,
-//                        downloadState = updateState.downloadState
-//                    )
-//                }
-//            }
-//        }
+        viewModelScope.launch {
+            getColorModeUseCase().collect { colorMode ->
+                _uiState.update { it.copy(colorMode = colorMode) }
+            }
+        }
         viewModelScope.launch {
             updateManager.effect.collect { managerEffect ->
                 when (managerEffect) {
@@ -143,6 +142,16 @@ class SettingsViewModel(
             is SettingsEvent.OnAutoUpdateCheckChanged -> {
                 viewModelScope.launch {
                     saveUpdateSettingUseCase(event.isEnabled)
+                }
+            }
+            is SettingsEvent.OnColorModeChanged -> {
+                viewModelScope.launch {
+                    saveColorModeUseCase(event.colorCode)
+                    _uiState.update {
+                        it.copy(
+                            colorMode = event.colorCode
+                        )
+                    }
                 }
             }
             is SettingsEvent.OnSaveClick -> {

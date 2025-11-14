@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,8 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
         val WEIXIN_ID = stringPreferencesKey("weixin_id")
 
         val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
+
+        val COLOR_MODE = intPreferencesKey("color_mode")
     }
 
     override fun getWeiXinID(): Flow<String> {
@@ -43,6 +46,18 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
     override suspend fun setAutoUpdateCheckEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.AUTO_UPDATE_CHECK] = enabled
+        }
+    }
+
+    override fun getColorModeSetting(): Flow<Int> {
+        return context.dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.COLOR_MODE] ?: 0
+        }
+    }
+
+    override suspend fun saveColorModeSetting(mode: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.COLOR_MODE] = mode
         }
     }
 }

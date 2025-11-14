@@ -46,4 +46,9 @@ class CalendarRepositoryImpl(
 
     override suspend fun saveAutoUpdateCheckSetting(enabled: Boolean) =
         localDataSource.setAutoUpdateCheckEnabled(enabled)
+
+    override suspend fun saveColorModeSetting( mode: Int) =
+        localDataSource.saveColorModeSetting(mode)
+
+    override fun getColorModeSetting() = localDataSource.getColorModeSetting()
 }

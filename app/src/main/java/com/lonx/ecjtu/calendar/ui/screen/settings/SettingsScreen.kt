@@ -77,7 +77,7 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 @Destination<RootGraph>(label = "设置")
-fun SettingScreen(
+fun SettingsScreen(
     navigator: DestinationsNavigator
 ) {
     val viewModel: SettingsViewModel = koinViewModel()

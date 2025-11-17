@@ -32,7 +32,7 @@ import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
 import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.SettingScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -114,7 +114,7 @@ fun MainScreen(
                         navigationIcon = {
                             IconButton(
                                 onClick = {
-                                    navigator.navigate(SettingScreenDestination())
+                                    navigator.navigate(SettingsScreenDestination())
                                 },
                                 modifier = Modifier.padding(start = 16.dp)
                             ) {

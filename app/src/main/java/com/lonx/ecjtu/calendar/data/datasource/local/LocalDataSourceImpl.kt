@@ -1,12 +1,12 @@
 package com.lonx.ecjtu.calendar.data.datasource.local
 
-
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -32,9 +32,7 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
     }
 
     override suspend fun saveWeiXinID(weiXinId: String) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.WEIXIN_ID] = weiXinId
-        }
+        context.dataStore.edit { preferences -> preferences[PreferencesKeys.WEIXIN_ID] = weiXinId }
     }
 
     override fun getAutoUpdateCheckEnabled(): Flow<Boolean> {
@@ -56,8 +54,23 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
     }
 
     override suspend fun saveColorModeSetting(mode: Int) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.COLOR_MODE] = mode
-        }
+        context.dataStore.edit { preferences -> preferences[PreferencesKeys.COLOR_MODE] = mode }
+    }
+
+    private fun lastRefreshKey(term: String) = longPreferencesKey("score_last_refresh_$term")
+
+    override fun getScoreLastRefresh(term: String): Flow<Long> {
+        val key = lastRefreshKey(term)
+        return context.dataStore.data.map { prefs -> prefs[key] ?: 0L }
+    }
+
+    override suspend fun saveScoreLastRefresh(term: String, timestampMillis: Long) {
+        val key = lastRefreshKey(term)
+        context.dataStore.edit { preferences -> preferences[key] = timestampMillis }
+    }
+
+    override suspend fun removeScoreLastRefresh(term: String) {
+        val key = lastRefreshKey(term)
+        context.dataStore.edit { preferences -> preferences.remove(key) }
     }
 }

@@ -2,27 +2,50 @@ package com.lonx.ecjtu.calendar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.domain.usecase.score.GetScoreUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase // 1. Import the new Use Case
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ScoreViewModel(
     private val getScoreUseCase: GetScoreUseCase,
-    private val getUserConfigUseCase: GetUserConfigUseCase // 2. Add the dependency to the constructor
+    private val getUserConfigUseCase: GetUserConfigUseCase, // 2. Add the dependency to the constructor
+    private val localDataSource: LocalDataSource
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ScoreScreenState())
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<ScoreScreenState> = _uiState.asStateFlow()
 
     private var currentWeiXinID: String? = null
 
     init {
         observeUserConfig()
+        observeTermRefresh()
+    }
+
+    private fun observeTermRefresh() {
+        viewModelScope.launch {
+            uiState.map { it.currentTerm }
+                .distinctUntilChanged()
+                .collectLatest { term ->
+                    if (term.isNotBlank()) {
+                        // subscribe to timestamp updates for the active term
+                        localDataSource.getScoreLastRefresh(term).collect { ts ->
+                            _uiState.update { it.copy(lastRefreshMillis = ts) }
+                        }
+                    } else {
+                        _uiState.update { it.copy(lastRefreshMillis = 0L) }
+                    }
+                }
+        }
     }
 
     private fun observeUserConfig() {
@@ -44,12 +67,18 @@ class ScoreViewModel(
     }
 
 
-    fun loadScores(term: String? = null) {
+    fun loadScores(term: String? = null, refresh: Boolean = false) {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val result = getScoreUseCase(term)
+            val result = if (refresh) {
+                // manual refresh: fetch from network (may save to local in repository)
+                getScoreUseCase(term)
+            } else {
+                // default: load from local DB
+                getScoreUseCase.getFromLocal(term)
+            }
 
             result.onSuccess { scorePage ->
                 _uiState.update {
@@ -60,6 +89,8 @@ class ScoreViewModel(
                         currentTerm = scorePage.currentTerm
                     )
                 }
+
+                // timestamp updates are handled by observeTermRefresh()
             }.onFailure { exception ->
                 _uiState.update {
                     it.copy(

@@ -12,4 +12,11 @@ interface LocalDataSource {
 
     suspend fun saveColorModeSetting(mode: Int)
     fun getColorModeSetting(): Flow<Int>
+
+    // Last network refresh timestamp for scores (per term). Returns 0L if not present.
+    fun getScoreLastRefresh(term: String): Flow<Long>
+
+    suspend fun saveScoreLastRefresh(term: String, timestampMillis: Long)
+
+    suspend fun removeScoreLastRefresh(term: String)
 }

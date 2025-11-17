@@ -1,7 +1,6 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone.getDefault
-import kotlin.apply
 
 plugins {
     alias(libs.plugins.android.application)
@@ -154,7 +153,10 @@ dependencies {
     implementation(libs.okhttp)
     // miuix库
     implementation(libs.miuix.android)
-
+    // room 数据库
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
     // 导航
     implementation(libs.core)
     ksp(libs.ksp)

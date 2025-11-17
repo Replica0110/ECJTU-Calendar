@@ -1,7 +1,9 @@
 package com.lonx.ecjtu.calendar.di
 
+import androidx.room.Room
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSourceImpl
+import com.lonx.ecjtu.calendar.data.datasource.local.ScoreDatabase
 import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSourceImpl
 import com.lonx.ecjtu.calendar.data.datasource.remote.UpdateDataSource
@@ -50,8 +52,22 @@ val dataModule = module {
         ScoreRepositoryImpl(
             jwxtDataSource = get(),
             localDataSource = get(),
-            htmlParser = get()
+            htmlParser = get(),
+            scoreDao = get()
         )
+    }
+
+    // Provide Room database and DAO for scores
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            ScoreDatabase::class.java,
+            "scores.db"
+        ).fallbackToDestructiveMigration(false).build()
+    }
+
+    single {
+        get<ScoreDatabase>().scoreDao()
     }
 
     single<UpdateRepository> {

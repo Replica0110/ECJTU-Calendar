@@ -17,5 +17,5 @@ data class ScoreScreenState(
     val availableTerms: List<String> = emptyList(),
     val currentTerm: String = "",
     val error: String? = null,
-    val colorMode: Int = 0
+    val lastRefreshMillis: Long = 0L
 )

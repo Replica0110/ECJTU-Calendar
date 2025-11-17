@@ -1,10 +1,23 @@
 package com.lonx.ecjtu.calendar.ui.screen.score
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +38,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.getWindowSize
@@ -51,22 +63,22 @@ fun ScoreScreen(
         modifier = Modifier
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
     ) {
-        if (!uiState.isLoading && uiState.error == null) {
-            Card(
-                modifier = Modifier.padding(12.dp)
-            ) {
-                SuperDropdown(
-                    title = "选择学期",
-                    items = uiState.availableTerms,
-                    selectedIndex = uiState.availableTerms.indexOf(uiState.currentTerm),
-                    onSelectedIndexChange = {
-                        if (uiState.availableTerms[it] != uiState.currentTerm) {
-                            viewModel.onTermSelected(uiState.availableTerms[it])
-                        }
-                    }
-                )
-            }
-        }
+//        if (!uiState.isLoading && uiState.error == null) {
+//            Card(
+//                modifier = Modifier.padding(12.dp)
+//            ) {
+//                SuperDropdown(
+//                    title = "选择学期",
+//                    items = uiState.availableTerms,
+//                    selectedIndex = uiState.availableTerms.indexOf(uiState.currentTerm),
+//                    onSelectedIndexChange = {
+//                        if (uiState.availableTerms[it] != uiState.currentTerm) {
+//                            viewModel.onTermSelected(uiState.availableTerms[it])
+//                        }
+//                    }
+//                )
+//            }
+//        }
         uiState.error?.let { errorMessage ->
             Box(
                 modifier = Modifier
@@ -77,7 +89,8 @@ fun ScoreScreen(
                     message = errorMessage,
                     type = MessageType.Warning,
                     onClick = {
-                        viewModel.loadScores()
+                        // 点击错误消息时执行手动刷新（从网络抓取并保存到数据库）
+                        viewModel.loadScores(refresh = true)
                     }
                 )
             }
@@ -92,7 +105,26 @@ fun ScoreScreen(
         ) {
             item {
                 if (!uiState.isLoading && uiState.error == null) {
-
+                    // 显示上次刷新时间
+                    val lastRefreshText = if (uiState.lastRefreshMillis > 0L) {
+                        android.text.format.DateUtils.getRelativeTimeSpanString(
+                            uiState.lastRefreshMillis,
+                            System.currentTimeMillis(),
+                            android.text.format.DateUtils.MINUTE_IN_MILLIS
+                        ).toString()
+                    } else {
+                        "未从网络刷新"
+                    }
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(6.dp)) {
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            text = "上次刷新于$lastRefreshText",
+                            style = MiuixTheme.textStyles.footnote1,
+                            color = MiuixTheme.colorScheme.onBackgroundVariant
+                        )
+                    }
 
                     uiState.scores.forEach {
                         ScoreCard(score = it)

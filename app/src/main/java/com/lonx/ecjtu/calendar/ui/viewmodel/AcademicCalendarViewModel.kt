@@ -3,14 +3,16 @@ package com.lonx.ecjtu.calendar.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
 import com.lonx.ecjtu.calendar.ui.screen.academiccalendar.AcademicCalendarUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URL
 
 class AcademicCalendarViewModel(
@@ -65,7 +67,9 @@ class AcademicCalendarViewModel(
     private fun cacheImage(url: String) {
         viewModelScope.launch {
             try {
-                val bytes = URL(url).openStream().use { it.readBytes() }
+                val bytes = withContext(Dispatchers.IO) {
+                    URL(url).openStream().use { it.readBytes() }
+                }
                 _uiState.update { it.copy(imageData = bytes) }
             } catch (e: Exception) {
                 Log.e("AcademicCalendar", "缓存图片失败: ${e.message}", e)

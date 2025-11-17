@@ -6,11 +6,11 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.lonx.ecjtu.calendar.BuildConfig
 import com.lonx.ecjtu.calendar.R
-import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.data.dto.GitHubReleaseDTO
 import com.lonx.ecjtu.calendar.data.dto.OutputMetadataDTO
-import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
 import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
+import com.lonx.ecjtu.calendar.data.model.DownloadState
+import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -32,7 +32,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
 
     override suspend fun checkForUpdate(): UpdateCheckResult = withContext(Dispatchers.IO) {
         try {
-            val response = RxHttp.get( GITHUB_API_URL)
+            val response = RxHttp.get(GITHUB_API_URL)
                 .execute()
 
             if (!response.isSuccessful) {
@@ -47,8 +47,10 @@ class UpdateDataSourceImpl: UpdateDataSource {
                 return@withContext UpdateCheckResult.ParsingError
             }
 
-            val downloadUrl = release?.assetDTOS?.firstOrNull { it.browser_download_url?.endsWith(".apk") == true }?.browser_download_url
-            val metadataUrl = release?.assetDTOS?.firstOrNull { it.browser_download_url?.endsWith(".json") == true }?.browser_download_url
+            val downloadUrl =
+                release?.assetDTOS?.firstOrNull { it.browserDownloadUrl?.endsWith(".apk") == true }?.browserDownloadUrl
+            val metadataUrl =
+                release?.assetDTOS?.firstOrNull { it.browserDownloadUrl?.endsWith(".json") == true }?.browserDownloadUrl
 
             val releaseNotes = release?.body?.trim()?.ifBlank { "没有提供具体的更新说明。" } ?: "没有提供具体的更新说明。"
 

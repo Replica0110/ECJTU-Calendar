@@ -68,6 +68,8 @@ import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.icons.other.GitHub
+import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -471,11 +473,11 @@ fun SettingScreen(
                 ) {
                     BasicComponent(
                         title = "应用版本",
-                        summary = "版本: ${BuildConfig.VERSION_NAME}\n编译时间: ${BuildConfig.BUILD_TIME}",
+                        summary = "版本: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\n编译时间: ${BuildConfig.BUILD_TIME}",
                         leftAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_version_24dp),
+                                imageVector = MiuixIcons.Useful.Info,
                                 contentDescription = "应用版本",
                                 tint = colorScheme.onBackground
                             )
@@ -505,7 +507,7 @@ fun SettingScreen(
                         leftAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_github_24dp),
+                                imageVector = MiuixIcons.Other.GitHub,
                                 contentDescription = "Github",
                                 tint = colorScheme.onBackground
                             )

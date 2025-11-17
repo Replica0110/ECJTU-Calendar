@@ -9,19 +9,26 @@ data class UpdateDTO(
     val downloadUrl: String,
     val releaseNotes: String
 )
+
 @Serializable
 data class GitHubReleaseDTO(
-    val tag_name: String?,
+    val url: String?,
+    @SerializedName("tag_name")
+    val tagName: String?,
+    val name: String?,
     val body: String?,
     @SerializedName("assets")
     val assetDTOS: List<AssetDTO>?
 ) {
     @Serializable
     data class AssetDTO(
-        val browser_download_url: String?,
-        val name: String?
+        @SerializedName("browser_download_url")
+        val browserDownloadUrl: String?,
+        val name: String?,
+        val url: String?
     )
 }
+
 @Serializable
 data class OutputMetadataDTO(
     val version: Int,

@@ -106,6 +106,8 @@
     *** Companion;
 }
 
+-keep class com.lonx.ecjtu.calendar.data.dto.** { *; }
+
 # 保持枚举类
 -keepclassmembers enum * {
     public static **[] values();

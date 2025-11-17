@@ -1,24 +1,33 @@
 package com.lonx.ecjtu.calendar.ui.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -72,15 +81,15 @@ fun CourseCard(
             ) {
                 CourseDetailRow(
                     // TODO(更新图标)
-                    icon = MiuixIcons.Useful.Info,
+                    icon = painterResource(R.drawable.ic_location),
                     text = "地点：${course.location.ifBlank { "N/A" }}"
                 )
                 CourseDetailRow(
-                    icon = MiuixIcons.Useful.Info,
+                    icon = painterResource(R.drawable.ic_teacher),
                     text = "教师：${course.teacher.ifBlank { "N/A" }}"
                 )
                 CourseDetailRow(
-                    icon = MiuixIcons.Useful.Info,
+                    icon = painterResource(R.drawable.ic_class_time),
                     text = "上课周：${course.duration.ifBlank { "N/A" }}"
                 )
             }
@@ -97,7 +106,7 @@ fun CourseCard(
  */
 @Composable
 private fun CourseDetailRow(
-    icon: ImageVector,
+    icon: Painter,
     text: String,
     modifier: Modifier = Modifier
 ) {
@@ -106,7 +115,7 @@ private fun CourseDetailRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = icon,
+            painter = icon,
             contentDescription = null,
             modifier = Modifier.size(18.dp),
             tint = MiuixTheme.colorScheme.onSecondaryVariant

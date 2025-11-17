@@ -58,7 +58,6 @@ val appModule = module {
     }
     viewModel {
         AcademicCalendarViewModel(
-            getColorModeUseCase = get(),
             getAcademicCalendarUseCase = get()
         )
     }

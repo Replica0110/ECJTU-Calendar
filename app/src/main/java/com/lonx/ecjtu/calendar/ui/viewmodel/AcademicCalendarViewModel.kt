@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
-import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
 import com.lonx.ecjtu.calendar.ui.screen.academiccalendar.AcademicCalendarUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,6 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 
 class AcademicCalendarViewModel(
-    private val getColorModeUseCase: GetColorModeUseCase,
     private val getAcademicCalendarUseCase: GetAcademicCalendarUseCase
 ): ViewModel() {
     private val _uiState = MutableStateFlow(AcademicCalendarUiState())
@@ -24,12 +22,6 @@ class AcademicCalendarViewModel(
     val uiState: StateFlow<AcademicCalendarUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            getColorModeUseCase().collect { colorMode ->
-                _uiState.update { it.copy(colorMode = colorMode) }
-            }
-        }
-        
         loadAcademicCalendar()
     }
     

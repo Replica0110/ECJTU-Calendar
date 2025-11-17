@@ -1,6 +1,5 @@
 package com.lonx.ecjtu.calendar
 
-import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -20,25 +19,24 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
+import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.generated.NavGraphs
-import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.Scaffold
 
 
 class MainActivity: ComponentActivity() {
-    private val viewModel: MainViewModel by lazy { getViewModel() }
+    private val viewModel: MainViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
 

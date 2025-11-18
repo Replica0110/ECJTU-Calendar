@@ -4,10 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [ScoreEntity::class],
+    entities = [ScoreEntity::class, SelectedCourseEntity::class],
     version = 1,
     exportSchema = false
 )
-abstract class ScoreDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun scoreDao(): ScoreDao
+    abstract fun selectedDao(): SelectedCourseDao
 }

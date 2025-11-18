@@ -7,4 +7,6 @@ object Constants {
     const val ACADEMIC_CALENDAR_URL = "${BASE_URL}/weixin/xiaoli.html"  // 校历页面
 
     const val SCORE_URL = "${BASE_URL}/weixin/ScoreQuery" // 成绩查询接口
+
+    const val SELECTED_COURSE_URL = "${BASE_URL}/weixin/ElectiveCourseCl"
 }

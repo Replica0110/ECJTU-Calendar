@@ -25,6 +25,10 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
         val COLOR_MODE = intPreferencesKey("color_mode")
     }
 
+    private fun lastScoreRefreshKey(term: String) = longPreferencesKey("score_last_refresh_$term")
+    private fun lastSelectedCourseRefreshKey(term: String) =
+        longPreferencesKey("selected_course_last_refresh_$term")
+
     override fun getWeiXinID(): Flow<String> {
         return context.dataStore.data.map { preferences ->
             preferences[PreferencesKeys.WEIXIN_ID] ?: ""
@@ -57,20 +61,35 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
         context.dataStore.edit { preferences -> preferences[PreferencesKeys.COLOR_MODE] = mode }
     }
 
-    private fun lastRefreshKey(term: String) = longPreferencesKey("score_last_refresh_$term")
 
     override fun getScoreLastRefresh(term: String): Flow<Long> {
-        val key = lastRefreshKey(term)
+        val key = lastScoreRefreshKey(term)
         return context.dataStore.data.map { prefs -> prefs[key] ?: 0L }
     }
 
     override suspend fun saveScoreLastRefresh(term: String, timestampMillis: Long) {
-        val key = lastRefreshKey(term)
+        val key = lastScoreRefreshKey(term)
         context.dataStore.edit { preferences -> preferences[key] = timestampMillis }
     }
 
     override suspend fun removeScoreLastRefresh(term: String) {
-        val key = lastRefreshKey(term)
+        val key = lastScoreRefreshKey(term)
+        context.dataStore.edit { preferences -> preferences.remove(key) }
+    }
+
+
+    override fun getSelectedCourseLastRefresh(term: String): Flow<Long> {
+        val key = lastSelectedCourseRefreshKey(term)
+        return context.dataStore.data.map { prefs -> prefs[key] ?: 0L }
+    }
+
+    override suspend fun saveSelectedCourseLastRefresh(term: String, timestampMillis: Long) {
+        val key = lastSelectedCourseRefreshKey(term)
+        context.dataStore.edit { preferences -> preferences[key] = timestampMillis }
+    }
+
+    override suspend fun removeSelectedCourseLastRefresh(term: String) {
+        val key = lastSelectedCourseRefreshKey(term)
         context.dataStore.edit { preferences -> preferences.remove(key) }
     }
 }

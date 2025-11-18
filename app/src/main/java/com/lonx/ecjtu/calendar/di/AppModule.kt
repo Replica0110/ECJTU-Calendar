@@ -4,6 +4,7 @@ import com.lonx.ecjtu.calendar.ui.viewmodel.AcademicCalendarViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.SelectedCourseViewModel
 import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
 import com.lonx.ecjtu.calendar.util.AppUpdateInstaller
 import com.lonx.ecjtu.calendar.util.AppUpdateInstallerImpl
@@ -59,6 +60,13 @@ val appModule = module {
     viewModel {
         AcademicCalendarViewModel(
             getAcademicCalendarUseCase = get()
+        )
+    }
+    viewModel {
+        SelectedCourseViewModel(
+            getSelectedCoursesUseCase = get(),
+            getUserConfigUseCase = get(),
+            localDataSource = get()
         )
     }
     single<AppUpdateInstaller> {

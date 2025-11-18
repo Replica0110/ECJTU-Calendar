@@ -5,6 +5,8 @@ import com.lonx.ecjtu.calendar.data.dto.CourseItemDTO
 import com.lonx.ecjtu.calendar.data.dto.ScheduleDTO
 import com.lonx.ecjtu.calendar.data.dto.ScoreDTO
 import com.lonx.ecjtu.calendar.data.dto.ScorePageData
+import com.lonx.ecjtu.calendar.data.dto.SelectedCourseDTO
+import com.lonx.ecjtu.calendar.data.dto.SelectedCoursePageData
 import org.jsoup.Jsoup
 import java.time.LocalDate
 
@@ -164,4 +166,102 @@ class HtmlParser {
             null
         }
     }
+
+    fun parseSelectedCoursePage(htmlContent: String): SelectedCoursePageData? {
+        return try {
+            val document = Jsoup.parse(htmlContent)
+
+            // 检查是否无已选课程
+            val noSelectedCourseElement =
+                document.select("a.btn-info:contains(该学期你暂无已选课程！)")
+            if (noSelectedCourseElement.isNotEmpty()) {
+                return SelectedCoursePageData(
+                    courses = emptyList(),
+                    availableTerms = emptyList(),
+                    currentTerm = "",
+                    error = "该学期你暂无已选课程！"
+                )
+            }
+
+            // 学期下拉框
+            val termElements = document.select("ul.dropdown-menu li a")
+            val availableTerms = termElements.map { it.text().trim() }
+
+            // 当前学期
+            val currentTerm = document.select("div.right span").last()?.text()?.trim() ?: ""
+
+            // 解析课程列表
+            val courseList = mutableListOf<SelectedCourseDTO>()
+            val courseRows = document.select("div.row")
+
+            for (row in courseRows) {
+                try {
+                    val textBlock = row.select("div.text").first() ?: continue
+
+                    // 课程名称和其余参数存在 a 标签的 href 中
+                    val courseLink = textBlock.select("a").first()
+                    val courseName = courseLink?.text()?.trim() ?: ""
+
+                    // href 参数
+                    val href = courseLink?.attr("href") ?: ""
+
+                    val requireRegex = Regex("courseRequire=([^&]+)")
+                    val periodRegex = Regex("period=([\\d.]+)")
+                    val creditRegex = Regex("creditHour=([\\d.]+)")
+                    val selectedTypeRegex = Regex("courseSelectType=([^&]+)")
+                    val selectTypeShowRegex = Regex("selectTypeShow=([^&]+)")
+                    val checkTypeRegex = Regex("checkType=([^&]+)")
+                    val yiXuanRegex = Regex("yiXuan=([^&]+)")
+
+                    val courseRequire = requireRegex.find(href)?.groupValues?.get(1) ?: ""
+                    val period =
+                        periodRegex.find(href)?.groupValues?.get(1)?.toDoubleOrNull() ?: 0.0
+                    val credit =
+                        creditRegex.find(href)?.groupValues?.get(1)?.toDoubleOrNull() ?: 0.0
+                    val selectedType = selectedTypeRegex.find(href)?.groupValues?.get(1) ?: ""
+                    val courseType = selectTypeShowRegex.find(href)?.groupValues?.get(1) ?: ""
+                    val checkType = checkTypeRegex.find(href)?.groupValues?.get(1) ?: ""
+                    val isSelected = yiXuanRegex.find(href)?.groupValues?.get(1) ?: ""
+
+                    // 解析教师、时间、教学班
+                    val teacher =
+                        textBlock.select("strong:contains(任课教师:) + span").text().trim()
+                    val classTime =
+                        textBlock.select("strong:contains(上课时间:) + span").text().trim()
+                    val className =
+                        textBlock.select("strong:contains(教学班名称:) + span").text().trim()
+
+                    val dto = SelectedCourseDTO(
+                        courseName = courseName,
+                        courseRequire = courseRequire,
+                        period = period,
+                        credit = credit,
+                        selectedType = selectedType,
+                        courseType = courseType,
+                        checkType = checkType,
+                        courseTeacher = teacher,
+                        isSelected = isSelected,
+                        className = className,
+                        classTime = classTime
+                    )
+
+                    courseList.add(dto)
+                } catch (e: Exception) {
+                    Log.w("HtmlParser", "Failed to parse a single course item.", e)
+                    continue
+                }
+            }
+
+            SelectedCoursePageData(
+                courses = courseList,
+                availableTerms = availableTerms,
+                currentTerm = currentTerm
+            )
+
+        } catch (e: Exception) {
+            Log.e("HtmlParser", "Failed to parse selected course page HTML.", e)
+            null
+        }
+    }
+
 }

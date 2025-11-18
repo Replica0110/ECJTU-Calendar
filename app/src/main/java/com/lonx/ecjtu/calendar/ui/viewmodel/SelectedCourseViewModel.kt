@@ -3,9 +3,9 @@ package com.lonx.ecjtu.calendar.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
-import com.lonx.ecjtu.calendar.domain.usecase.score.GetScoreUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.course.GetSelectedCoursesUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
-import com.lonx.ecjtu.calendar.ui.screen.score.ScoreUiState
+import com.lonx.ecjtu.calendar.ui.screen.course.SelectedCourseUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,14 +15,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ScoreViewModel(
-    private val getScoreUseCase: GetScoreUseCase,
-    private val getUserConfigUseCase: GetUserConfigUseCase, // 2. Add the dependency to the constructor
+class SelectedCourseViewModel(
+    private val getSelectedCoursesUseCase: GetSelectedCoursesUseCase,
+    private val getUserConfigUseCase: GetUserConfigUseCase,
     private val localDataSource: LocalDataSource
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(ScoreUiState())
-    val uiState: StateFlow<ScoreUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(SelectedCourseUiState())
+    val uiState: StateFlow<SelectedCourseUiState> = _uiState.asStateFlow()
 
     private var currentWeiXinID: String? = null
 
@@ -37,8 +36,7 @@ class ScoreViewModel(
                 .distinctUntilChanged()
                 .collectLatest { term ->
                     if (term.isNotBlank()) {
-                        // subscribe to timestamp updates for the active term
-                        localDataSource.getScoreLastRefresh(term).collect { ts ->
+                        localDataSource.getSelectedCourseLastRefresh(term).collect { ts ->
                             _uiState.update { it.copy(lastRefreshMillis = ts) }
                         }
                     } else {
@@ -53,7 +51,7 @@ class ScoreViewModel(
             getUserConfigUseCase().distinctUntilChanged().collect { newWeiXinID ->
                 currentWeiXinID = newWeiXinID
                 if (newWeiXinID.isNotBlank()) {
-                    loadScores()
+                    loadCourses()
                 } else {
                     _uiState.update {
                         it.copy(
@@ -66,31 +64,27 @@ class ScoreViewModel(
         }
     }
 
-
-    fun loadScores(term: String? = null, refresh: Boolean = false) {
+    fun loadCourses(term: String? = null, refresh: Boolean = false) {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             val result = if (refresh) {
-                // manual refresh: fetch from network (may save to local in repository)
-                getScoreUseCase(term)
+                getSelectedCoursesUseCase(term)
             } else {
-                // default: load from local DB
-                getScoreUseCase.getFromLocal(term)
+                getSelectedCoursesUseCase.getFromLocal(term)
             }
 
-            result.onSuccess { scorePage ->
+            result.onSuccess { coursePage ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        scores = scorePage.scores,
-                        availableTerms = scorePage.availableTerms,
-                        currentTerm = scorePage.currentTerm
+                        courses = coursePage.courses,
+                        availableTerms = coursePage.availableTerms,
+                        currentTerm = coursePage.currentTerm
                     )
                 }
 
-                // timestamp updates are handled by observeTermRefresh()
             }.onFailure { exception ->
                 _uiState.update {
                     it.copy(
@@ -103,6 +97,6 @@ class ScoreViewModel(
     }
 
     fun onTermSelected(newTerm: String) {
-        loadScores(term = newTerm)
+        loadCourses(term = newTerm)
     }
 }

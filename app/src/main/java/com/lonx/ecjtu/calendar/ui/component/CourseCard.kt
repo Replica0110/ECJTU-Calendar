@@ -1,6 +1,5 @@
 package com.lonx.ecjtu.calendar.ui.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,19 +46,8 @@ fun CourseCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(MiuixTheme.colorScheme.primary)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = "节次：${course.time}",
-                        color = MiuixTheme.colorScheme.onPrimary,
-                        style = MiuixTheme.textStyles.body2,
-                        maxLines = 1,
-                    )
-                }
+
+                SurfaceTag("节次：${course.time}")
 
                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -80,7 +66,6 @@ fun CourseCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 CourseDetailRow(
-                    // TODO(更新图标)
                     icon = painterResource(R.drawable.ic_location),
                     text = "地点：${course.location.ifBlank { "N/A" }}"
                 )

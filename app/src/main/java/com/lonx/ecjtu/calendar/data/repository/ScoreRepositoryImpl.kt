@@ -130,7 +130,7 @@ class ScoreRepositoryImpl(
             // 更新该学期的数据库后，基于数据库状态返回页面以保持UI一致性
             val dbTermsSingle = scoreDao.getAllTerms().first()
             val current =
-                if (term != null && dbTermsSingle.contains(term)) term else dbTermsSingle.firstOrNull()
+                if (dbTermsSingle.contains(term)) term else dbTermsSingle.firstOrNull()
                     .orEmpty()
             val scoresFromDb = if (current.isNotBlank()) scoreDao.getScoresByTerm(current).first()
                 .map { it.toDomain() } else emptyList()

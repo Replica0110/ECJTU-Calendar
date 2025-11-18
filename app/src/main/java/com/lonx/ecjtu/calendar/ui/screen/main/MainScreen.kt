@@ -28,8 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarScreen
+import com.lonx.ecjtu.calendar.ui.screen.course.SelectedCourseScreen
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreScreen
 import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.SelectedCourseViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
@@ -73,6 +75,10 @@ fun MainScreen(
         NavigationItem(
             label = "成绩",
             icon = ImageVector.vectorResource(R.drawable.ic_score_24dp)
+        ),
+        NavigationItem(
+            label = "已选课程",
+            icon = ImageVector.vectorResource(R.drawable.ic_pin_appwidget)
         )
     )
     val coroutineScope = rememberCoroutineScope()
@@ -89,8 +95,10 @@ fun MainScreen(
     val currentScrollBehavior = topAppBarScrollBehaviorList[pagerState.currentPage]
 
     val scoreViewModel: ScoreViewModel = koinViewModel()
+    val selectedCourseViewModel: SelectedCourseViewModel = koinViewModel()
 
     val scoreScreenState by scoreViewModel.uiState.collectAsStateWithLifecycle()
+    val selectedScreenState by selectedCourseViewModel.uiState.collectAsStateWithLifecycle()
 
     val showTopPopup = remember { mutableStateOf(false) }
     CompositionLocalProvider(
@@ -103,54 +111,50 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize(),
             topBar = {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
-                ) {
-                    TopAppBar(
-                        title = routes[pagerState.currentPage].label,
-                        scrollBehavior = currentScrollBehavior,
-                        navigationIcon = {
-                            IconButton(
-                                onClick = {
-                                    navigator.navigate(SettingsScreenDestination())
-                                },
-                                modifier = Modifier.padding(start = 16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = MiuixIcons.Useful.Settings,
-                                    contentDescription = "设置"
-                                )
-                            }
-                        },
-                        actions = {
-                            AnimatedVisibility(
-                                visible = pagerState.currentPage == 1,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                Row(modifier = Modifier.padding(end = 16.dp)) {
-                                    IconButton(
-                                        onClick = {
-                                            showTopPopup.value = true
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = MiuixIcons.Useful.Order,
-                                            contentDescription = "学期"
-                                        )
-                                    }
-                                    ListPopup(
-                                        show = showTopPopup,
-                                        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-                                        alignment = PopupPositionProvider.Align.BottomRight,
-                                        onDismissRequest = {
-                                            showTopPopup.value = false
-                                        },
-                                        enableWindowDim = false
-                                    ) {
-                                        ListPopupColumn {
+                TopAppBar(
+                    title = routes[pagerState.currentPage].label,
+                    scrollBehavior = currentScrollBehavior,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                navigator.navigate(SettingsScreenDestination())
+                            },
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Useful.Settings,
+                                contentDescription = "设置"
+                            )
+                        }
+                    },
+                    actions = {
+                        AnimatedVisibility(
+                            visible = pagerState.currentPage == 1 || pagerState.currentPage == 2,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Row(modifier = Modifier.padding(end = 16.dp)) {
+                                IconButton(
+                                    onClick = {
+                                        showTopPopup.value = true
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = MiuixIcons.Useful.Order,
+                                        contentDescription = "学期"
+                                    )
+                                }
+                                ListPopup(
+                                    show = showTopPopup,
+                                    popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
+                                    alignment = PopupPositionProvider.Align.TopRight,
+                                    onDismissRequest = {
+                                        showTopPopup.value = false
+                                    },
+                                    enableWindowDim = false
+                                ) {
+                                    ListPopupColumn {
+                                        if (pagerState.currentPage == 1) {
                                             scoreScreenState.availableTerms.forEach { term ->
                                                 DropdownImpl(
                                                     text = term,
@@ -165,24 +169,41 @@ fun MainScreen(
                                                     }
                                                 )
                                             }
+                                        } else {
+                                            selectedScreenState.availableTerms.forEach { term ->
+                                                DropdownImpl(
+                                                    text = term,
+                                                    optionSize = selectedScreenState.availableTerms.size,
+                                                    isSelected = selectedScreenState.currentTerm == term,
+                                                    index = selectedScreenState.availableTerms.indexOf(
+                                                        term
+                                                    ),
+                                                    onSelectedIndexChange = {
+                                                        showTopPopup.value = false
+                                                        selectedCourseViewModel.onTermSelected(
+                                                            term
+                                                        )
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
-                                    IconButton(
-                                        onClick = {
-                                            showRefreshDialog.value = true
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = MiuixIcons.Useful.Refresh,
-                                            contentDescription = "刷新"
-                                        )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        showRefreshDialog.value = true
                                     }
+                                ) {
+                                    Icon(
+                                        imageVector = MiuixIcons.Useful.Refresh,
+                                        contentDescription = "刷新"
+                                    )
                                 }
                             }
                         }
+                    }
 
-                    )
-                }
+                )
             },
             bottomBar = {
                 NavigationBar(
@@ -206,18 +227,24 @@ fun MainScreen(
                     1 -> ScoreScreen(
                         topAppBarScrollBehavior = topAppBarScrollBehaviorList[it]
                     )
+
+                    2 -> {
+                        SelectedCourseScreen(
+                            topAppBarScrollBehavior = topAppBarScrollBehaviorList[it]
+                        )
+                    }
                 }
             }
             SuperDialog(
                 modifier = Modifier.padding(bottom = 16.dp),
                 show = showRefreshDialog,
-                title = "刷新数据",
+                title = "重新获取数据？",
                 onDismissRequest = {
                     showRefreshDialog.value = false
                 },
                 content = {
                     Text(
-                        text = "是否重新从教务系统获取成绩数据？\n这可能需要一点时间",
+                        text = "是否重新从教务系统获取数据？\n这可能需要一点时间",
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Row(
@@ -234,7 +261,11 @@ fun MainScreen(
                         TextButton(
                             text = "确定",
                             onClick = {
-                                scoreViewModel.loadScores(refresh = true)
+                                if (pagerState.currentPage == 2) {
+                                    selectedCourseViewModel.loadCourses(refresh = true)
+                                } else if (pagerState.currentPage == 1) {
+                                    scoreViewModel.loadScores(refresh = true)
+                                }
                                 showRefreshDialog.value = false
                             },
                             modifier = Modifier.weight(1f),

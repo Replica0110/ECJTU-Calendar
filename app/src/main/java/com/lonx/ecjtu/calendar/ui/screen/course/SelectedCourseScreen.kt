@@ -1,4 +1,4 @@
-package com.lonx.ecjtu.calendar.ui.screen.score
+package com.lonx.ecjtu.calendar.ui.screen.course
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,17 +22,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lonx.ecjtu.calendar.domain.model.Score
+import com.lonx.ecjtu.calendar.domain.model.SelectedCourse
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.component.SurfaceTag
-import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
-import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
+import com.lonx.ecjtu.calendar.ui.viewmodel.SelectedCourseViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -43,40 +42,23 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-@Destination<RootGraph>(label = "我的成绩")
-fun ScoreScreen(
+@Destination<RootGraph>(label = "已选课程")
+fun SelectedCourseScreen(
     topAppBarScrollBehavior: ScrollBehavior
 ) {
-    val viewModel: ScoreViewModel = koinViewModel()
+    val viewModel: SelectedCourseViewModel = koinViewModel()
     val windowSize = getWindowSize()
     val uiState by viewModel.uiState.collectAsState()
-    // 只有当没有数据时才加载，避免重复请求
-    LaunchedEffect(uiState.scores) {
-        if (uiState.scores.isEmpty() && uiState.error == null && !uiState.isLoading) {
-            viewModel.loadScores()
+
+    LaunchedEffect(uiState.courses) {
+        if (uiState.courses.isEmpty() && uiState.error == null && !uiState.isLoading) {
+            viewModel.loadCourses()
         }
     }
-
     Column(
         modifier = Modifier
             .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
     ) {
-//        if (!uiState.isLoading && uiState.error == null) {
-//            Card(
-//                modifier = Modifier.padding(12.dp)
-//            ) {
-//                SuperDropdown(
-//                    title = "选择学期",
-//                    items = uiState.availableTerms,
-//                    selectedIndex = uiState.availableTerms.indexOf(uiState.currentTerm),
-//                    onSelectedIndexChange = {
-//                        if (uiState.availableTerms[it] != uiState.currentTerm) {
-//                            viewModel.onTermSelected(uiState.availableTerms[it])
-//                        }
-//                    }
-//                )
-//            }
-//        }
         uiState.error?.let { errorMessage ->
             Box(
                 modifier = Modifier
@@ -88,7 +70,7 @@ fun ScoreScreen(
                     type = MessageType.Warning,
                     onClick = {
                         // 点击错误消息时执行手动刷新（从网络抓取并保存到数据库）
-                        viewModel.loadScores(refresh = true)
+                        viewModel.loadCourses(refresh = true)
                     }
                 )
             }
@@ -126,8 +108,8 @@ fun ScoreScreen(
                         )
                     }
 
-                    uiState.scores.forEach {
-                        ScoreCard(score = it, term = uiState.currentTerm)
+                    uiState.courses.forEach {
+                        CourseCard(course = it, term = uiState.currentTerm)
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
@@ -142,12 +124,14 @@ fun ScoreScreen(
             }
         }
     }
-
 }
 
-
 @Composable
-private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier) {
+private fun CourseCard(
+    course: SelectedCourse,
+    term: String,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -155,102 +139,138 @@ private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier)
         insideMargin = PaddingValues(16.dp),
         pressFeedbackType = PressFeedbackType.Sink
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
 
+            /* -------------------- 标题 & 学期 -------------------- */
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = score.courseName,
+                    text = course.courseName,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 22.sp
                 )
+                Text(
+                    text = term,
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onBackgroundVariant
+                )
+            }
 
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SurfaceTag(text = "教师: ${course.courseTeacher}")
+                SurfaceTag(text = "考核方式: ${course.checkType}")
+            }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SurfaceTag(text = "学分: ${score.credit}")
-                    SurfaceTag(text = score.courseType)
-                }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "教学班名称",
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onBackgroundVariant
+                )
+                Text(
+                    text = course.className,
+                    style = MiuixTheme.textStyles.footnote1
+                )
+            }
+            if (course.classTime.isNotEmpty()) {
                 Column(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "课程代码: ${score.courseCode}",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onBackgroundVariant
-                        )
+                    Text(
+                        text = "上课时间",
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onBackgroundVariant
+                    )
+                    Text(
+                        text = course.classTime,
+                        style = MiuixTheme.textStyles.footnote1
+                    )
+                }
 
-                        Text(
-                            text = "学期: $term",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onBackgroundVariant
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        if (score.retakeScore.isNotBlank()) {
-                            Text(
-                                text = "重考成绩: ${score.retakeScore}",
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = MiuixTheme.colorScheme.onBackgroundVariant
-                            )
-                        }
-                        if (score.relearnScore.isNotBlank()) {
-                            Text(
-                                text = "重修成绩: ${score.relearnScore}",
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = MiuixTheme.colorScheme.onBackgroundVariant
-                            )
-                        }
-                    }
+            }
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    InfoItem(title = "课程类型", value = course.courseRequire)
+
+                    InfoItem(title = "类型", value = course.courseType)
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    InfoItem(title = "学时", value = "${course.period}")
+                    InfoItem(title = "学分", value = "${course.credit}")
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+
+                    InfoItem(title = "选课模块", value = course.selectedType)
+                    InfoItem(title = "状态", value = course.isSelected)
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = score.finalScore,
-                style = MiuixTheme.textStyles.title2,
-                fontWeight = FontWeight.Bold,
-                color = MiuixTheme.colorScheme.primary
-            )
         }
     }
 }
 
-
-// 添加预览函数
-@Preview(showBackground = true)
 @Composable
-private fun ScoreCardPreview() {
-    CalendarTheme {
-        ScoreCard(
-            score = Score(
-                courseName = "高等数学",
-                courseCode = "MATH101",
-                credit = 5.0,
-                finalScore = "95",
-                retakeScore = "88",
-                relearnScore = "99",
-                courseType = "必修"
-            ),
-            term = "2023.1"
+private fun InfoItem(title: String, value: String) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = title,
+            style = MiuixTheme.textStyles.footnote1,
+            color = MiuixTheme.colorScheme.onBackgroundVariant
+        )
+        Text(
+            text = value,
+            style = MiuixTheme.textStyles.footnote1,
+            fontWeight = FontWeight.Medium
         )
     }
+}
+
+
+@Preview
+@Composable
+fun CourseCardPreview() {
+    CourseCard(
+        course = SelectedCourse(
+            courseName = "计算机组成原理",
+            courseTeacher = "王伟",
+            classTime = "第2-18周 星期三 第1,2节(单)[10-111]|第2-18周 星期一 第1,2节[10-103]|",
+            courseType = "必修",
+            checkType = "考查",
+            selectedType = "计划内选课",
+            period = 32.0,
+            credit = 2.0,
+            isSelected = "已选",
+            className = "计算机组成原理(20231-1)",
+            courseRequire = "必修课"
+        ),
+        term = "2023.1"
+    )
 }

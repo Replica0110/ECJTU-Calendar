@@ -5,6 +5,7 @@ import com.lonx.ecjtu.calendar.domain.usecase.cache.ClearCacheUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.cache.GetCacheSizeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.course.GetSelectedCoursesUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.score.GetScoreUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
@@ -50,5 +51,8 @@ val domainModule = module {
     }
     factory {
         GetScoreUseCase(repository = get())
+    }
+    factory {
+        GetSelectedCoursesUseCase(repository = get())
     }
 }

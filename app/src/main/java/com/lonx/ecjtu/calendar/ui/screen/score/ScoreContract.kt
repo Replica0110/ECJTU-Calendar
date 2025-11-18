@@ -11,7 +11,7 @@ import com.lonx.ecjtu.calendar.domain.model.Score
  * @param currentTerm 当前显示的成绩所属的学期。
  * @param error 如果发生错误，则包含错误消息，否则为null。
  */
-data class ScoreScreenState(
+data class ScoreUiState(
     val isLoading: Boolean = false,
     val scores: List<Score> = emptyList(),
     val availableTerms: List<String> = emptyList(),

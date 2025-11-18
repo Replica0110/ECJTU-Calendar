@@ -19,4 +19,10 @@ interface LocalDataSource {
     suspend fun saveScoreLastRefresh(term: String, timestampMillis: Long)
 
     suspend fun removeScoreLastRefresh(term: String)
+
+    fun getSelectedCourseLastRefresh(term: String): Flow<Long>
+
+    suspend fun saveSelectedCourseLastRefresh(term: String, timestampMillis: Long)
+
+    suspend fun removeSelectedCourseLastRefresh(term: String)
 }

@@ -179,44 +179,26 @@ private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier)
                     SurfaceTag(text = "学分: ${score.credit}")
                     SurfaceTag(text = score.courseType)
                 }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "课程代码: ${score.courseCode}",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onBackgroundVariant
-                        )
 
-                        Text(
-                            text = "学期: $term",
-                            style = MiuixTheme.textStyles.footnote1,
-                            color = MiuixTheme.colorScheme.onBackgroundVariant
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        if (score.retakeScore.isNotBlank()) {
-                            Text(
-                                text = "重考成绩: ${score.retakeScore}",
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = MiuixTheme.colorScheme.onBackgroundVariant
-                            )
+                        InfoItem(title = "课程代码", value = score.courseCode)
+                        if (score.retakeScore.isNotEmpty()) {
+                            InfoItem(title = "重考成绩", value = score.retakeScore)
                         }
-                        if (score.relearnScore.isNotBlank()) {
-                            Text(
-                                text = "重修成绩: ${score.relearnScore}",
-                                style = MiuixTheme.textStyles.footnote1,
-                                color = MiuixTheme.colorScheme.onBackgroundVariant
-                            )
+                    }
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        InfoItem(title = "学期", value = term)
+                        if (score.relearnScore.isNotEmpty()) {
+                            InfoItem(title = "重修成绩", value = score.relearnScore)
                         }
                     }
                 }
@@ -234,8 +216,25 @@ private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier)
     }
 }
 
+@Composable
+private fun InfoItem(title: String, value: String) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = title,
+            style = MiuixTheme.textStyles.footnote1,
+            color = MiuixTheme.colorScheme.onBackgroundVariant
+        )
+        Text(
+            text = value,
+            style = MiuixTheme.textStyles.footnote1,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
 
-// 添加预览函数
 @Preview(showBackground = true)
 @Composable
 private fun ScoreCardPreview() {

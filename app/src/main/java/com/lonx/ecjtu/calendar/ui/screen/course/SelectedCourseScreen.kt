@@ -196,7 +196,7 @@ private fun CourseCard(
                         color = MiuixTheme.colorScheme.onBackgroundVariant
                     )
                     Text(
-                        text = course.classTime,
+                        text = course.classTime.replace("|", "\n").removeSuffix("\n"),
                         style = MiuixTheme.textStyles.footnote1
                     )
                 }
@@ -211,9 +211,9 @@ private fun CourseCard(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    InfoItem(title = "课程类型", value = course.courseRequire)
+                    InfoItem(title = "课程要求", value = course.courseRequire)
 
-                    InfoItem(title = "类型", value = course.courseType)
+                    InfoItem(title = "选课类型", value = course.courseType)
                 }
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -226,7 +226,7 @@ private fun CourseCard(
                 ) {
 
                     InfoItem(title = "选课模块", value = course.selectedType)
-                    InfoItem(title = "状态", value = course.isSelected)
+                    InfoItem(title = "选课状态", value = course.isSelected)
                 }
             }
 

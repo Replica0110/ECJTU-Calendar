@@ -196,7 +196,7 @@ private fun CourseCard(
                         color = MiuixTheme.colorScheme.onBackgroundVariant
                     )
                     Text(
-                        text = course.classTime,
+                        text = course.classTime.replace("|", "\n").removeSuffix("\n"),
                         style = MiuixTheme.textStyles.footnote1
                     )
                 }

@@ -1,5 +1,7 @@
 package com.lonx.ecjtu.calendar.ui.screen.course
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,12 +13,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,7 +39,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -132,7 +138,12 @@ private fun CourseCard(
     term: String,
     modifier: Modifier = Modifier
 ) {
+    var expanded by remember { mutableStateOf(true) }
+
     Card(
+        onClick = {
+            expanded = !expanded
+        },
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp),
@@ -144,7 +155,6 @@ private fun CourseCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            /* -------------------- 标题 & 学期 -------------------- */
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -168,68 +178,54 @@ private fun CourseCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SurfaceTag(text = "教师: ${course.courseTeacher}")
-                SurfaceTag(text = "考核方式: ${course.checkType}")
+                SurfaceTag(text = course.checkType)
             }
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = "教学班名称",
-                    style = MiuixTheme.textStyles.footnote1,
-                    color = MiuixTheme.colorScheme.onBackgroundVariant
-                )
-                Text(
-                    text = course.className,
-                    style = MiuixTheme.textStyles.footnote1
-                )
-            }
-            if (course.classTime.isNotEmpty()) {
+            AnimatedVisibility(visible = expanded) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = "上课时间",
-                        style = MiuixTheme.textStyles.footnote1,
-                        color = MiuixTheme.colorScheme.onBackgroundVariant
+                    InfoItem(
+                        title = "教学班名称",
+                        value = course.className
                     )
-                    Text(
-                        text = course.classTime.replace("|", "\n").removeSuffix("\n"),
-                        style = MiuixTheme.textStyles.footnote1
-                    )
+                    if (course.classTime.isNotEmpty()) {
+                        InfoItem(
+                            title = "上课时间",
+                            value = course.classTime.replace("|", "\n").removeSuffix("\n")
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            InfoItem(title = "课程要求", value = course.courseRequire)
+
+                            InfoItem(title = "选课类型", value = course.courseType)
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            InfoItem(title = "学时", value = "${course.period}")
+                            InfoItem(title = "学分", value = "${course.credit}")
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+
+                            InfoItem(title = "选课模块", value = course.selectedType)
+                            InfoItem(title = "选课状态", value = course.isSelected)
+                        }
+
+                    }
                 }
+
 
             }
-            HorizontalDivider()
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    InfoItem(title = "课程要求", value = course.courseRequire)
-
-                    InfoItem(title = "选课类型", value = course.courseType)
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    InfoItem(title = "学时", value = "${course.period}")
-                    InfoItem(title = "学分", value = "${course.credit}")
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-
-                    InfoItem(title = "选课模块", value = course.selectedType)
-                    InfoItem(title = "选课状态", value = course.isSelected)
-                }
-            }
-
         }
     }
 }
@@ -245,11 +241,18 @@ private fun InfoItem(title: String, value: String) {
             style = MiuixTheme.textStyles.footnote1,
             color = MiuixTheme.colorScheme.onBackgroundVariant
         )
-        Text(
-            text = value,
-            style = MiuixTheme.textStyles.footnote1,
-            fontWeight = FontWeight.Medium
-        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(MiuixTheme.colorScheme.secondaryContainer)
+                .padding(horizontal = 6.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = value,
+                style = MiuixTheme.textStyles.footnote1,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 

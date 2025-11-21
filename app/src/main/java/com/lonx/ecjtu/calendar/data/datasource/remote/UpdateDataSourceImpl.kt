@@ -52,9 +52,11 @@ class UpdateDataSourceImpl: UpdateDataSource {
             val metadataUrl =
                 release?.assetDTOS?.firstOrNull { it.browserDownloadUrl?.endsWith(".json") == true }?.browserDownloadUrl
 
+            val size = release?.assetDTOS?.firstOrNull()?.size
+
             val releaseNotes = release?.body?.trim()?.ifBlank { "没有提供具体的更新说明。" } ?: "没有提供具体的更新说明。"
 
-            if (downloadUrl == null || metadataUrl == null) {
+            if (downloadUrl == null || metadataUrl == null || size == null) {
                 Log.e(TAG, "Required assets (APK or metadata) are missing.")
                 return@withContext UpdateCheckResult.ParsingError
             }
@@ -86,9 +88,10 @@ class UpdateDataSourceImpl: UpdateDataSource {
             return@withContext if (latestVersionCode > currentVersionCode) {
                 UpdateCheckResult.NewVersion(
                     UpdateDTO(
-                        latestVersionName,
-                        downloadUrl,
-                        releaseNotes
+                        versionName = latestVersionName,
+                        downloadUrl = downloadUrl,
+                        releaseNotes = releaseNotes,
+                        size = size,
                     )
                 )
             } else {

@@ -110,7 +110,7 @@ class MainActivity: ComponentActivity() {
                     UpdateBottomSheet(
                         updateState = updateState,
                         onDismiss = {
-                            updateManager.resetUpdateState()
+//                            updateManager.resetUpdateState()
                         },
                         onDownload = {
                             updateManager.startDownload(context =  context)

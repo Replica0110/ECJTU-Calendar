@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 data class UpdateDTO(
     val versionName: String,
     val downloadUrl: String,
-    val releaseNotes: String
+    val releaseNotes: String,
+    val size: Long,
 )
 
 @Serializable
@@ -25,7 +26,8 @@ data class GitHubReleaseDTO(
         @SerializedName("browser_download_url")
         val browserDownloadUrl: String?,
         val name: String?,
-        val url: String?
+        val url: String?,
+        val size: Long?
     )
 }
 

@@ -1,22 +1,39 @@
 package com.lonx.ecjtu.calendar.ui.component
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.util.UpdateState
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.extra.SuperBottomSheet
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import java.io.File
 
-// TODO(优化布局)
 @Composable
 fun UpdateBottomSheet(
     updateState: UpdateState,
@@ -59,107 +76,311 @@ fun UpdateBottomSheet(
             onDismissRequest = {
                 // 用户拖拽或点击外部导致的 dismiss —— 先隐藏本地 sheet，再走 onDismiss 由外部处理状态清理
                 showSheet = false
-            },
-            leftAction = {
-                TextButton(
-                    onClick = {
-                        showSheet = false
-                    },
-                    text = "取消"
-                )
-            },
-            rightAction = {
-                val ds = updateState.downloadState
-                when (ds) {
-                    is DownloadState.InProgress -> {
-                        IconButton(
-                            onClick = {
-                                onCancelDownload()
-                            }
-                        ) {
-                            Text(text = "取消下载")
-                        }
-                    }
-
-                    is DownloadState.Success -> {
-                        IconButton(
-                            onClick = {
-                                onInstall()
-                            }
-                        ) {
-                            Text(text = "安装更新")
-                        }
-                    }
-
-                    else -> {
-                        IconButton(
-                            onClick = {
-                                onDownload()
-                            }
-                        ) {
-                            Text(text = "下载更新")
-                        }
-                    }
-                }
             }
         ) {
             // 内容区：安全读取 updateDTO 的字段（使用安全调用和默认文本）
-            Column(
+
+            val sizeText = updateState.updateDTO?.size ?: 0L
+            if (sizeText != 0L) {
+                Text(
+                    text = "安装包大小：${sizeText / 1024 / 1024}MB",
+                    style = MiuixTheme.textStyles.footnote1,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // 更新日志
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalAlignment = Alignment.Start
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MiuixTheme.colorScheme.secondaryContainer)
+                    .padding(8.dp)
             ) {
+                MarkdownText(
+                    markdown = updateState.updateDTO?.releaseNotes ?: "更新内容未提供",
+                    style = MiuixTheme.textStyles.body2
+                )
+            }
 
-//                val sizeText = updateState.updateDTO?.size ?: ""
-//                if (sizeText.isNotEmpty()) {
-//                    Text(text = "包大小：$sizeText", style = MaterialTheme.typography.bodyMedium)
-//                    Spacer(modifier = Modifier.height(8.dp))
-//                }
+            Spacer(modifier = Modifier.height(12.dp))
 
-                // 更新日志
-                Card(modifier = Modifier.fillMaxWidth(), insideMargin = PaddingValues(16.dp)) {
-                    MarkdownText(
-                        markdown = updateState.updateDTO?.releaseNotes ?: "更新内容未提供",
-                        style = MiuixTheme.textStyles.main
+            // 下载状态视图
+            when (val ds2 = updateState.downloadState) {
+                is DownloadState.InProgress -> {
+                    val p = (ds2.progress.coerceIn(0, 100)) / 100f
+
+                    ProgressButton(
+                        text = "下载中 ${ds2.progress}%",
+                        progress = p,
+                        onClick = {
+                            onCancelDownload()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                }
+
+
+                is DownloadState.Error -> {
+                    Text(
+                        text = "下载失败：${ds2.exception.message ?: "未知错误"}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        style = MiuixTheme.textStyles.footnote1
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        text = "重试",
+                        onClick = {
+                            onDownload()
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                is DownloadState.Success -> {
 
-                // 下载状态视图
-                when (val ds2 = updateState.downloadState) {
-                    is DownloadState.InProgress -> {
-                        val progressFloat = (ds2.progress.coerceIn(0, 100)) / 100f
-                        LinearProgressIndicator(progress = progressFloat)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "下载中：${ds2.progress}%")
-                    }
-
-                    is DownloadState.Error -> {
-                        MessageCard(
-                            message = "下载失败：${ds2.exception},点击重试",
-                            type = MessageType.Error,
-                            onClick = {
-                                onDownload()
-                            }
-                        )
-                    }
-
-                    is DownloadState.Success -> {
-                        MessageCard(
-                            message = "下载完成",
-                            type = MessageType.Info,
-                            onClick = {
-                                onInstall()
-                            }
-                        )
-                    }
-
-                    DownloadState.Idle -> {
-                        // nothing
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        text = "安装更新",
+                        onClick = {
+                            onInstall()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.textButtonColorsPrimary()
+                    )
                 }
+
+                DownloadState.Idle -> {
+                    TextButton(
+                        text = "下载更新",
+                        onClick = {
+                            onDownload()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+fun ProgressButton(
+    text: String,
+    progress: Float?,       // null = 普通按钮；非 null = 显示进度条（0f~1f）
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val contentColor = MiuixTheme.colorScheme.onBackground
+
+    Box(
+        modifier = modifier
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(enabled = enabled && (progress == null)) {
+                onClick()
+            }
+    ) {
+
+        if (progress != null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MiuixTheme.colorScheme.secondaryVariant)
+            )
+
+            // 已下载部分填充
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(progress)
+                    .background(MiuixTheme.colorScheme.primaryVariant)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                color = contentColor,
+                style = MiuixTheme.textStyles.main
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateBottomSheetPreview() {
+    // 创建预览用的模拟数据
+    val updateDTO = UpdateDTO(
+        versionName = "v2.1.0",
+        downloadUrl = "https://example.com/update.apk",
+        releaseNotes = """
+            ## 更新内容
+
+            - 修复了一些已知问题
+            - 优化了界面显示效果
+            - 提升了性能表现
+
+            感谢您的使用！
+        """.trimIndent(),
+        size = 18215242
+    )
+
+    val updateStateIdle = UpdateState(
+        isChecking = false,
+        updateDTO = updateDTO,
+        downloadState = DownloadState.Idle,
+        info = null
+    )
+
+    MiuixTheme {
+        Scaffold(
+        ) {
+            Box(modifier = Modifier.padding(it)) {
+                UpdateBottomSheet(
+                    updateState = updateStateIdle,
+                    onDismiss = {},
+                    onDownload = {},
+                    onCancelDownload = {},
+                    onInstall = {}
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateBottomSheetDownloadingPreview() {
+    // 创建预览用的模拟数据
+    val updateDTO = UpdateDTO(
+        versionName = "v2.1.0",
+        downloadUrl = "https://example.com/update.apk",
+        releaseNotes = """
+            ## 更新内容
+
+            - 修复了一些已知问题
+            - 优化了界面显示效果
+            - 提升了性能表现
+
+            感谢您的使用！
+        """.trimIndent(),
+        size = 1024 * 1024 * 10
+    )
+
+    val updateStateDownloading = UpdateState(
+        isChecking = false,
+        updateDTO = updateDTO,
+        downloadState = DownloadState.InProgress(15),
+        info = null
+    )
+
+    MiuixTheme {
+        Scaffold() {
+            Box(modifier = Modifier.padding(it)) {
+                UpdateBottomSheet(
+                    updateState = updateStateDownloading,
+                    onDismiss = {},
+                    onDownload = {},
+                    onCancelDownload = {},
+                    onInstall = {}
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateBottomSheetSuccessPreview() {
+    // 创建预览用的模拟数据
+    val updateDTO = UpdateDTO(
+        versionName = "v2.1.0",
+        downloadUrl = "https://example.com/update.apk",
+        releaseNotes = """
+            ## 更新内容
+
+            - 修复了一些已知问题
+            - 优化了界面显示效果
+            - 提升了性能表现
+
+            感谢您的使用！
+        """.trimIndent(),
+        size = 1024
+    )
+
+    val updateStateSuccess = UpdateState(
+        isChecking = false,
+        updateDTO = updateDTO,
+        downloadState = DownloadState.Success(File("")),
+        info = null
+    )
+
+    MiuixTheme {
+        Scaffold() {
+            Box(modifier = Modifier.padding(it)) {
+                UpdateBottomSheet(
+                    updateState = updateStateSuccess,
+                    onDismiss = {},
+                    onDownload = {},
+                    onCancelDownload = {},
+                    onInstall = {}
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateBottomSheetErrorPreview() {
+    // 创建预览用的模拟数据
+    val updateDTO = UpdateDTO(
+        versionName = "v2.1.0",
+        downloadUrl = "https://example.com/update.apk",
+        releaseNotes = """
+            ## 更新内容
+
+            - 修复了一些已知问题
+            - 优化了界面显示效果
+            - 提升了性能表现
+
+            感谢您的使用！
+        """.trimIndent(),
+        size = 1024
+    )
+
+    val updateStateError = UpdateState(
+        isChecking = false,
+        updateDTO = updateDTO,
+        downloadState = DownloadState.Error(Exception("网络连接失败")),
+        info = null
+    )
+
+    MiuixTheme {
+        Scaffold() {
+            Box(modifier = Modifier.padding(it)) {
+                UpdateBottomSheet(
+                    updateState = updateStateError,
+                    onDismiss = {},
+                    onDownload = {},
+                    onCancelDownload = {},
+                    onInstall = {}
+                )
             }
         }
     }

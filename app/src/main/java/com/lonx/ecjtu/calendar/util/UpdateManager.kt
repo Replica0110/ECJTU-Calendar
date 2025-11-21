@@ -1,9 +1,9 @@
 package com.lonx.ecjtu.calendar.util
 
 import android.content.Context
+import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
-import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import com.lonx.ecjtu.calendar.domain.repository.UpdateRepository
 import com.lonx.ecjtu.calendar.domain.usecase.update.ApkInstallUseCase
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +22,8 @@ import kotlinx.coroutines.launch
 data class UpdateState(
     val isChecking: Boolean = false,
     val updateDTO: UpdateDTO? = null,
-    val downloadState: DownloadState = DownloadState.Idle
+    val downloadState: DownloadState = DownloadState.Idle,
+    val info: String? = null,
 )
 sealed interface UpdateEffect {
     data class ShowToast(val message: String) : UpdateEffect
@@ -59,32 +60,34 @@ class UpdateManagerImpl(
 
         appScope.launch {
             _state.update { it.copy(isChecking = true) }
-            val result = updateRepository.checkForUpdate()
-
-
-            when (result) {
+            when (val result = updateRepository.checkForUpdate()) {
                 is UpdateCheckResult.NewVersion -> {
                     lastValidUpdateResult = result
                     _state.update { it.copy(updateDTO = result.info) }
                 }
                 is UpdateCheckResult.NoUpdateAvailable -> {
                     lastValidUpdateResult = null
+                    _state.update { it.copy(info = "已经是最新版本") }
                     _effect.emit(UpdateEffect.ShowToast("已经是最新版本"))
                 }
                 is UpdateCheckResult.ApiError -> {
                     lastValidUpdateResult = null
+                    _state.update { it.copy(info = "API错误: ${result.code}") }
                     _effect.emit(UpdateEffect.ShowToast("API错误: ${result.code}"))
                 }
                 is UpdateCheckResult.NetworkError -> {
                     lastValidUpdateResult = null
+                    _state.update { it.copy(info = "网络错误，请检查连接") }
                     _effect.emit(UpdateEffect.ShowToast("网络错误，请检查连接"))
                 }
                 UpdateCheckResult.ParsingError -> {
                     lastValidUpdateResult = null
+                    _state.update { it.copy(info = "解析更新信息失败") }
                     _effect.emit(UpdateEffect.ShowToast("解析更新信息失败"))
                 }
                 UpdateCheckResult.TimeoutError -> {
                     lastValidUpdateResult = null
+                    _state.update { it.copy(info = "检查更新超时") }
                     _effect.emit(UpdateEffect.ShowToast("检查更新超时"))
                 }
             }
@@ -100,7 +103,7 @@ class UpdateManagerImpl(
                 .onStart { _state.update { it.copy(downloadState = DownloadState.InProgress(0)) } }
                 .catch { e -> _state.update { it.copy(downloadState = DownloadState.Error(e)) } }
                 .collect { downloadState ->
-                    _state.update { it.copy(downloadState = downloadState) }
+                    _state.update { it.copy(downloadState = downloadState, info = "下载中...") }
                 }
         }
     }

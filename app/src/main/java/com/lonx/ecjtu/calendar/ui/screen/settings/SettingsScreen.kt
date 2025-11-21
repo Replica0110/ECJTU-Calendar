@@ -355,12 +355,7 @@ fun SettingsScreen(
                     )
                     SuperArrow(
                         title = "检查更新",
-                        summary = when (updateState.downloadState) {
-                            is DownloadState.Idle -> "点击检查更新"
-                            is DownloadState.InProgress -> "正在下载更新: ${(updateState.downloadState as DownloadState.InProgress).progress}%"
-                            is DownloadState.Success -> "点击安装更新"
-                            is DownloadState.Error -> "更新检查/下载失败：${(updateState.downloadState as DownloadState.Error).exception.message}"
-                        },
+                        summary = updateState.info ?: "点击检查更新",
                         onClick = {
                             when (updateState.downloadState) {
                                 is DownloadState.Idle -> {

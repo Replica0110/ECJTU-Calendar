@@ -27,7 +27,8 @@ import java.net.SocketTimeoutException
 
 class UpdateDataSourceImpl: UpdateDataSource {
     private val gson = Gson()
-    private val GITHUB_API_URL = "https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
+    private val GITHUB_API_URL =
+        "https://gh-proxy.org/https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
     private val TAG = "UpdateDataSourceImpl"
 
     override suspend fun checkForUpdate(): UpdateCheckResult = withContext(Dispatchers.IO) {

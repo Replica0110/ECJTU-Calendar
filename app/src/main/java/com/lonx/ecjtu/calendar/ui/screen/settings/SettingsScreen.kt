@@ -418,7 +418,7 @@ fun SettingsScreen(
                     )
                     SuperArrow(
                         title = "清理缓存",
-                        summary = "清理应用缓存",
+                        summary = uiState.cacheSize,
                         onClick = {
                             showClearCacheDialog.value = true
                         },
@@ -429,8 +429,7 @@ fun SettingsScreen(
                                 contentDescription = "清理缓存",
                                 tint = colorScheme.onBackground
                             )
-                        },
-                        rightText = uiState.cacheSize
+                        }
                     )
                 }
                 Spacer(Modifier.height(12.dp))

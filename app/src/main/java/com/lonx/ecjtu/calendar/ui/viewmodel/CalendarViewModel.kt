@@ -72,7 +72,7 @@ class CalendarViewModel(
     }
 
     private fun fetchCourses(date: LocalDate) {
-        _uiState.update { it.copy(isLoading = true, error = null) }
+        _uiState.update { it.copy(isLoading = true, error = null, courses = emptyList()) }
         viewModelScope.launch {
             val result = getCoursesUseCase(date)
             result.onSuccess { schedulePage ->

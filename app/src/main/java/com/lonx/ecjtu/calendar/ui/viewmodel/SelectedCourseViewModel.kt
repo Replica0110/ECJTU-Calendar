@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.domain.usecase.course.GetSelectedCoursesUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
+import com.lonx.ecjtu.calendar.ui.screen.course.SelectedCourseEffect
 import com.lonx.ecjtu.calendar.ui.screen.course.SelectedCourseUiState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -22,6 +25,9 @@ class SelectedCourseViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SelectedCourseUiState())
     val uiState: StateFlow<SelectedCourseUiState> = _uiState.asStateFlow()
+
+    private val _effect = MutableSharedFlow<SelectedCourseEffect>()
+    val effect = _effect.asSharedFlow()
 
     private var currentWeiXinID: String? = null
 
@@ -85,6 +91,9 @@ class SelectedCourseViewModel(
                     )
                 }
 
+                if (refresh) {
+                    _effect.emit(SelectedCourseEffect.ShowToast("找到了 ${coursePage.courses.size} 门课程"))
+                }
             }.onFailure { exception ->
                 _uiState.update {
                     it.copy(

@@ -19,3 +19,7 @@ data class ScoreUiState(
     val error: String? = null,
     val lastRefreshMillis: Long = 0L
 )
+
+sealed interface ScoreEffect {
+    data class ShowToast(val message: String) : ScoreEffect
+}

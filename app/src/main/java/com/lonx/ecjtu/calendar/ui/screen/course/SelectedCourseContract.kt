@@ -10,3 +10,7 @@ data class SelectedCourseUiState(
     val error: String? = null,
     val lastRefreshMillis: Long = 0L
 )
+
+sealed interface SelectedCourseEffect {
+    data class ShowToast(val message: String) : SelectedCourseEffect
+}

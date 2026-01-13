@@ -1,0 +1,55 @@
+name: 🏗️ 构建 Debug APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 🏗️ 构建 Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: ☕ 设置 JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: 🔐 赋予 gradlew 执行权限
+        run: chmod +x gradlew
+
+      - name: 🐘 配置 Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: 🛠️ 构建 Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: 🏷️ 获取版本号
+        id: version
+        run: |
+          APK_PATH=$(ls app/build/outputs/apk/debug/ECJTU-Calendar-*.apk 2>/dev/null | head -n 1)
+          if [ -n "$APK_PATH" ]; then
+            VERSION=$(basename "$APK_PATH" | sed -E 's/ECJTU-Calendar-(.+)\.apk/\1/')
+          else
+            VERSION="unknown"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ 获取 Commit SHA
+        id: commit
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: 📤 上传 Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ECJTU-Calendar-${{ steps.version.outputs.version }}+${{ steps.commit.outputs.sha }}
+          path: app/build/outputs/apk/debug/ECJTU-Calendar-*.apk
+          retention-days: 30

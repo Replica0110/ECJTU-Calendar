@@ -29,7 +29,7 @@ fun DateHeaderCard(
             .fillMaxWidth()
             .padding(12.dp),
         colors = CardDefaults.defaultColors(
-            color = MiuixTheme.colorScheme.primaryVariant
+            color = MiuixTheme.colorScheme.primary
         ),
         insideMargin = PaddingValues(16.dp),
         onClick = { onClick() },
@@ -43,14 +43,14 @@ fun DateHeaderCard(
             )
             if (weekNum.isNotBlank()){
                 Text(
-                    color = MiuixTheme.colorScheme.onPrimaryVariant,
+                    color = MiuixTheme.colorScheme.onPrimary,
                     text = "$weekDay · 第${weekNum}周",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal
                 )
             } else {
                 Text(
-                    color = MiuixTheme.colorScheme.onPrimaryVariant,
+                    color = MiuixTheme.colorScheme.onPrimary,
                     text = weekDay,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Normal

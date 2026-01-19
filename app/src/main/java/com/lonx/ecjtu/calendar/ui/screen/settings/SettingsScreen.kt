@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -149,8 +151,11 @@ fun SettingsScreen(
         },
         content = {
             Text(
-                text = "您确定要清理所有应用缓存吗？\n这将永久删除已下载的安装包和其他临时文件",
-                modifier = Modifier.padding(bottom = 16.dp)
+                text = "确定后将会永久删除：\n已下载的安装包、其他临时文件",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                textAlign = TextAlign.Center
             )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween

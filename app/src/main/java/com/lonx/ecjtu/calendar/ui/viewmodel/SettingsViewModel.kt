@@ -71,7 +71,7 @@ class SettingsViewModel(
             updateManager.effect.collect { managerEffect ->
                 when (managerEffect) {
                     is UpdateEffect.ShowToast -> {
-                        _effect.emit(SettingsEffect.ShowToast(managerEffect.message))
+                        _uiState.update { it.copy(toastMessage = managerEffect.message) }
                     }
                 }
             }
@@ -196,11 +196,10 @@ class SettingsViewModel(
 
             result.onSuccess { bytesFreed ->
                 val sizeInMB = String.format("%.2f", bytesFreed / (1024.0 * 1024.0))
-                _effect.emit(SettingsEffect.ShowToast("缓存已清理，释放了 $sizeInMB MB"))
-
+                _uiState.update { it.copy(toastMessage = "缓存已清理，释放了 $sizeInMB MB") }
                 refreshCacheSize()
-            }.onFailure {
-                _effect.emit(SettingsEffect.ShowToast("清理缓存失败: ${it.message}"))
+            }.onFailure { exception ->
+                _uiState.update { it.copy(toastMessage = "清理缓存失败: ${exception.message}") }
             }
         }
     }
@@ -223,7 +222,15 @@ class SettingsViewModel(
                 }
             } ?: "保存成功"
 
-            _effect.emit(SettingsEffect.ShowToast(message))
+            _uiState.update { it.copy(toastMessage = message) }
         }
+    }
+
+    fun showToast(message: String) {
+        _uiState.update { it.copy(toastMessage = message) }
+    }
+
+    fun onToastShown() {
+        _uiState.update { it.copy(toastMessage = null) }
     }
 }

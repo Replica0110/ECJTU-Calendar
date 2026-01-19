@@ -64,6 +64,8 @@ import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
 import top.yukonga.miuix.kmp.icon.extended.Info
 import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Years
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
@@ -76,7 +78,7 @@ fun MainScreen(
     val routes = listOf(
         NavigationItem(
             label = "日历",
-            icon = ImageVector.vectorResource(R.drawable.ic_course_24dp)
+            icon = MiuixIcons.Regular.Years
         ),
         NavigationItem(
             label = "成绩",
@@ -84,7 +86,7 @@ fun MainScreen(
         ),
         NavigationItem(
             label = "已选课程",
-            icon = ImageVector.vectorResource(R.drawable.ic_pin_appwidget)
+            icon = MiuixIcons.Regular.GridView
         )
     )
     val coroutineScope = rememberCoroutineScope()

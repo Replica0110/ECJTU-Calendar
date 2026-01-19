@@ -10,6 +10,7 @@ import com.lonx.ecjtu.calendar.domain.model.Score
  * @param availableTerms 所有可供选择的学期列表（用于填充下拉菜单）。
  * @param currentTerm 当前显示的成绩所属的学期。
  * @param error 如果发生错误，则包含错误消息，否则为null。
+ * @param toastMessage 要显示的 Toast 消息，为 null 时不显示
  */
 data class ScoreUiState(
     val isLoading: Boolean = false,
@@ -17,9 +18,6 @@ data class ScoreUiState(
     val availableTerms: List<String> = emptyList(),
     val currentTerm: String = "",
     val error: String? = null,
-    val lastRefreshMillis: Long = 0L
+    val lastRefreshMillis: Long = 0L,
+    val toastMessage: String? = null
 )
-
-sealed interface ScoreEffect {
-    data class ShowToast(val message: String) : ScoreEffect
-}

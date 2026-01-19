@@ -2,8 +2,8 @@ package com.lonx.ecjtu.calendar.ui.screen.settings
 
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -39,6 +39,7 @@ import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
+import com.lonx.ecjtu.calendar.ui.component.MiuixToast
 import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
 import com.lonx.ecjtu.calendar.ui.widget.CourseGlanceWidget
 import com.lonx.ecjtu.calendar.ui.widget.CourseUiState
@@ -71,9 +72,14 @@ import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.ContactsCircle
+import top.yukonga.miuix.kmp.icon.extended.Help
 import top.yukonga.miuix.kmp.icon.extended.Info
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.extended.Theme
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Th31
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -184,10 +190,6 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is SettingsEffect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
-                }
-
                 is SettingsEffect.RequestPinAppWidgetClick -> {
                     try {
                         coroutineScope.launch {
@@ -249,13 +251,14 @@ fun SettingsScreen(
                             )
                         }
                     } catch (e: Exception) {
-                        Toast.makeText(context, "添加失败: ${e.message}", Toast.LENGTH_LONG).show()
+                        viewModel.showToast("添加失败: ${e.message}")
                     }
                 }
             }
         }
     }
-    Scaffold(
+    Box {
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = "设置",
@@ -302,7 +305,7 @@ fun SettingsScreen(
                         startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_theme_24dp),
+                                imageVector = MiuixIcons.Regular.Theme,
                                 contentDescription = "应用主题",
                                 tint = colorScheme.onBackground
                             )
@@ -333,7 +336,7 @@ fun SettingsScreen(
                         startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_pin_appwidget),
+                                imageVector = MiuixIcons.Regular.GridView,
                                 contentDescription = "日历小组件",
                                 tint = colorScheme.onBackground
                             )
@@ -365,18 +368,12 @@ fun SettingsScreen(
                         onClick = {
                             when (updateState.downloadState) {
                                 is DownloadState.Idle -> {
-                                    Toast.makeText(context, "正在检查更新...", Toast.LENGTH_SHORT)
-                                        .show()
+                                    viewModel.showToast("正在检查更新...")
                                     viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
                                 }
 
                                 is DownloadState.InProgress -> {
-                                    Toast.makeText(
-                                        context,
-                                        "正在下载更新，请稍等~",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    viewModel.showToast("正在下载更新，请稍等~")
                                 }
 
                                 is DownloadState.Success -> {
@@ -384,8 +381,7 @@ fun SettingsScreen(
                                 }
 
                                 is DownloadState.Error -> {
-                                    Toast.makeText(context, "重新检查更新...", Toast.LENGTH_SHORT)
-                                        .show()
+                                    viewModel.showToast("重新检查更新...")
                                     viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
                                 }
                             }
@@ -416,7 +412,7 @@ fun SettingsScreen(
                         startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_date_24dp),
+                                imageVector = MiuixIcons.Regular.Th31,
                                 contentDescription = "校历",
                                 tint = colorScheme.onBackground
                             )
@@ -457,7 +453,7 @@ fun SettingsScreen(
                         startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_tutorial_24dp),
+                                imageVector = MiuixIcons.Regular.Help,
                                 contentDescription = "使用教程",
                                 tint = colorScheme.onBackground
                             )
@@ -492,7 +488,7 @@ fun SettingsScreen(
                         startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_developer_24dp),
+                                imageVector = MiuixIcons.Regular.ContactsCircle,
                                 contentDescription = "开发者",
                                 tint = colorScheme.onBackground
                             )
@@ -507,7 +503,7 @@ fun SettingsScreen(
                         startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                imageVector = MiuixIcons.Regular.Link,
+                                painter = painterResource(R.drawable.miuix_github),
                                 contentDescription = "Github",
                                 tint = colorScheme.onBackground
                             )
@@ -517,6 +513,14 @@ fun SettingsScreen(
                 Spacer(Modifier.height(12.dp))
             }
         }
+    }
+
+    // Miuix 风格的 Toast，跟随主题色
+    MiuixToast(
+        message = uiState.toastMessage,
+        duration = 2000,
+        onDismiss = { viewModel.onToastShown() }
+    )
     }
 }
 

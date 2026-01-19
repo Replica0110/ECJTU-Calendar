@@ -5,12 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.domain.usecase.score.GetScoreUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
-import com.lonx.ecjtu.calendar.ui.screen.score.ScoreEffect
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreUiState
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,9 +23,6 @@ class ScoreViewModel(
 
     private val _uiState = MutableStateFlow(ScoreUiState())
     val uiState: StateFlow<ScoreUiState> = _uiState.asStateFlow()
-
-    private val _effect = MutableSharedFlow<ScoreEffect>()
-    val effect = _effect.asSharedFlow()
 
     private var currentWeiXinID: String? = null
 
@@ -92,14 +86,11 @@ class ScoreViewModel(
                         isLoading = false,
                         scores = scorePage.scores,
                         availableTerms = scorePage.availableTerms,
-                        currentTerm = scorePage.currentTerm
+                        currentTerm = scorePage.currentTerm,
+                        toastMessage = if (refresh) "找到了 ${scorePage.scores.size} 门成绩" else null
                     )
                 }
-
                 // timestamp updates are handled by observeTermRefresh()
-                if (refresh) {
-                    _effect.emit(ScoreEffect.ShowToast("找到了 ${scorePage.scores.size} 门成绩"))
-                }
             }.onFailure { exception ->
                 _uiState.update {
                     it.copy(
@@ -113,5 +104,9 @@ class ScoreViewModel(
 
     fun onTermSelected(newTerm: String) {
         loadScores(term = newTerm)
+    }
+
+    fun onToastShown() {
+        _uiState.update { it.copy(toastMessage = null) }
     }
 }

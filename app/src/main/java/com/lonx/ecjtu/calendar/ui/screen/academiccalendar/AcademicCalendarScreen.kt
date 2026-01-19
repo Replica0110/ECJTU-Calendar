@@ -33,18 +33,19 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopup
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.extra.DropdownImpl
+import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import java.net.URL
@@ -61,7 +62,6 @@ fun AcademicCalendarScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showTopPopup = remember { mutableStateOf(false) }
-    val windowSize = getWindowSize()
 
 
     Scaffold(
@@ -78,7 +78,7 @@ fun AcademicCalendarScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Basic.ArrowRight,
+                            imageVector = MiuixIcons.Regular.ChevronBackward,
                             contentDescription = "返回",
                             tint = colorScheme.onBackground,
                             modifier = Modifier.rotate(180f)
@@ -93,20 +93,20 @@ fun AcademicCalendarScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.ImmersionMore,
+                            imageVector = MiuixIcons.Regular.More,
                             contentDescription = "更多",
                             tint = colorScheme.onBackground
                         )
                     }
-                    ListPopup(
+                    WindowListPopup(
                         show = showTopPopup,
                         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-                        alignment = PopupPositionProvider.Align.TopRight,
+                        alignment = PopupPositionProvider.Align.TopEnd,
                         onDismissRequest = {
                             showTopPopup.value = false
-                        },
-                        enableWindowDim = false
+                        }
                     ) {
+                        val state = LocalWindowListPopupState.current
                         ListPopupColumn {
                             DropdownImpl(
                                 text = "保存图片",
@@ -116,7 +116,7 @@ fun AcademicCalendarScreen(
                                     scope.launch {
                                         downloadImage(context, uiState.imageUrl, uiState.imageData, scope)
                                     }
-                                    showTopPopup.value = false
+                                    state.invoke()
                                 },
                                 index = 0
                             )
@@ -130,7 +130,7 @@ fun AcademicCalendarScreen(
                                             openUrl(context, url, scope)
                                         }
                                     }
-                                    showTopPopup.value = false
+                                    state.invoke()
                                 },
                                 index = 1
                             )
@@ -140,7 +140,7 @@ fun AcademicCalendarScreen(
                                 isSelected = false,
                                 onSelectedIndexChange = {
                                     viewModel.refresh()
-                                    showTopPopup.value = false
+                                    state.invoke()
                                 },
                                 index = 2
                             )
@@ -155,7 +155,7 @@ fun AcademicCalendarScreen(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .padding(contentPadding)
-                .height(windowSize.height.dp)
+                .fillMaxHeight()
         ) {
             when {
                 uiState.isLoading -> {

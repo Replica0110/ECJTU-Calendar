@@ -47,7 +47,9 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.ChevronForward
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -175,7 +177,7 @@ private fun CalendarView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { onMonthChange(displayedMonth.minusMonths(1)) }) {
-                Icon(MiuixIcons.Basic.ArrowRight, modifier = Modifier.rotate(180f), contentDescription = "上个月")
+                Icon(MiuixIcons.Regular.ChevronBackward, modifier = Modifier.rotate(180f), contentDescription = "上个月")
             }
             Text(
                 text = "${displayedMonth.year}年${displayedMonth.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}",
@@ -184,7 +186,7 @@ private fun CalendarView(
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = { onMonthChange(displayedMonth.plusMonths(1)) }) {
-                Icon(MiuixIcons.Basic.ArrowRight, contentDescription = "下一个月")
+                Icon(MiuixIcons.Regular.ChevronForward, contentDescription = "下一个月")
             }
         }
         Spacer(modifier = Modifier.height(8.dp))

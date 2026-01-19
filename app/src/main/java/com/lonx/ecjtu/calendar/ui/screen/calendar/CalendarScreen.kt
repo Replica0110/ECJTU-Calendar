@@ -30,7 +30,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -46,7 +45,6 @@ fun CalendarScreen(
     val isViewingToday = uiState.selectedDate == LocalDate.now()
 
     val showBottomSheet = remember { mutableStateOf(false) }
-    val windowSize = getWindowSize()
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedCourse: Course? by remember { mutableStateOf(null) }
 
@@ -67,7 +65,7 @@ fun CalendarScreen(
             modifier = Modifier
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .height(windowSize.height.dp)
+                .fillMaxHeight()
                 .weight(1f),
             overscrollEffect = null
         ) {

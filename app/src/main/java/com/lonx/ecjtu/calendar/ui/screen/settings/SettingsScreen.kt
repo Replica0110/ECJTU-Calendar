@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -69,11 +70,11 @@ import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.other.GitHub
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.icon.extended.Link
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -94,7 +95,6 @@ fun SettingsScreen(
     val showClearCacheDialog = remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
-    val windowSize = getWindowSize()
 
     val colorModeOptions: List<SpinnerEntry> = listOf(
         SpinnerEntry(title = "跟随系统"),
@@ -268,7 +268,7 @@ fun SettingsScreen(
                         modifier = Modifier.padding(start = 16.dp)
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Basic.ArrowRight,
+                            imageVector = MiuixIcons.Regular.ChevronBackward,
                             contentDescription = "返回",
                             tint = colorScheme.onBackground,
                             modifier = Modifier.rotate(180f)
@@ -284,7 +284,7 @@ fun SettingsScreen(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .height(windowSize.height.dp),
+                .fillMaxHeight(),
             overscrollEffect = null
         ) {
             item {
@@ -299,14 +299,15 @@ fun SettingsScreen(
                         selectedIndex = uiState.colorMode,
                         onSelectedIndexChange = {
                             viewModel.onEvent(SettingsEvent.OnColorModeChanged(it)) },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_theme_24dp),
                                 contentDescription = "应用主题",
                                 tint = colorScheme.onBackground
                             )
-                        }
+                        },
+                        dialogButtonString = "取消"
                     )
                     SuperArrow(
                         title = "weiXinID设置",
@@ -314,7 +315,7 @@ fun SettingsScreen(
                         onClick = {
                             showWeiXinIdDialog.value = true
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_id_24dp),
@@ -329,7 +330,7 @@ fun SettingsScreen(
                             onEvent(SettingsEvent.RequestPinAppWidgetClick)
                         },
                         summary = "添加日历小组件到桌面",
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_pin_appwidget),
@@ -349,7 +350,7 @@ fun SettingsScreen(
                         },
                         title = "自动检查更新",
                         summary = "应用启动时检查新版本",
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_update),
@@ -389,7 +390,7 @@ fun SettingsScreen(
                                 }
                             }
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_update),
@@ -412,7 +413,7 @@ fun SettingsScreen(
                         onClick = {
                             navigator.navigate(AcademicCalendarScreenDestination)
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_date_24dp),
@@ -427,7 +428,7 @@ fun SettingsScreen(
                         onClick = {
                             showClearCacheDialog.value = true
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_clear_cache),
@@ -453,7 +454,7 @@ fun SettingsScreen(
                                 "https://github.com/Replica0110/ECJTU-Calendar/blob/main/README.md"
                             )
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_tutorial_24dp),
@@ -473,10 +474,10 @@ fun SettingsScreen(
                     BasicComponent(
                         title = "应用版本",
                         summary = "版本: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\n编译时间: ${BuildConfig.BUILD_TIME}",
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                imageVector = MiuixIcons.Useful.Info,
+                                imageVector = MiuixIcons.Regular.Info,
                                 contentDescription = "应用版本",
                                 tint = colorScheme.onBackground
                             )
@@ -488,7 +489,7 @@ fun SettingsScreen(
                         onClick = {
                             openUrl(context, "https://github.com/Replica0110")
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_developer_24dp),
@@ -503,10 +504,10 @@ fun SettingsScreen(
                         onClick = {
                             openUrl(context, "https://github.com/Replica0110/ECJTU-Calendar")
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                imageVector = MiuixIcons.Other.GitHub,
+                                imageVector = MiuixIcons.Regular.Link,
                                 contentDescription = "Github",
                                 tint = colorScheme.onBackground
                             )

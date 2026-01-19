@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +47,6 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -56,7 +56,6 @@ fun SelectedCourseScreen(
     topAppBarScrollBehavior: ScrollBehavior
 ) {
     val viewModel: SelectedCourseViewModel = koinViewModel()
-    val windowSize = getWindowSize()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -101,7 +100,7 @@ fun SelectedCourseScreen(
             modifier = Modifier
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .height(windowSize.height.dp)
+                .fillMaxHeight()
                 .weight(1f),
             overscrollEffect = null
         ) {

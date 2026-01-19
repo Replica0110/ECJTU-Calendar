@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,7 +42,6 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -51,7 +51,6 @@ fun ScoreScreen(
     topAppBarScrollBehavior: ScrollBehavior
 ) {
     val viewModel: ScoreViewModel = koinViewModel()
-    val windowSize = getWindowSize()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     // 只有当没有数据时才加载，避免重复请求
@@ -112,7 +111,7 @@ fun ScoreScreen(
             modifier = Modifier
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .height(windowSize.height.dp)
+                .fillMaxHeight()
                 .weight(1f),
             overscrollEffect = null
         ) {

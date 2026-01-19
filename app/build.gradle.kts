@@ -154,6 +154,7 @@ dependencies {
     implementation(libs.okhttp)
     // miuix库
     implementation(libs.miuix.android)
+    implementation(libs.miuix.icons)
     // room 数据库
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)

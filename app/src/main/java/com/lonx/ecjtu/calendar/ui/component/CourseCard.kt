@@ -51,7 +51,7 @@ fun CourseCard(
 
                 SurfaceTag("节次：${course.time}")
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 // 课程名称
                 Text(
@@ -65,7 +65,7 @@ fun CourseCard(
             }
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 CourseDetailRow(
                     icon = MiuixIcons.Regular.Location,
@@ -104,7 +104,7 @@ private fun CourseDetailRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(20.dp),
             tint = MiuixTheme.colorScheme.onSecondaryVariant
         )
         Spacer(modifier = Modifier.width(8.dp))

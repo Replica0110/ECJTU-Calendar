@@ -18,7 +18,7 @@ fun SurfaceTag(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(MiuixTheme.colorScheme.primary)
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {

@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -66,7 +65,7 @@ fun MessageCard(
             Text(
                 text = message,
                 color = textColor,
-                fontSize = 16.sp
+                style = MiuixTheme.textStyles.body1
             )
         }
     }

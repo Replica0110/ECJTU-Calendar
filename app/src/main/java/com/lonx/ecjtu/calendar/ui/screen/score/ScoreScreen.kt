@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.domain.model.Score
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
@@ -117,7 +117,7 @@ fun ScoreScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(6.dp)
+                            .padding(8.dp)
                     ) {
                         Text(
                             modifier = Modifier.align(Alignment.Center),
@@ -174,7 +174,7 @@ private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier)
 
                 Text(
                     text = score.courseName,
-                    fontSize = 18.sp,
+                    style = MiuixTheme.textStyles.title4,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 22.sp
                 )
@@ -194,7 +194,7 @@ private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier)
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         InfoItem(title = "课程代码", value = score.courseCode)
                         if (score.retakeScore.isNotEmpty()) {
@@ -202,7 +202,7 @@ private fun ScoreCard(score: Score, term: String, modifier: Modifier = Modifier)
                         }
                     }
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         InfoItem(title = "学期", value = term)
                         if (score.relearnScore.isNotEmpty()) {

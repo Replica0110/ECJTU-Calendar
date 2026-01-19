@@ -23,6 +23,8 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
         val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
 
         val COLOR_MODE = intPreferencesKey("color_mode")
+
+        val KEY_COLOR_INDEX = intPreferencesKey("key_color_index")
     }
 
     private fun lastScoreRefreshKey(term: String) = longPreferencesKey("score_last_refresh_$term")
@@ -91,5 +93,17 @@ class LocalDataSourceImpl(private val context: Context) : LocalDataSource {
     override suspend fun removeSelectedCourseLastRefresh(term: String) {
         val key = lastSelectedCourseRefreshKey(term)
         context.dataStore.edit { preferences -> preferences.remove(key) }
+    }
+
+    override suspend fun saveKeyColorIndex(index: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEY_COLOR_INDEX] = index
+        }
+    }
+
+    override fun getKeyColorIndex(): Flow<Int> {
+        return context.dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.KEY_COLOR_INDEX] ?: 0
+        }
     }
 }

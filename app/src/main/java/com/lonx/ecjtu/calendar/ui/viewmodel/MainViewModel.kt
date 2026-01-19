@@ -8,6 +8,7 @@ import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.cache.CleanUpApksUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetKeyColorIndexUseCase
 import com.lonx.ecjtu.calendar.ui.screen.main.MainUiState
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,8 @@ class MainViewModel(
     private val saveUserConfigUseCase: SaveUserConfigUseCase,
     private val updateManager: UpdateManager,
     private val cleanUpApksUseCase: CleanUpApksUseCase,
-    private val getColorModeUseCase: GetColorModeUseCase
+    private val getColorModeUseCase: GetColorModeUseCase,
+    private val getKeyColorIndexUseCase: GetKeyColorIndexUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
@@ -38,6 +40,11 @@ class MainViewModel(
         viewModelScope.launch {
             getColorModeUseCase().distinctUntilChanged().collect { color ->
                 _uiState.update { it.copy(colorMode = color) }
+            }
+        }
+        viewModelScope.launch {
+            getKeyColorIndexUseCase().distinctUntilChanged().collect { index ->
+                _uiState.update { it.copy(keyColorIndex = index) }
             }
         }
         // 检查更新的逻辑保持不变

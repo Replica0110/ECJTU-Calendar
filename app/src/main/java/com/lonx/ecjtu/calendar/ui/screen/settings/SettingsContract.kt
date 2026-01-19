@@ -16,6 +16,7 @@ data class SettingsUiState(
     val parseResult: ParseResult? = null,
     val cacheSize: String = "计算中...",
     val colorMode: Int = 0,
+    val keyColorIndex: Int = 0,
     val toastMessage: String? = null
     //    val isCheckingForUpdate: Boolean = false,
     //    val downloadState: DownloadState = DownloadState.Idle,
@@ -30,6 +31,7 @@ sealed interface SettingsEvent {
     data class OnAutoUpdateCheckChanged(val isEnabled: Boolean) : SettingsEvent
 
     data class OnColorModeChanged(val colorCode: Int) : SettingsEvent
+    data class OnKeyColorIndexChanged(val index: Int) : SettingsEvent
     data object RequestPinAppWidgetClick : SettingsEvent
     data object OnCheckUpdateNowClick : SettingsEvent
 

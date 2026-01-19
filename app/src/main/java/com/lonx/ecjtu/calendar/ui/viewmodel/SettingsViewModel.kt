@@ -8,9 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.domain.usecase.cache.ClearCacheUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.cache.GetCacheSizeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetKeyColorIndexUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveColorModeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveKeyColorIndexUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.settings.ParseResult
@@ -38,7 +40,9 @@ class SettingsViewModel(
     private val clearCacheUseCase: ClearCacheUseCase,
     private val getCacheSizeUseCase: GetCacheSizeUseCase,
     private val saveColorModeUseCase: SaveColorModeUseCase,
-    private val getColorModeUseCase: GetColorModeUseCase
+    private val getColorModeUseCase: GetColorModeUseCase,
+    private val saveKeyColorIndexUseCase: SaveKeyColorIndexUseCase,
+    private val getKeyColorIndexUseCase: GetKeyColorIndexUseCase
 ) : ViewModel() {
 
     // 私有的可变状态流，仅在 ViewModel 内部修改
@@ -65,6 +69,11 @@ class SettingsViewModel(
         viewModelScope.launch {
             getColorModeUseCase().collect { colorMode ->
                 _uiState.update { it.copy(colorMode = colorMode) }
+            }
+        }
+        viewModelScope.launch {
+            getKeyColorIndexUseCase().collect { index ->
+                _uiState.update { it.copy(keyColorIndex = index) }
             }
         }
         viewModelScope.launch {
@@ -152,6 +161,12 @@ class SettingsViewModel(
                             colorMode = event.colorCode
                         )
                     }
+                }
+            }
+            is SettingsEvent.OnKeyColorIndexChanged -> {
+                viewModelScope.launch {
+                    saveKeyColorIndexUseCase(event.index)
+                    _uiState.update { it.copy(keyColorIndex = event.index) }
                 }
             }
             is SettingsEvent.OnSaveClick -> {

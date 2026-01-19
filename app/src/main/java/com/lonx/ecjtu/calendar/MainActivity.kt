@@ -50,7 +50,8 @@ class MainActivity: ComponentActivity() {
             Log.d("MainActivity", "uiState: $uiState")
 //            val colorMode = remember { mutableIntStateOf(uiState.colorMode) }
 //            Log.d("MainActivity", "colorMode: $colorMode")
-            val darkMode = uiState.colorMode == 2 || (isSystemInDarkTheme() && uiState.colorMode == 0)
+            val darkMode = uiState.colorMode == 2 || uiState.colorMode == 5 ||
+                (isSystemInDarkTheme() && (uiState.colorMode == 0 || uiState.colorMode == 3))
             DisposableEffect(darkMode) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { darkMode },

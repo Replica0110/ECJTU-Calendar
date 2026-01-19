@@ -19,4 +19,7 @@ interface CalendarRepository {
     suspend fun saveColorModeSetting( mode: Int)
 
     fun getColorModeSetting(): Flow<Int>
+
+    suspend fun saveKeyColorIndex(index: Int)
+    fun getKeyColorIndex(): Flow<Int>
 }

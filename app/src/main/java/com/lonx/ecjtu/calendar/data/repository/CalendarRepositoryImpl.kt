@@ -51,4 +51,7 @@ class CalendarRepositoryImpl(
         localDataSource.saveColorModeSetting(mode)
 
     override fun getColorModeSetting() = localDataSource.getColorModeSetting()
+
+    override suspend fun saveKeyColorIndex(index: Int) = localDataSource.saveKeyColorIndex(index)
+    override fun getKeyColorIndex() = localDataSource.getKeyColorIndex()
 }

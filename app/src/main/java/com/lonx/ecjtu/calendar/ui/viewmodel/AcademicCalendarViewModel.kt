@@ -72,4 +72,12 @@ class AcademicCalendarViewModel(
     fun refresh() {
         loadAcademicCalendar()
     }
+
+    fun showToast(message: String) {
+        _uiState.update { it.copy(toastMessage = message) }
+    }
+
+    fun onToastShown() {
+        _uiState.update { it.copy(toastMessage = null) }
+    }
 }

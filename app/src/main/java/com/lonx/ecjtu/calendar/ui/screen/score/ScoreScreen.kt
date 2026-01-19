@@ -1,13 +1,12 @@
 package com.lonx.ecjtu.calendar.ui.screen.score
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,13 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lonx.ecjtu.calendar.domain.model.Score
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
+import com.lonx.ecjtu.calendar.ui.component.MiuixToast
 import com.lonx.ecjtu.calendar.ui.component.SurfaceTag
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.ui.viewmodel.ScoreViewModel
@@ -41,7 +40,6 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -51,9 +49,7 @@ fun ScoreScreen(
     topAppBarScrollBehavior: ScrollBehavior
 ) {
     val viewModel: ScoreViewModel = koinViewModel()
-    val windowSize = getWindowSize()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     // 只有当没有数据时才加载，避免重复请求
     LaunchedEffect(uiState.scores) {
         if (uiState.scores.isEmpty() && uiState.error == null && !uiState.isLoading) {
@@ -61,21 +57,11 @@ fun ScoreScreen(
         }
     }
 
-    // 监听 Effect 并显示 Toast
-    LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                is ScoreEffect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-    ) {
+    Box {
+        Column(
+            modifier = Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+        ) {
 //        if (!uiState.isLoading && uiState.error == null) {
 //            Card(
 //                modifier = Modifier.padding(12.dp)
@@ -112,7 +98,7 @@ fun ScoreScreen(
             modifier = Modifier
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .height(windowSize.height.dp)
+                .fillMaxHeight()
                 .weight(1f),
             overscrollEffect = null
         ) {
@@ -158,6 +144,13 @@ fun ScoreScreen(
         }
     }
 
+    // Miuix 风格的 Toast，跟随主题色
+    MiuixToast(
+        message = uiState.toastMessage,
+        duration = 2000,
+        onDismiss = { viewModel.onToastShown() }
+    )
+    }
 }
 
 

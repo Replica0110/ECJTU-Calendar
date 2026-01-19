@@ -25,4 +25,7 @@ interface LocalDataSource {
     suspend fun saveSelectedCourseLastRefresh(term: String, timestampMillis: Long)
 
     suspend fun removeSelectedCourseLastRefresh(term: String)
+
+    suspend fun saveKeyColorIndex(index: Int)
+    fun getKeyColorIndex(): Flow<Int>
 }

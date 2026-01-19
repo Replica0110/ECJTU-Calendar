@@ -8,9 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.domain.usecase.cache.ClearCacheUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.cache.GetCacheSizeUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetColorModeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.GetKeyColorIndexUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveColorModeUseCase
+import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveKeyColorIndexUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUpdateSettingUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.SaveUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.settings.ParseResult
@@ -38,7 +40,9 @@ class SettingsViewModel(
     private val clearCacheUseCase: ClearCacheUseCase,
     private val getCacheSizeUseCase: GetCacheSizeUseCase,
     private val saveColorModeUseCase: SaveColorModeUseCase,
-    private val getColorModeUseCase: GetColorModeUseCase
+    private val getColorModeUseCase: GetColorModeUseCase,
+    private val saveKeyColorIndexUseCase: SaveKeyColorIndexUseCase,
+    private val getKeyColorIndexUseCase: GetKeyColorIndexUseCase
 ) : ViewModel() {
 
     // 私有的可变状态流，仅在 ViewModel 内部修改
@@ -68,10 +72,15 @@ class SettingsViewModel(
             }
         }
         viewModelScope.launch {
+            getKeyColorIndexUseCase().collect { index ->
+                _uiState.update { it.copy(keyColorIndex = index) }
+            }
+        }
+        viewModelScope.launch {
             updateManager.effect.collect { managerEffect ->
                 when (managerEffect) {
                     is UpdateEffect.ShowToast -> {
-                        _effect.emit(SettingsEffect.ShowToast(managerEffect.message))
+                        _uiState.update { it.copy(toastMessage = managerEffect.message) }
                     }
                 }
             }
@@ -154,6 +163,12 @@ class SettingsViewModel(
                     }
                 }
             }
+            is SettingsEvent.OnKeyColorIndexChanged -> {
+                viewModelScope.launch {
+                    saveKeyColorIndexUseCase(event.index)
+                    _uiState.update { it.copy(keyColorIndex = event.index) }
+                }
+            }
             is SettingsEvent.OnSaveClick -> {
                 saveUrl()
             }
@@ -196,11 +211,10 @@ class SettingsViewModel(
 
             result.onSuccess { bytesFreed ->
                 val sizeInMB = String.format("%.2f", bytesFreed / (1024.0 * 1024.0))
-                _effect.emit(SettingsEffect.ShowToast("缓存已清理，释放了 $sizeInMB MB"))
-
+                _uiState.update { it.copy(toastMessage = "缓存已清理，释放了 $sizeInMB MB") }
                 refreshCacheSize()
-            }.onFailure {
-                _effect.emit(SettingsEffect.ShowToast("清理缓存失败: ${it.message}"))
+            }.onFailure { exception ->
+                _uiState.update { it.copy(toastMessage = "清理缓存失败: ${exception.message}") }
             }
         }
     }
@@ -223,7 +237,15 @@ class SettingsViewModel(
                 }
             } ?: "保存成功"
 
-            _effect.emit(SettingsEffect.ShowToast(message))
+            _uiState.update { it.copy(toastMessage = message) }
         }
+    }
+
+    fun showToast(message: String) {
+        _uiState.update { it.copy(toastMessage = message) }
+    }
+
+    fun onToastShown() {
+        _uiState.update { it.copy(toastMessage = null) }
     }
 }

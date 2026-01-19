@@ -25,6 +25,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
+import com.lonx.ecjtu.calendar.ui.theme.keyColorFor
 import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -62,7 +63,12 @@ class MainActivity: ComponentActivity() {
 
                 onDispose {}
             }
-            CalendarTheme(colorMode = uiState.colorMode) {
+            val keyColor = keyColorFor(uiState.keyColorIndex)
+
+            CalendarTheme(
+                colorMode = uiState.colorMode,
+                keyColor = keyColor
+            ) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val updateManager: UpdateManager = koinInject()

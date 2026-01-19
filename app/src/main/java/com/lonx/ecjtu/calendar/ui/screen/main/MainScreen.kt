@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -24,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.R
@@ -39,9 +42,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -52,12 +55,17 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.DropdownImpl
+import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Order
-import top.yukonga.miuix.kmp.icon.icons.useful.Refresh
-import top.yukonga.miuix.kmp.icon.icons.useful.Settings
+import top.yukonga.miuix.kmp.icon.extended.Refresh
+import top.yukonga.miuix.kmp.icon.extended.Settings
+import top.yukonga.miuix.kmp.icon.extended.Sort
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Years
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
@@ -70,7 +78,7 @@ fun MainScreen(
     val routes = listOf(
         NavigationItem(
             label = "日历",
-            icon = ImageVector.vectorResource(R.drawable.ic_course_24dp)
+            icon = MiuixIcons.Regular.Years
         ),
         NavigationItem(
             label = "成绩",
@@ -78,7 +86,7 @@ fun MainScreen(
         ),
         NavigationItem(
             label = "已选课程",
-            icon = ImageVector.vectorResource(R.drawable.ic_pin_appwidget)
+            icon = MiuixIcons.Regular.GridView
         )
     )
     val coroutineScope = rememberCoroutineScope()
@@ -122,7 +130,7 @@ fun MainScreen(
                             modifier = Modifier.padding(start = 16.dp)
                         ) {
                             Icon(
-                                imageVector = MiuixIcons.Useful.Settings,
+                                imageVector = MiuixIcons.Regular.Settings,
                                 contentDescription = "设置"
                             )
                         }
@@ -140,19 +148,19 @@ fun MainScreen(
                                     },
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Useful.Order,
+                                        imageVector = MiuixIcons.Regular.Sort,
                                         contentDescription = "学期"
                                     )
                                 }
-                                ListPopup(
+                                WindowListPopup(
                                     show = showTopPopup,
                                     popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-                                    alignment = PopupPositionProvider.Align.TopRight,
+                                    alignment = PopupPositionProvider.Align.TopEnd,
                                     onDismissRequest = {
                                         showTopPopup.value = false
-                                    },
-                                    enableWindowDim = false
+                                    }
                                 ) {
+                                    val state = LocalWindowListPopupState.current
                                     ListPopupColumn {
                                         if (pagerState.currentPage == 1) {
                                             scoreScreenState.availableTerms.forEach { term ->
@@ -164,7 +172,7 @@ fun MainScreen(
                                                         term
                                                     ),
                                                     onSelectedIndexChange = {
-                                                        showTopPopup.value = false
+                                                        state.invoke()
                                                         scoreViewModel.onTermSelected(term)
                                                     }
                                                 )
@@ -179,7 +187,7 @@ fun MainScreen(
                                                         term
                                                     ),
                                                     onSelectedIndexChange = {
-                                                        showTopPopup.value = false
+                                                        state.invoke()
                                                         selectedCourseViewModel.onTermSelected(
                                                             term
                                                         )
@@ -195,7 +203,7 @@ fun MainScreen(
                                     }
                                 ) {
                                     Icon(
-                                        imageVector = MiuixIcons.Useful.Refresh,
+                                        imageVector = MiuixIcons.Regular.Refresh,
                                         contentDescription = "刷新"
                                     )
                                 }
@@ -238,14 +246,17 @@ fun MainScreen(
             SuperDialog(
                 modifier = Modifier.padding(bottom = 16.dp),
                 show = showRefreshDialog,
-                title = "重新获取数据？",
+                title = "重新获取数据",
                 onDismissRequest = {
                     showRefreshDialog.value = false
                 },
                 content = {
                     Text(
                         text = "是否重新从教务系统获取数据？\n这可能需要一点时间",
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        textAlign = TextAlign.Center
                     )
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween

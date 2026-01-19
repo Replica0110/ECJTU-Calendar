@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +15,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.lonx.ecjtu.calendar.ui.component.MiuixToast
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.viewmodel.AcademicCalendarViewModel
@@ -33,18 +33,19 @@ import org.koin.compose.koinInject
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.ListPopup
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.extra.DropdownImpl
+import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.useful.ImmersionMore
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import java.net.URL
@@ -61,10 +62,9 @@ fun AcademicCalendarScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val showTopPopup = remember { mutableStateOf(false) }
-    val windowSize = getWindowSize()
 
-
-    Scaffold(
+    Box {
+        Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
@@ -78,7 +78,7 @@ fun AcademicCalendarScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Basic.ArrowRight,
+                            imageVector = MiuixIcons.Regular.ChevronBackward,
                             contentDescription = "返回",
                             tint = colorScheme.onBackground,
                             modifier = Modifier.rotate(180f)
@@ -93,20 +93,20 @@ fun AcademicCalendarScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Useful.ImmersionMore,
+                            imageVector = MiuixIcons.Regular.More,
                             contentDescription = "更多",
                             tint = colorScheme.onBackground
                         )
                     }
-                    ListPopup(
+                    WindowListPopup(
                         show = showTopPopup,
                         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
-                        alignment = PopupPositionProvider.Align.TopRight,
+                        alignment = PopupPositionProvider.Align.TopEnd,
                         onDismissRequest = {
                             showTopPopup.value = false
-                        },
-                        enableWindowDim = false
+                        }
                     ) {
+                        val state = LocalWindowListPopupState.current
                         ListPopupColumn {
                             DropdownImpl(
                                 text = "保存图片",
@@ -114,9 +114,9 @@ fun AcademicCalendarScreen(
                                 isSelected = false,
                                 onSelectedIndexChange = {
                                     scope.launch {
-                                        downloadImage(context, uiState.imageUrl, uiState.imageData, scope)
+                                        downloadImage(context, uiState.imageUrl, uiState.imageData, scope, viewModel)
                                     }
-                                    showTopPopup.value = false
+                                    state.invoke()
                                 },
                                 index = 0
                             )
@@ -127,10 +127,10 @@ fun AcademicCalendarScreen(
                                 onSelectedIndexChange = {
                                     uiState.imageUrl?.let { url ->
                                         scope.launch {
-                                            openUrl(context, url, scope)
+                                            openUrl(context, url, scope, viewModel)
                                         }
                                     }
-                                    showTopPopup.value = false
+                                    state.invoke()
                                 },
                                 index = 1
                             )
@@ -140,7 +140,7 @@ fun AcademicCalendarScreen(
                                 isSelected = false,
                                 onSelectedIndexChange = {
                                     viewModel.refresh()
-                                    showTopPopup.value = false
+                                    state.invoke()
                                 },
                                 index = 2
                             )
@@ -155,7 +155,7 @@ fun AcademicCalendarScreen(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .padding(contentPadding)
-                .height(windowSize.height.dp)
+                .fillMaxHeight()
         ) {
             when {
                 uiState.isLoading -> {
@@ -200,19 +200,26 @@ fun AcademicCalendarScreen(
             }
         }
     }
+
+        // Miuix 风格的 Toast
+        MiuixToast(
+            message = uiState.toastMessage,
+            duration = 2000,
+            onDismiss = { viewModel.onToastShown() }
+        )
+    }
 }
 
 private fun downloadImage(
     context: Context,
     imageUrl: String?,
     imageData: ByteArray?,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    viewModel: AcademicCalendarViewModel
 ) {
     scope.launch {
         try {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(context, "开始保存...", Toast.LENGTH_SHORT).show()
-            }
+            viewModel.showToast("开始保存...")
 
             val bytes = imageData ?: imageUrl?.let {
                 withContext(Dispatchers.IO) {
@@ -237,32 +244,31 @@ private fun downloadImage(
                             context.contentResolver.openOutputStream(imageUri)?.use { output ->
                                 output.write(it)
                             }
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "图片已保存到相册", Toast.LENGTH_SHORT).show()
-                            }
+                            viewModel.showToast("图片已保存到相册")
                         }
                     }
                 }
             }
         } catch (e: Exception) {
             Log.e("AcademicCalendar", "保存图片失败", e)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(context, "保存失败: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+            viewModel.showToast("保存失败: ${e.message}")
         }
     }
 }
 
-private fun openUrl(context: Context, url: String, scope: CoroutineScope) {
+private fun openUrl(
+    context: Context,
+    url: String,
+    scope: CoroutineScope,
+    viewModel: AcademicCalendarViewModel
+) {
     scope.launch {
         try {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             context.startActivity(intent)
         } catch (e: Exception) {
             Log.e("AcademicCalendar", "打开链接失败", e)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(context, "打开链接失败: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+            viewModel.showToast("打开链接失败: ${e.message}")
         }
     }
 }

@@ -8,9 +8,6 @@ data class SelectedCourseUiState(
     val availableTerms: List<String> = emptyList(),
     val currentTerm: String = "",
     val error: String? = null,
-    val lastRefreshMillis: Long = 0L
+    val lastRefreshMillis: Long = 0L,
+    val toastMessage: String? = null
 )
-
-sealed interface SelectedCourseEffect {
-    data class ShowToast(val message: String) : SelectedCourseEffect
-}

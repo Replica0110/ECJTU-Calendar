@@ -7,7 +7,8 @@ data class AcademicCalendarUiState(
     val scale: Float = 1f,
     val offsetX: Float = 0f,
     val offsetY: Float = 0f,
-    val imageData: ByteArray? = null
+    val imageData: ByteArray? = null,
+    val toastMessage: String? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -22,6 +23,7 @@ data class AcademicCalendarUiState(
         if (imageUrl != other.imageUrl) return false
         if (error != other.error) return false
         if (!imageData.contentEquals(other.imageData)) return false
+        if (toastMessage != other.toastMessage) return false
 
         return true
     }
@@ -34,6 +36,7 @@ data class AcademicCalendarUiState(
         result = 31 * result + (imageUrl?.hashCode() ?: 0)
         result = 31 * result + (error?.hashCode() ?: 0)
         result = 31 * result + (imageData?.contentHashCode() ?: 0)
+        result = 31 * result + (toastMessage?.hashCode() ?: 0)
         return result
     }
 }

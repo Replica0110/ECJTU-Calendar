@@ -16,9 +16,11 @@ data class SettingsUiState(
     val parseResult: ParseResult? = null,
     val cacheSize: String = "计算中...",
     val colorMode: Int = 0,
-//    val isCheckingForUpdate: Boolean = false,
-//    val downloadState: DownloadState = DownloadState.Idle,
-//    val availableUpdateInfo: UpdateInfo? = null
+    val keyColorIndex: Int = 0,
+    val toastMessage: String? = null
+    //    val isCheckingForUpdate: Boolean = false,
+    //    val downloadState: DownloadState = DownloadState.Idle,
+    //    val availableUpdateInfo: UpdateInfo? = null
 )
 
 // 定义用户可以触发的事件
@@ -29,6 +31,7 @@ sealed interface SettingsEvent {
     data class OnAutoUpdateCheckChanged(val isEnabled: Boolean) : SettingsEvent
 
     data class OnColorModeChanged(val colorCode: Int) : SettingsEvent
+    data class OnKeyColorIndexChanged(val index: Int) : SettingsEvent
     data object RequestPinAppWidgetClick : SettingsEvent
     data object OnCheckUpdateNowClick : SettingsEvent
 
@@ -43,7 +46,5 @@ sealed interface SettingsEvent {
 
 // 定义 UI 效果
 sealed interface SettingsEffect {
-    data class ShowToast(val message: String) : SettingsEffect
     data object RequestPinAppWidgetClick: SettingsEffect
-
 }

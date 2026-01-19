@@ -30,7 +30,9 @@ val appModule = module {
             clearCacheUseCase = get(),
             getCacheSizeUseCase = get(),
             saveColorModeUseCase = get(),
-            getColorModeUseCase = get()
+            getColorModeUseCase = get(),
+            saveKeyColorIndexUseCase = get(),
+            getKeyColorIndexUseCase = get()
         )
     }
     viewModel {
@@ -40,7 +42,8 @@ val appModule = module {
             saveUserConfigUseCase = get(),
             updateManager = get(),
             cleanUpApksUseCase = get(),
-            getColorModeUseCase = get()
+            getColorModeUseCase = get(),
+            getKeyColorIndexUseCase = get()
         )
     }
     // 提供 CalendarViewModel

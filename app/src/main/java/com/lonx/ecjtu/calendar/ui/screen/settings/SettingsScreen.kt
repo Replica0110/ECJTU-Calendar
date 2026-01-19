@@ -2,14 +2,26 @@ package com.lonx.ecjtu.calendar.ui.screen.settings
 
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -19,13 +31,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -36,6 +51,8 @@ import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.domain.model.SchedulePage
+import com.lonx.ecjtu.calendar.ui.component.MiuixToast
+import com.lonx.ecjtu.calendar.ui.theme.KeyColors
 import com.lonx.ecjtu.calendar.ui.viewmodel.SettingsViewModel
 import com.lonx.ecjtu.calendar.ui.widget.CourseGlanceWidget
 import com.lonx.ecjtu.calendar.ui.widget.CourseUiState
@@ -67,11 +84,14 @@ import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperSpinner
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.other.GitHub
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
+import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
+import top.yukonga.miuix.kmp.icon.extended.ContactsCircle
+import top.yukonga.miuix.kmp.icon.extended.GridView
+import top.yukonga.miuix.kmp.icon.extended.Help
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.icon.extended.Th31
+import top.yukonga.miuix.kmp.icon.extended.Theme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.getWindowSize
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -92,12 +112,14 @@ fun SettingsScreen(
     val showClearCacheDialog = remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
-    val windowSize = getWindowSize()
 
     val colorModeOptions: List<SpinnerEntry> = listOf(
         SpinnerEntry(title = "跟随系统"),
         SpinnerEntry(title = "浅色模式"),
-        SpinnerEntry(title = "深色模式")
+        SpinnerEntry(title = "深色模式"),
+        SpinnerEntry(title = "莫奈取色·跟随系统"),
+        SpinnerEntry(title = "莫奈取色·浅色"),
+        SpinnerEntry(title = "莫奈取色·深色")
     )
     SuperDialog(
         modifier = Modifier.padding(bottom = 16.dp),
@@ -149,8 +171,11 @@ fun SettingsScreen(
         },
         content = {
             Text(
-                text = "您确定要清理所有应用缓存吗？\n这将永久删除已下载的安装包和其他临时文件",
-                modifier = Modifier.padding(bottom = 16.dp)
+                text = "确定后将会永久删除：\n已下载的安装包、其他临时文件",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                textAlign = TextAlign.Center
             )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -179,10 +204,6 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is SettingsEffect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
-                }
-
                 is SettingsEffect.RequestPinAppWidgetClick -> {
                     try {
                         coroutineScope.launch {
@@ -244,13 +265,14 @@ fun SettingsScreen(
                             )
                         }
                     } catch (e: Exception) {
-                        Toast.makeText(context, "添加失败: ${e.message}", Toast.LENGTH_LONG).show()
+                        viewModel.showToast("添加失败: ${e.message}")
                     }
                 }
             }
         }
     }
-    Scaffold(
+    Box {
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = "设置",
@@ -263,7 +285,7 @@ fun SettingsScreen(
                         modifier = Modifier.padding(start = 16.dp)
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Basic.ArrowRight,
+                            imageVector = MiuixIcons.Regular.ChevronBackward,
                             contentDescription = "返回",
                             tint = colorScheme.onBackground,
                             modifier = Modifier.rotate(180f)
@@ -279,7 +301,7 @@ fun SettingsScreen(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .height(windowSize.height.dp),
+                .fillMaxHeight(),
             overscrollEffect = null
         ) {
             item {
@@ -290,26 +312,44 @@ fun SettingsScreen(
                     SuperSpinner(
                         title = "应用主题",
                         items = colorModeOptions,
-                        summary = "应用主题色",
+                        summary = colorModeOptions.getOrNull(uiState.colorMode)?.title ?: "跟随系统",
                         selectedIndex = uiState.colorMode,
                         onSelectedIndexChange = {
                             viewModel.onEvent(SettingsEvent.OnColorModeChanged(it)) },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_theme_24dp),
+                                imageVector = MiuixIcons.Regular.Theme,
                                 contentDescription = "应用主题",
                                 tint = colorScheme.onBackground
                             )
                         }
                     )
+                    // 仅在 Monet 模式下显示主题色选择器
+                    if (uiState.colorMode in listOf(3, 4, 5)) {
+                        ColorDropdown(
+                            title = "主题颜色",
+                            selectedIndex = uiState.keyColorIndex,
+                            onSelectedIndexChange = {
+                                viewModel.onEvent(SettingsEvent.OnKeyColorIndexChanged(it))
+                            },
+                            startAction = {
+                                Icon(
+                                    modifier = Modifier.padding(end = 16.dp),
+                                    imageVector = MiuixIcons.Regular.Theme,
+                                    contentDescription = "主题颜色",
+                                    tint = colorScheme.onBackground
+                                )
+                            }
+                        )
+                    }
                     SuperArrow(
                         title = "weiXinID设置",
                         summary = "华交教务weiXinID",
                         onClick = {
                             showWeiXinIdDialog.value = true
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_id_24dp),
@@ -324,10 +364,10 @@ fun SettingsScreen(
                             onEvent(SettingsEvent.RequestPinAppWidgetClick)
                         },
                         summary = "添加日历小组件到桌面",
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_pin_appwidget),
+                                imageVector = MiuixIcons.Regular.GridView,
                                 contentDescription = "日历小组件",
                                 tint = colorScheme.onBackground
                             )
@@ -344,7 +384,7 @@ fun SettingsScreen(
                         },
                         title = "自动检查更新",
                         summary = "应用启动时检查新版本",
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_update),
@@ -359,18 +399,12 @@ fun SettingsScreen(
                         onClick = {
                             when (updateState.downloadState) {
                                 is DownloadState.Idle -> {
-                                    Toast.makeText(context, "正在检查更新...", Toast.LENGTH_SHORT)
-                                        .show()
+                                    viewModel.showToast("正在检查更新...")
                                     viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
                                 }
 
                                 is DownloadState.InProgress -> {
-                                    Toast.makeText(
-                                        context,
-                                        "正在下载更新，请稍等~",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    viewModel.showToast("正在下载更新，请稍等~")
                                 }
 
                                 is DownloadState.Success -> {
@@ -378,13 +412,12 @@ fun SettingsScreen(
                                 }
 
                                 is DownloadState.Error -> {
-                                    Toast.makeText(context, "重新检查更新...", Toast.LENGTH_SHORT)
-                                        .show()
+                                    viewModel.showToast("重新检查更新...")
                                     viewModel.onEvent(SettingsEvent.OnCheckUpdateNowClick)
                                 }
                             }
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_update),
@@ -407,10 +440,10 @@ fun SettingsScreen(
                         onClick = {
                             navigator.navigate(AcademicCalendarScreenDestination)
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_date_24dp),
+                                imageVector = MiuixIcons.Regular.Th31,
                                 contentDescription = "校历",
                                 tint = colorScheme.onBackground
                             )
@@ -422,7 +455,7 @@ fun SettingsScreen(
                         onClick = {
                             showClearCacheDialog.value = true
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
                                 painter = painterResource(R.drawable.ic_clear_cache),
@@ -448,10 +481,10 @@ fun SettingsScreen(
                                 "https://github.com/Replica0110/ECJTU-Calendar/blob/main/README.md"
                             )
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_tutorial_24dp),
+                                imageVector = MiuixIcons.Regular.Help,
                                 contentDescription = "使用教程",
                                 tint = colorScheme.onBackground
                             )
@@ -468,10 +501,10 @@ fun SettingsScreen(
                     BasicComponent(
                         title = "应用版本",
                         summary = "版本: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\n编译时间: ${BuildConfig.BUILD_TIME}",
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                imageVector = MiuixIcons.Useful.Info,
+                                imageVector = MiuixIcons.Regular.Info,
                                 contentDescription = "应用版本",
                                 tint = colorScheme.onBackground
                             )
@@ -483,10 +516,10 @@ fun SettingsScreen(
                         onClick = {
                             openUrl(context, "https://github.com/Replica0110")
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.ic_developer_24dp),
+                                imageVector = MiuixIcons.Regular.ContactsCircle,
                                 contentDescription = "开发者",
                                 tint = colorScheme.onBackground
                             )
@@ -498,10 +531,10 @@ fun SettingsScreen(
                         onClick = {
                             openUrl(context, "https://github.com/Replica0110/ECJTU-Calendar")
                         },
-                        leftAction = {
+                        startAction = {
                             Icon(
                                 modifier = Modifier.padding(end = 16.dp),
-                                imageVector = MiuixIcons.Other.GitHub,
+                                painter = painterResource(R.drawable.miuix_github),
                                 contentDescription = "Github",
                                 tint = colorScheme.onBackground
                             )
@@ -512,9 +545,126 @@ fun SettingsScreen(
             }
         }
     }
+
+    // Miuix 风格的 Toast，跟随主题色
+    MiuixToast(
+        message = uiState.toastMessage,
+        duration = 2000,
+        onDismiss = { viewModel.onToastShown() }
+    )
+    }
 }
 
 private fun openUrl(context: Context, url: String) {
     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     context.startActivity(intent)
+}
+
+@Composable
+private fun ColorDot(
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(16.dp)
+            .background(color, CircleShape)
+    )
+}
+
+@Composable
+private fun ColorOptionItem(
+    name: String,
+    color: Color?,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val backgroundColor = if (selected) colorScheme.secondaryContainer else Color.Transparent
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (color != null) {
+            ColorDot(
+                color = color,
+                modifier = Modifier.padding(end = 12.dp)
+            )
+        }
+        Text(
+            text = name,
+            color = if (selected) colorScheme.onSecondaryContainer else colorScheme.onSurface
+        )
+        Spacer(Modifier.weight(1f))
+        if (selected) {
+            Text(
+                text = "✓",
+                color = colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorDropdown(
+    title: String,
+    selectedIndex: Int,
+    onSelectedIndexChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    startAction: (@Composable () -> Unit)? = null,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(modifier = modifier) {
+        SuperArrow(
+            title = title,
+            summary = when (selectedIndex) {
+                0 -> "默认"
+                else -> KeyColors.getOrNull(selectedIndex - 1)?.first ?: "默认"
+            },
+            onClick = { expanded = !expanded },
+            startAction = startAction,
+        )
+
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Column {
+                    // 默认选项
+                    ColorOptionItem(
+                        name = "默认",
+                        color = null,
+                        selected = selectedIndex == 0,
+                        onClick = {
+                            onSelectedIndexChange(0)
+                            expanded = false
+                        }
+                    )
+                    // 带颜色的选项
+                    KeyColors.forEachIndexed { index, (name, color) ->
+                        ColorOptionItem(
+                            name = name,
+                            color = color,
+                            selected = selectedIndex == index + 1,
+                            onClick = {
+                                onSelectedIndexChange(index + 1)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

@@ -13,18 +13,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.domain.model.Course
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.ContactsCircle
+import top.yukonga.miuix.kmp.icon.extended.Location
+import top.yukonga.miuix.kmp.icon.extended.WorldClock
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -66,15 +68,15 @@ fun CourseCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 CourseDetailRow(
-                    icon = painterResource(R.drawable.ic_location),
+                    icon = MiuixIcons.Regular.Location,
                     text = "地点：${course.location.ifBlank { "N/A" }}"
                 )
                 CourseDetailRow(
-                    icon = painterResource(R.drawable.ic_teacher),
+                    icon = MiuixIcons.Regular.ContactsCircle,
                     text = "教师：${course.teacher.ifBlank { "N/A" }}"
                 )
                 CourseDetailRow(
-                    icon = painterResource(R.drawable.ic_class_time),
+                    icon = MiuixIcons.Regular.WorldClock,
                     text = "上课周：${course.duration.ifBlank { "N/A" }}"
                 )
             }
@@ -85,13 +87,13 @@ fun CourseCard(
 
 /**
  * 一个可复用的私有 Composable，用于显示一行 "图标 + 文本" 的详情。
- * @param icon 左侧显示的图标。
+ * @param icon 左侧显示的图标（ImageVector 类型）。
  * @param text 右侧显示的文本。
  * @param modifier Modifier for this composable.
  */
 @Composable
 private fun CourseDetailRow(
-    icon: Painter,
+    icon: ImageVector,
     text: String,
     modifier: Modifier = Modifier
 ) {
@@ -100,7 +102,7 @@ private fun CourseDetailRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = icon,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(18.dp),
             tint = MiuixTheme.colorScheme.onSecondaryVariant

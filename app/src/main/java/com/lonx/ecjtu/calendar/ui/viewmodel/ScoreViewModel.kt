@@ -67,7 +67,7 @@ class ScoreViewModel(
     }
 
 
-    fun loadScores(term: String? = null, refresh: Boolean = false) {
+    fun loadScores(term: String? = null, refresh: Boolean = false, showToast: Boolean = false) {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -87,7 +87,7 @@ class ScoreViewModel(
                         scores = scorePage.scores,
                         availableTerms = scorePage.availableTerms,
                         currentTerm = scorePage.currentTerm,
-                        toastMessage = if (refresh) "找到了 ${scorePage.scores.size} 门成绩" else null
+                        toastMessage = if (refresh || showToast) "找到了 ${scorePage.scores.size} 门成绩" else null
                     )
                 }
                 // timestamp updates are handled by observeTermRefresh()
@@ -103,7 +103,7 @@ class ScoreViewModel(
     }
 
     fun onTermSelected(newTerm: String) {
-        loadScores(term = newTerm)
+        loadScores(term = newTerm, showToast = true)
     }
 
     fun onToastShown() {

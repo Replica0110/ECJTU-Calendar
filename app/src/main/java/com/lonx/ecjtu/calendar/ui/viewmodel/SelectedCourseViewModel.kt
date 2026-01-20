@@ -64,7 +64,7 @@ class SelectedCourseViewModel(
         }
     }
 
-    fun loadCourses(term: String? = null, refresh: Boolean = false) {
+    fun loadCourses(term: String? = null, refresh: Boolean = false, showToast: Boolean = false) {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -82,7 +82,7 @@ class SelectedCourseViewModel(
                         courses = coursePage.courses,
                         availableTerms = coursePage.availableTerms,
                         currentTerm = coursePage.currentTerm,
-                        toastMessage = if (refresh) "找到了 ${coursePage.courses.size} 门课程" else null
+                        toastMessage = if (refresh || showToast) "找到了 ${coursePage.courses.size} 门课程" else null
                     )
                 }
             }.onFailure { exception ->
@@ -97,7 +97,7 @@ class SelectedCourseViewModel(
     }
 
     fun onTermSelected(newTerm: String) {
-        loadCourses(term = newTerm)
+        loadCourses(term = newTerm, showToast = true)
     }
 
     fun onToastShown() {

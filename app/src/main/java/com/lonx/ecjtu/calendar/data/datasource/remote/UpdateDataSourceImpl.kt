@@ -40,7 +40,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
                 return@withContext UpdateCheckResult.ApiError(response.code, response.message)
             }
 
-            val responseBody = response.body?.string()
+            val responseBody = response.body.string()
             val release: GitHubReleaseDTO? = try {
                 gson.fromJson(responseBody, GitHubReleaseDTO::class.java)
             } catch (e: JsonSyntaxException) {
@@ -70,7 +70,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             }
 
             val metadata: OutputMetadataDTO = try {
-                gson.fromJson(metadataResponse.body?.string(), OutputMetadataDTO::class.java)
+                gson.fromJson(metadataResponse.body.string(), OutputMetadataDTO::class.java)
             } catch (e: JsonSyntaxException) {
                 Log.e(TAG, "Metadata JSON parsing failed", e)
                 return@withContext UpdateCheckResult.ParsingError
@@ -130,7 +130,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             val response = RxHttp.get(info.downloadUrl).execute()
             if (!response.isSuccessful) throw IOException("下载失败: ${response.code}")
 
-            val body = response.body ?: throw IOException("响应体为空")
+            val body = response.body
             val totalBytes = body.contentLength()
             val inputStream: InputStream = body.byteStream()
 

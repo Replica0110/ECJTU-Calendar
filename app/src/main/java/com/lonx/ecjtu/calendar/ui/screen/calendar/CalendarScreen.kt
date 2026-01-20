@@ -16,8 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import android.content.ClipData
+import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.domain.model.Course
@@ -54,7 +58,8 @@ fun CalendarScreen(
 ) {
     val viewModel: CalendarViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     val isViewingToday = uiState.selectedDate == LocalDate.now()
 
     val showBottomSheet = remember { mutableStateOf(false) }
@@ -151,8 +156,17 @@ fun CalendarScreen(
         show = showBottomSheet,
         title = selectedCourse?.name,
         content = {
+            // 教师
             Card(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onLongPress = {
+                    selectedCourse?.teacher?.let { text ->
+                        coroutineScope.launch {
+                            val clipData = ClipData.newPlainText("text", text)
+                            clipboard.setClipEntry(clipData.toClipEntry())
+                        }
+                    }
+                }
             ) {
                 BasicComponent(
                     title = "教师",
@@ -167,6 +181,19 @@ fun CalendarScreen(
                         }
                     }
                 )
+            }
+            // 地点
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onLongPress = {
+                    selectedCourse?.location?.let { text ->
+                        coroutineScope.launch {
+                            val clipData = ClipData.newPlainText("text", text)
+                            clipboard.setClipEntry(clipData.toClipEntry())
+                        }
+                    }
+                }
+            ) {
                 BasicComponent(
                     title = "地点",
                     summary = selectedCourse?.location,
@@ -180,6 +207,19 @@ fun CalendarScreen(
                         }
                     }
                 )
+            }
+            // 节次
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onLongPress = {
+                    selectedCourse?.time?.let { text ->
+                        coroutineScope.launch {
+                            val clipData = ClipData.newPlainText("text", text)
+                            clipboard.setClipEntry(clipData.toClipEntry())
+                        }
+                    }
+                }
+            ) {
                 BasicComponent(
                     title = "节次",
                     summary = selectedCourse?.time,
@@ -193,6 +233,19 @@ fun CalendarScreen(
                         }
                     }
                 )
+            }
+            // 上课周
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onLongPress = {
+                    selectedCourse?.duration?.let { text ->
+                        coroutineScope.launch {
+                            val clipData = ClipData.newPlainText("text", text)
+                            clipboard.setClipEntry(clipData.toClipEntry())
+                        }
+                    }
+                }
+            ) {
                 BasicComponent(
                     title = "上课周",
                     summary = selectedCourse?.duration,

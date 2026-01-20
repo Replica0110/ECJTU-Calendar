@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -59,12 +58,10 @@ import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.GridView
 import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Sort
-import top.yukonga.miuix.kmp.icon.extended.Info
-import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
-import top.yukonga.miuix.kmp.icon.extended.GridView
 import top.yukonga.miuix.kmp.icon.extended.Years
 
 val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
@@ -144,7 +141,19 @@ fun MainScreen(
                             Row(modifier = Modifier.padding(end = 16.dp)) {
                                 IconButton(
                                     onClick = {
-                                        showTopPopup.value = true
+                                        when (pagerState.currentPage) {
+                                            1 -> {
+                                                if (scoreScreenState.availableTerms.isNotEmpty()) {
+                                                    showTopPopup.value = true
+                                                }
+                                            }
+
+                                            2 -> {
+                                                if (selectedScreenState.availableTerms.isNotEmpty()) {
+                                                    showTopPopup.value = true
+                                                }
+                                            }
+                                        }
                                     },
                                 ) {
                                     Icon(

@@ -1,5 +1,6 @@
 package com.lonx.ecjtu.calendar.ui.screen.calendar
 
+import android.content.ClipData
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,15 +14,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.runtime.rememberCoroutineScope
-import android.content.ClipData
-import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.domain.model.Course
@@ -33,9 +33,11 @@ import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.viewmodel.CalendarViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -159,6 +161,7 @@ fun CalendarScreen(
             // 教师
             Card(
                 modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.defaultColors(color = Color.Transparent),
                 onLongPress = {
                     selectedCourse?.teacher?.let { text ->
                         coroutineScope.launch {
@@ -185,6 +188,7 @@ fun CalendarScreen(
             // 地点
             Card(
                 modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.defaultColors(color = Color.Transparent),
                 onLongPress = {
                     selectedCourse?.location?.let { text ->
                         coroutineScope.launch {
@@ -211,6 +215,7 @@ fun CalendarScreen(
             // 节次
             Card(
                 modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.defaultColors(color = Color.Transparent),
                 onLongPress = {
                     selectedCourse?.time?.let { text ->
                         coroutineScope.launch {
@@ -237,6 +242,7 @@ fun CalendarScreen(
             // 上课周
             Card(
                 modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.defaultColors(color = Color.Transparent),
                 onLongPress = {
                     selectedCourse?.duration?.let { text ->
                         coroutineScope.launch {

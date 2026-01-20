@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
@@ -318,7 +317,7 @@ private fun YearPickerView(
                     .clickable { onYearSelected(year) }
                     .padding(vertical = 12.dp),
                 textAlign = TextAlign.Center,
-                fontSize = if (isSelected) 24.sp else 18.sp,
+                style = if (isSelected) MiuixTheme.textStyles.title2 else MiuixTheme.textStyles.title4,
                 color = if (isSelected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )

@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.lonx.ecjtu.calendar.domain.model.DateInfo
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import top.yukonga.miuix.kmp.basic.Card
@@ -29,7 +28,7 @@ fun DateHeaderCard(
             .fillMaxWidth()
             .padding(12.dp),
         colors = CardDefaults.defaultColors(
-            color = MiuixTheme.colorScheme.primaryVariant
+            color = MiuixTheme.colorScheme.primary
         ),
         insideMargin = PaddingValues(16.dp),
         onClick = { onClick() },
@@ -38,21 +37,21 @@ fun DateHeaderCard(
             Text(
                 color = MiuixTheme.colorScheme.onPrimary,
                 text = date,
-                fontSize = 19.sp,
+                style = MiuixTheme.textStyles.title4,
                 fontWeight = FontWeight.SemiBold
             )
             if (weekNum.isNotBlank()){
                 Text(
-                    color = MiuixTheme.colorScheme.onPrimaryVariant,
+                    color = MiuixTheme.colorScheme.onPrimary,
                     text = "$weekDay · 第${weekNum}周",
-                    fontSize = 17.sp,
+                    style = MiuixTheme.textStyles.headline1,
                     fontWeight = FontWeight.Normal
                 )
             } else {
                 Text(
-                    color = MiuixTheme.colorScheme.onPrimaryVariant,
+                    color = MiuixTheme.colorScheme.onPrimary,
                     text = weekDay,
-                    fontSize = 17.sp,
+                    style = MiuixTheme.textStyles.headline1,
                     fontWeight = FontWeight.Normal
                 )
             }

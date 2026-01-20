@@ -8,16 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lonx.ecjtu.calendar.domain.model.SelectedCourse
 import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
@@ -106,7 +106,7 @@ fun SelectedCourseScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(6.dp)
+                            .padding(8.dp)
                     ) {
                         Text(
                             modifier = Modifier.align(Alignment.Center),
@@ -172,7 +172,7 @@ private fun CourseCard(
             ) {
                 Text(
                     text = course.courseName,
-                    fontSize = 18.sp,
+                    style = MiuixTheme.textStyles.title4,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 22.sp
                 )
@@ -184,7 +184,7 @@ private fun CourseCard(
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SurfaceTag(text = "教师: ${course.courseTeacher}")
@@ -211,20 +211,20 @@ private fun CourseCard(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             InfoItem(title = "课程要求", value = course.courseRequire)
 
                             InfoItem(title = "选课类型", value = course.courseType)
                         }
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             InfoItem(title = "学时", value = "${course.period}")
                             InfoItem(title = "学分", value = "${course.credit}")
                         }
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
 
                             InfoItem(title = "选课模块", value = course.selectedType)
@@ -253,7 +253,7 @@ private fun InfoItem(title: String, value: String) {
         )
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .background(MiuixTheme.colorScheme.secondaryContainer)
                 .padding(horizontal = 6.dp, vertical = 4.dp)
         ) {

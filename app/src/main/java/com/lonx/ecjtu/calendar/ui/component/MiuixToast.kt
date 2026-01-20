@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlinx.coroutines.delay
@@ -101,7 +100,7 @@ private fun ToastContent(message: String, visible: Boolean) {
             ) {
                 Text(
                     text = message,
-                    fontSize = 14.sp,
+                    style = MiuixTheme.textStyles.body2,
                     color = MiuixTheme.colorScheme.onPrimary
                 )
             }

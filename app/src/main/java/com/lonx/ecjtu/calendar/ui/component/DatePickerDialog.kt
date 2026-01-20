@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +47,6 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ChevronBackward
 import top.yukonga.miuix.kmp.icon.extended.ChevronForward
-import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -168,7 +166,9 @@ private fun CalendarView(
     onMonthChange: (YearMonth) -> Unit
 ) {
     Column(
-        modifier = Modifier.background(MiuixTheme.colorScheme.background).padding(start = 16.dp, end = 16.dp)
+        modifier = Modifier
+            .background(MiuixTheme.colorScheme.background)
+            .padding(start = 16.dp, end = 16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -176,7 +176,7 @@ private fun CalendarView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { onMonthChange(displayedMonth.minusMonths(1)) }) {
-                Icon(MiuixIcons.Regular.ChevronBackward, modifier = Modifier.rotate(180f), contentDescription = "上个月")
+                Icon(MiuixIcons.Regular.ChevronBackward, contentDescription = "上个月")
             }
             Text(
                 text = "${displayedMonth.year}年${displayedMonth.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}",

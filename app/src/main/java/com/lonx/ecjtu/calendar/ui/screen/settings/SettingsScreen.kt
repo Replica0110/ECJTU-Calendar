@@ -33,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -287,8 +286,7 @@ fun SettingsScreen(
                         Icon(
                             imageVector = MiuixIcons.Regular.ChevronBackward,
                             contentDescription = "返回",
-                            tint = colorScheme.onBackground,
-                            modifier = Modifier.rotate(180f)
+                            tint = colorScheme.onBackground
                         )
                     }
                 }

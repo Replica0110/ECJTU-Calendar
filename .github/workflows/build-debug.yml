@@ -3,7 +3,33 @@ name: 🏗️ 构建 Debug APK
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'build.gradle.kts'
+      - 'settings.gradle'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - '.github/workflows/build-debug.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'build.gradle.kts'
+      - 'settings.gradle'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - '.github/workflows/build-debug.yml'
   workflow_dispatch:
+
+concurrency:
+  group: debug-apk-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -13,8 +39,7 @@ jobs:
     steps:
       - name: 📥 检出代码
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+        # 默认 fetch-depth: 1
 
       - name: ☕ 设置 JDK 21
         uses: actions/setup-java@v5

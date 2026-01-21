@@ -172,6 +172,14 @@ android {
         buildConfig = true
         compose = true
     }
+
+    // Compose 编译器优化 - 减少不必要的重组，提升运行时性能
+    // 注：Kotlin 2.3 中 StrongSkipping 模式已默认启用，无需显式配置
+    composeCompiler {
+        // 生成编译报告（开发时使用，用于分析稳定性问题）
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    }
 }
 
 dependencies {

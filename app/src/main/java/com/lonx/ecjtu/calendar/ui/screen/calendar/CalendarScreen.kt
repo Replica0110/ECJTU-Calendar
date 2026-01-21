@@ -90,9 +90,15 @@ fun CalendarScreen(
             overscrollEffect = null
         ) {
             if (uiState.courses.isNotEmpty()) {
-                items(uiState.courses.size) { index ->
+                items(
+                    count = uiState.courses.size,
+                    key = { index ->
+                        val course = uiState.courses[index]
+                        "${course.name}_${course.teacher}_${course.location}_${course.time}_${course.dayOfWeek}"
+                    },
+                    contentType = { "course" }
+                ) { index ->
                     val course = uiState.courses[index]
-
                     CourseCard(
                         course = course,
                         onClick = {

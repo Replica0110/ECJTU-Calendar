@@ -57,16 +57,16 @@ jobs:
       - name: 🛠️ 构建 Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: 🏷️ 获取版本号
-        id: version
-        run: |
-          APK_PATH=$(ls app/build/outputs/apk/debug/ECJTU-Calendar-*.apk 2>/dev/null | head -n 1)
-          if [ -n "$APK_PATH" ]; then
-            VERSION=$(basename "$APK_PATH" | sed -E 's/ECJTU-Calendar-(.+)\.apk/\1/')
-          else
-            VERSION="unknown"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      #      - name: 🏷️ 获取版本号
+      #        id: version
+      #        run: |
+      #          APK_PATH=$(ls app/build/outputs/apk/debug/ECJTU-Calendar-*.apk 2>/dev/null | head -n 1)
+      #          if [ -n "$APK_PATH" ]; then
+      #            VERSION=$(basename "$APK_PATH" | sed -E 's/ECJTU-Calendar-(.+)\.apk/\1/')
+      #          else
+      #            VERSION="unknown"
+      #          fi
+      #          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: 🏷️ 获取 Commit SHA
         id: commit
@@ -75,6 +75,6 @@ jobs:
       - name: 📤 上传 Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: ECJTU-Calendar-${{ steps.version.outputs.version }}+${{ steps.commit.outputs.sha }}
+          name: ECJTU-Calendar-debug-${{ github.ref_name }}-${{ steps.commit.outputs.sha }}
           path: app/build/outputs/apk/debug/ECJTU-Calendar-*.apk
           retention-days: 30

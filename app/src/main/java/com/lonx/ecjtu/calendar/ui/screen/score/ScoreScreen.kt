@@ -102,9 +102,9 @@ fun ScoreScreen(
                 .weight(1f),
             overscrollEffect = null
         ) {
-            item {
-                if (!uiState.isLoading && uiState.error == null) {
-                    // 显示上次刷新时间
+            if (!uiState.isLoading && uiState.error == null) {
+                // 显示上次刷新时间
+                item {
                     val lastRefreshText = if (uiState.lastRefreshMillis > 0L) {
                         android.text.format.DateUtils.getRelativeTimeSpanString(
                             uiState.lastRefreshMillis,
@@ -126,13 +126,21 @@ fun ScoreScreen(
                             color = MiuixTheme.colorScheme.onBackgroundVariant
                         )
                     }
-
-                    uiState.scores.forEach {
-                        ScoreCard(score = it, term = uiState.currentTerm)
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
                 }
-                if (uiState.isLoading) {
+
+                items(
+                    count = uiState.scores.size,
+                    key = { uiState.scores[it].courseCode },
+                    contentType = { "score" }
+                ) { index ->
+                    val score = uiState.scores[index]
+                    ScoreCard(score = score, term = uiState.currentTerm)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+
+            if (uiState.isLoading) {
+                item {
                     Box(
                         modifier = Modifier.fillParentMaxSize(),
                         contentAlignment = Alignment.Center

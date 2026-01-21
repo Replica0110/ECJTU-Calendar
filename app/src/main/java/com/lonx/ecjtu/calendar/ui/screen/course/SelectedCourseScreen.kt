@@ -91,9 +91,9 @@ fun SelectedCourseScreen(
                 .weight(1f),
             overscrollEffect = null
         ) {
-            item {
-                if (!uiState.isLoading && uiState.error == null) {
-                    // 显示上次刷新时间
+            if (!uiState.isLoading && uiState.error == null) {
+                // 显示上次刷新时间
+                item {
                     val lastRefreshText = if (uiState.lastRefreshMillis > 0L) {
                         android.text.format.DateUtils.getRelativeTimeSpanString(
                             uiState.lastRefreshMillis,
@@ -115,13 +115,21 @@ fun SelectedCourseScreen(
                             color = MiuixTheme.colorScheme.onBackgroundVariant
                         )
                     }
-
-                    uiState.courses.forEach {
-                        CourseCard(course = it, term = uiState.currentTerm)
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
                 }
-                if (uiState.isLoading) {
+
+                items(
+                    count = uiState.courses.size,
+                    key = { uiState.courses[it].className },
+                    contentType = { "course" }
+                ) { index ->
+                    val course = uiState.courses[index]
+                    CourseCard(course = course, term = uiState.currentTerm)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+
+            if (uiState.isLoading) {
+                item {
                     Box(
                         modifier = Modifier.fillParentMaxSize(),
                         contentAlignment = Alignment.Center

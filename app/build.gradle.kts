@@ -55,6 +55,22 @@ fun gitVersionCode(): Int {
     }
 }
 
+fun gitCommitHash(): String {
+    val cmd = "git rev-parse --short HEAD"
+    val process = ProcessBuilder(cmd.split(" "))
+        .redirectErrorStream(true)
+        .start()
+    return try {
+        process.waitFor()
+        process.inputStream.bufferedReader().readText().trim()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        "unknown"
+    } finally {
+        process.destroy()
+    }
+}
+
 
 android {
     namespace = "com.lonx.ecjtu.calendar"
@@ -64,8 +80,8 @@ android {
         applicationId = "com.lonx.ecjtu.calendar"
         minSdk = 28
         targetSdk = 36
-        versionCode = gitVersionCode()
-        versionName = gitVersionTag()
+        // versionCode = gitVersionCode()
+        // versionName = gitVersionTag()
 
         val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
             timeZone = getDefault()
@@ -77,10 +93,35 @@ android {
             variant.outputs
                 .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
                 .forEach { output ->
-                    val outputFileName = "ECJTU-Calendar-${variant.versionName}.apk"
-                    println("OutputFileName: $outputFileName")
+                    val buildType = variant.buildType.name
+                    val outputFileName = "ECJTU-Calendar-$buildType.apk"
                     output.outputFileName = outputFileName
                 }
+
+            variant.assembleProvider.configure {
+                doLast {
+
+                    println("\n========== Build Artifact Info ==========")
+                    println("Build Time   : $buildTime")
+                    println("Commit Hash  : ${gitCommitHash()}")
+                    println("Variant      : ${variant.name}")
+                    println("App ID       : ${variant.applicationId}")
+                    // println("Version Code : ${variant.versionCode}")
+                    // println("Version Name : ${variant.versionName}")
+
+                    variant.outputs.forEach { output ->
+                        val outputFile = output.outputFile
+                        if (outputFile != null && outputFile.exists()) {
+                            val sizeMb = String.format("%.2f", outputFile.length() / (1024.0 * 1024.0))
+                            println("-----------------------------------------")
+                            println("File Name    : ${outputFile.name}")
+                            println("File Size    : $sizeMb MB")
+                            println("File Path    : ${outputFile.absolutePath}")
+                        }
+                    }
+                    println("=========================================\n")
+                }
+            }
         }
 
         buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
@@ -100,6 +141,20 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // 修复报错
+            // > Task :app:stripDebugDebugSymbols
+            // Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
+            // 解决 libandroidx.graphics.path.so 等库无法 strip 的问题
+            // 使用 **/ 通配符以确保匹配所有架构目录下的文件
+            keepDebugSymbols += setOf(
+                "**/libandroidx.graphics.path.so",
+                "**/libdatastore_shared_counter.so"
+            )
         }
     }
 

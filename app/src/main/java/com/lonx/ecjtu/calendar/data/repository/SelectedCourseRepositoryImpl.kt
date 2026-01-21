@@ -12,6 +12,9 @@ import com.lonx.ecjtu.calendar.data.repository.utils.requireWeiXinId
 import com.lonx.ecjtu.calendar.data.repository.utils.safeApiCall
 import com.lonx.ecjtu.calendar.domain.model.SelectedCoursePage
 import com.lonx.ecjtu.calendar.domain.repository.SelectedCourseRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 
 class SelectedCourseRepositoryImpl(
@@ -38,29 +41,33 @@ class SelectedCourseRepositoryImpl(
                 parsedDto.error?.let { throw Exception(it) }
                 val domainPage = parsedDto.toDomain()
 
-                domainPage.availableTerms.forEach { t ->
-                    val p = params.toMutableMap()
-                    p["term"] = t
-                    val htmlForTerm =
-                        jwxtDataSource.fetchHtml(SELECTED_COURSE_URL, p).getOrElse { null }
-                    if (htmlForTerm == null) {
-                        return@forEach
-                    }
-                    val parsedDtoForTerm = htmlParser.parseSelectedCoursePage(htmlForTerm)
-                    if (parsedDtoForTerm == null || parsedDtoForTerm.error != null) {
-                        selectedCourseDao.deleteSelectedCoursesByTerm(t)
-                        return@forEach
-                    }
-                    val selectedCourses = parsedDtoForTerm.toDomain().courses
-                    if (selectedCourses.isEmpty()) {
-                        selectedCourseDao.deleteSelectedCoursesByTerm(t)
-                        localDataSource.removeSelectedCourseLastRefresh(t)
-                    } else {
-                        selectedCourseDao.deleteSelectedCoursesByTerm(t)
-                        val entities = selectedCourses.map { it.toEntity(t) }
-                        selectedCourseDao.insertSelectedCourses(entities)
-                        localDataSource.saveSelectedCourseLastRefresh(t, System.currentTimeMillis())
-                    }
+                coroutineScope {
+                    domainPage.availableTerms.map { t ->
+                        async {
+                            val p = params.toMutableMap()
+                            p["term"] = t
+                            val htmlForTerm =
+                                jwxtDataSource.fetchHtml(SELECTED_COURSE_URL, p).getOrElse { null }
+                            if (htmlForTerm == null) {
+                                return@async
+                            }
+                            val parsedDtoForTerm = htmlParser.parseSelectedCoursePage(htmlForTerm)
+                            if (parsedDtoForTerm == null || parsedDtoForTerm.error != null) {
+                                selectedCourseDao.deleteSelectedCoursesByTerm(t)
+                                return@async
+                            }
+                            val selectedCourses = parsedDtoForTerm.toDomain().courses
+                            if (selectedCourses.isEmpty()) {
+                                selectedCourseDao.deleteSelectedCoursesByTerm(t)
+                                localDataSource.removeSelectedCourseLastRefresh(t)
+                            } else {
+                                selectedCourseDao.deleteSelectedCoursesByTerm(t)
+                                val entities = selectedCourses.map { it.toEntity(t) }
+                                selectedCourseDao.insertSelectedCourses(entities)
+                                localDataSource.saveSelectedCourseLastRefresh(t, System.currentTimeMillis())
+                            }
+                        }
+                    }.awaitAll()
                 }
 
                 // 尝试获取并保存所有学期后，从数据库读取实际学期

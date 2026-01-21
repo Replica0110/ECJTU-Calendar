@@ -12,6 +12,9 @@ import com.lonx.ecjtu.calendar.data.repository.utils.requireWeiXinId
 import com.lonx.ecjtu.calendar.data.repository.utils.safeApiCall
 import com.lonx.ecjtu.calendar.domain.model.ScorePage
 import com.lonx.ecjtu.calendar.domain.repository.ScoreRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 
 class ScoreRepositoryImpl(
@@ -40,39 +43,43 @@ class ScoreRepositoryImpl(
 
             val domainPage = parsedDto.toDomain()
 
-            // 遍历所有可选学期并分别获取/保存
-            domainPage.availableTerms.forEach { t ->
-                val p = params.toMutableMap()
-                p["term"] = t
-                val htmlForTerm = jwxtDataSource.fetchHtml(SCORE_URL, p)
-                    .getOrElse { null }
+            // 并行获取所有可选学期数据
+            coroutineScope {
+                domainPage.availableTerms.map { term ->
+                    async {
+                        val p = params.toMutableMap()
+                        p["term"] = term
+                        val htmlForTerm = jwxtDataSource.fetchHtml(SCORE_URL, p)
+                            .getOrElse { null }
 
-                if (htmlForTerm == null) {
-                    // 获取此学期时网络错误，跳过
-                    return@forEach
-                }
+                        if (htmlForTerm == null) {
+                            // 获取此学期时网络错误，跳过
+                            return@async
+                        }
 
-                val parsedForTerm = htmlParser.parseScorePage(htmlForTerm)
-                if (parsedForTerm == null || parsedForTerm.error != null) {
-                    // 解析错误或服务器端错误：删除该学期数据
-                    scoreDao.deleteScoresByTerm(t)
-                    return@forEach
-                }
+                        val parsedForTerm = htmlParser.parseScorePage(htmlForTerm)
+                        if (parsedForTerm == null || parsedForTerm.error != null) {
+                            // 解析错误或服务器端错误：删除该学期数据
+                            scoreDao.deleteScoresByTerm(term)
+                            return@async
+                        }
 
-                val scores = parsedForTerm.toDomain().scores
+                        val scores = parsedForTerm.toDomain().scores
 
-                if (scores.isEmpty()) {
-                    scoreDao.deleteScoresByTerm(t)
-                    // 删除该学期的存储时间戳
-                    localDataSource.removeScoreLastRefresh(t)
-                } else {
-                    // 删除该学期的旧条目然后插入新条目
-                    scoreDao.deleteScoresByTerm(t)
-                    val entities = scores.map { s -> s.toEntity(t) }
-                    scoreDao.insertScores(entities)
-                    // 保存该学期的最后刷新时间
-                    localDataSource.saveScoreLastRefresh(t, System.currentTimeMillis())
-                }
+                        if (scores.isEmpty()) {
+                            scoreDao.deleteScoresByTerm(term)
+                            // 删除该学期的存储时间戳
+                            localDataSource.removeScoreLastRefresh(term)
+                        } else {
+                            // 删除该学期的旧条目然后插入新条目
+                            scoreDao.deleteScoresByTerm(term)
+                            val entities = scores.map { s -> s.toEntity(term) }
+                            scoreDao.insertScores(entities)
+                            // 保存该学期的最后刷新时间
+                            localDataSource.saveScoreLastRefresh(term, System.currentTimeMillis())
+                        }
+                    }
+                }.awaitAll()
             }
 
             // 尝试获取并保存所有学期后，从数据库读取实际学期

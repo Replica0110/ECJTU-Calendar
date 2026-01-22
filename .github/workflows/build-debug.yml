@@ -39,7 +39,8 @@ jobs:
     steps:
       - name: 📥 检出代码
         uses: actions/checkout@v6
-        # 默认 fetch-depth: 1
+        with:
+          fetch-depth: 0
 
       - name: 🌏 设置时区
         uses: szenius/set-timezone@v2.0

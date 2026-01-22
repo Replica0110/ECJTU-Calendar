@@ -2,8 +2,6 @@ package com.lonx.ecjtu.calendar.data.datasource.remote
 
 import android.content.Context
 import android.util.Log
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import com.lonx.ecjtu.calendar.BuildConfig
 import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.data.dto.GitHubReleaseDTO
@@ -13,6 +11,8 @@ import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -26,9 +26,12 @@ import java.io.InputStream
 import java.net.SocketTimeoutException
 
 class UpdateDataSourceImpl: UpdateDataSource {
-    private val gson = Gson()
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
     private val GITHUB_API_URL =
-        "https://gh-proxy.org/https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
+        "https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
     private val TAG = "UpdateDataSourceImpl"
 
     override suspend fun checkForUpdate(): UpdateCheckResult = withContext(Dispatchers.IO) {
@@ -42,8 +45,8 @@ class UpdateDataSourceImpl: UpdateDataSource {
 
             val responseBody = response.body.string()
             val release: GitHubReleaseDTO? = try {
-                gson.fromJson(responseBody, GitHubReleaseDTO::class.java)
-            } catch (e: JsonSyntaxException) {
+                json.decodeFromString<GitHubReleaseDTO>(responseBody)
+            } catch (e: SerializationException) {
                 Log.e(TAG, "JSON parsing failed", e)
                 return@withContext UpdateCheckResult.ParsingError
             }
@@ -70,8 +73,8 @@ class UpdateDataSourceImpl: UpdateDataSource {
             }
 
             val metadata: OutputMetadataDTO = try {
-                gson.fromJson(metadataResponse.body.string(), OutputMetadataDTO::class.java)
-            } catch (e: JsonSyntaxException) {
+                json.decodeFromString<OutputMetadataDTO>(metadataResponse.body.string())
+            } catch (e: SerializationException) {
                 Log.e(TAG, "Metadata JSON parsing failed", e)
                 return@withContext UpdateCheckResult.ParsingError
             }

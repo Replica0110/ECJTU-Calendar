@@ -1,6 +1,9 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone.getDefault
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     alias(libs.plugins.android.application)
@@ -8,69 +11,41 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-
-}
-fun gitVersionTag(): String {
-    val cmd = "git describe --tags --match v*.*.*"
-    val process = ProcessBuilder(cmd.split(" "))
-        .redirectErrorStream(true)
-        .start()
-    val version = try {
-        process.waitFor()
-        process.inputStream.bufferedReader().readText().trim()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        "unknown"
-    } finally {
-        process.destroy()
-    }
-
-    val cleanVersion = if (version.startsWith("v")) version.substring(1) else version
-
-
-    val pattern = """(\d+\.\d+)(\.\d+)?"""
-    return when (val matcher = pattern.toRegex().find(cleanVersion)) {
-        null -> "$cleanVersion.0"
-        else -> {
-            val majorMinor = matcher.groupValues[1]
-            val patch = matcher.groupValues[2].takeIf { it.isNotEmpty() } ?: ".0"
-            "$majorMinor$patch"
-        }
-    }
 }
 
-fun gitVersionCode(): Int {
-    val cmd = "git rev-list HEAD --first-parent --count"
-    val process = ProcessBuilder(cmd.split(" "))
-        .redirectErrorStream(true)
-        .start()
-    return try {
-        process.waitFor()
-        process.inputStream.bufferedReader().readText().trim().toInt()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        0
-    } finally {
-        process.destroy()
-    }
+// ===== Configuration Cache 兼容的辅助函数 =====
+
+fun currentBuildTime(): Provider<String> = provider {
+    SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
+        timeZone = getDefault()
+    }.format(Date())
 }
 
-fun gitCommitHash(): String {
-    val cmd = "git rev-parse --short HEAD"
-    val process = ProcessBuilder(cmd.split(" "))
-        .redirectErrorStream(true)
-        .start()
-    return try {
-        process.waitFor()
-        process.inputStream.bufferedReader().readText().trim()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        "unknown"
-    } finally {
-        process.destroy()
-    }
-}
+fun gitCommitHash(): Provider<String> = providers.exec {
+    commandLine("git", "rev-parse", "--short", "HEAD")
+    isIgnoreExitValue = true // 防止没有 git 时构建崩溃
+}.standardOutput.asText.map { it.trim().ifEmpty { "unknown" } }
+    .orElse("unknown")
 
+fun gitVersionCount(): Provider<Int> = providers.exec {
+    commandLine("git", "rev-list", "HEAD", "--first-parent", "--count")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }
+    .orElse(1)
+
+fun gitVersionTag(): Provider<String> = providers.exec {
+    commandLine("git", "tag", "--list", "v*", "--sort=-v:refname")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { tagsOutput ->
+    val latestTag = tagsOutput.trim().lines().firstOrNull()
+    latestTag?.removePrefix("v")?.let { version ->
+        val parts = version.split(".")
+        val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
+        val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
+        val patch = parts.getOrNull(2)?.toIntOrNull() ?: 0
+        "$major.$minor.$patch"
+    } ?: "1.0.0"
+}.orElse("1.0.0")
 
 android {
     namespace = "com.lonx.ecjtu.calendar"
@@ -80,52 +55,12 @@ android {
         applicationId = "com.lonx.ecjtu.calendar"
         minSdk = 28
         targetSdk = 36
-        // versionCode = gitVersionCode()
-        // versionName = gitVersionTag()
-
-        val buildTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").apply {
-            timeZone = getDefault()
-        }.format(Date())
-
-        // 设置输出文件名
-        applicationVariants.all {
-            val variant = this
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-                .forEach { output ->
-                    val buildType = variant.buildType.name
-                    val outputFileName = "ECJTU-Calendar-$buildType.apk"
-                    output.outputFileName = outputFileName
-                }
-
-            variant.assembleProvider.configure {
-                doLast {
-
-                    println("\n========== Build Artifact Info ==========")
-                    println("Build Time   : $buildTime")
-                    println("Commit Hash  : ${gitCommitHash()}")
-                    println("Variant      : ${variant.name}")
-                    println("App ID       : ${variant.applicationId}")
-                    // println("Version Code : ${variant.versionCode}")
-                    // println("Version Name : ${variant.versionName}")
-
-                    variant.outputs.forEach { output ->
-                        val outputFile = output.outputFile
-                        if (outputFile != null && outputFile.exists()) {
-                            val sizeMb = String.format("%.2f", outputFile.length() / (1024.0 * 1024.0))
-                            println("-----------------------------------------")
-                            println("File Name    : ${outputFile.name}")
-                            println("File Size    : $sizeMb MB")
-                            println("File Path    : ${outputFile.absolutePath}")
-                        }
-                    }
-                    println("=========================================\n")
-                }
-            }
-        }
-
-        buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        versionCode = gitVersionCount().get()
+        versionName = gitVersionTag().get()
+
+        buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime().get()}\"")
     }
 
     buildTypes {
@@ -146,11 +81,6 @@ android {
 
     packaging {
         jniLibs {
-            // 修复报错
-            // > Task :app:stripDebugDebugSymbols
-            // Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
-            // 解决 libandroidx.graphics.path.so 等库无法 strip 的问题
-            // 使用 **/ 通配符以确保匹配所有架构目录下的文件
             keepDebugSymbols += setOf(
                 "**/libandroidx.graphics.path.so",
                 "**/libdatastore_shared_counter.so"
@@ -173,12 +103,126 @@ android {
         compose = true
     }
 
-    // Compose 编译器优化 - 减少不必要的重组，提升运行时性能
-    // 注：Kotlin 2.3 中 StrongSkipping 模式已默认启用，无需显式配置
     composeCompiler {
-        // 生成编译报告（开发时使用，用于分析稳定性问题）
         reportsDestination = layout.buildDirectory.dir("compose_compiler")
         metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    }
+}
+
+// 使用 androidComponents API 注册构建信息任务
+
+// 存储任务名称而不是 TaskProvider 对象，避免内存泄漏风险
+val buildInfoTaskNames = mutableMapOf<String, String>()
+
+androidComponents {
+    onVariants { variant ->
+        val currentBuildType = variant.buildType ?: "debug"
+        val variantName = variant.name
+
+        // 创建任务名称
+        val taskName = "${variantName}BuildInfo"
+        buildInfoTaskNames[variantName] = taskName
+
+        // 注册任务
+        tasks.register(taskName, BuildInfoTask::class.java) {
+            buildTime.set(currentBuildTime())
+            commitHash.set(gitCommitHash())
+            this.variantName.set(variantName)
+            applicationId.set(variant.applicationId.get())
+            buildType.set(currentBuildType)
+            // 处理可能的版本号为空的情况
+            versionCode.set(variant.outputs.firstOrNull()?.versionCode?.map { it.toString() } ?: provider { "1" })
+            versionName.set(variant.outputs.firstOrNull()?.versionName ?: provider { "1.0.0" })
+            outputDir.set(layout.buildDirectory.dir("outputs/apk/${currentBuildType}"))
+        }
+    }
+}
+
+// 修复：使用 configureEach 替代 projectsEvaluated 以支持 Configuration Cache
+// 并在任务创建时懒加载匹配
+tasks.configureEach {
+    val taskName = this.name
+    // 检查此任务是否为某个变体的 assemble 任务
+    // 格式通常为 assembleDebug, assembleRelease
+    if (taskName.startsWith("assemble")) {
+        // 尝试反向匹配变体名称
+        buildInfoTaskNames.forEach { (variantName, infoTaskName) ->
+            val capitalizedVariant = variantName.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            if (taskName == "assemble$capitalizedVariant") {
+                // 建立依赖关系
+                finalizedBy(infoTaskName)
+            }
+        }
+    }
+}
+
+// 设置 APK 输出文件名
+android.applicationVariants.all {
+    val variantName = this.name
+    val buildType = if (variantName.contains("debug", ignoreCase = true)) "debug" else "release"
+
+    outputs.all {
+        if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
+            outputFileName = "ECJTU-Calendar-${buildType}.apk"
+        }
+    }
+}
+
+/**
+ * 自定义任务：输出构建信息
+ */
+abstract class BuildInfoTask : DefaultTask() {
+    @get:Input
+    abstract val buildTime: Property<String>
+
+    @get:Input
+    abstract val commitHash: Property<String>
+
+    @get:Input
+    abstract val variantName: Property<String>
+
+    @get:Input
+    abstract val applicationId: Property<String>
+
+    @get:Input
+    abstract val buildType: Property<String>
+
+    @get:Input
+    abstract val versionCode: Property<String>
+
+    @get:Input
+    abstract val versionName: Property<String>
+
+    @get:Internal // 输出目录是用来读取文件的，不是生成文件的，所以用 Internal 避免缓存干扰
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun printBuildInfo() {
+        val type = buildType.get()
+
+        println("\n========== Build Artifact Info ==========")
+        println("Build Time   : ${buildTime.get()}")
+        println("Commit Hash  : ${commitHash.get()}")
+        println("Variant      : ${variantName.get()}")
+        println("Build Type   : $type")
+        println("App ID       : ${applicationId.get()}")
+        println("Version Code : ${versionCode.get()}")
+        println("Version Name : ${versionName.get()}")
+
+        val outputFile = outputDir.get()
+            .file("ECJTU-Calendar-${type}.apk")
+            .asFile
+
+        if (outputFile.exists()) {
+            val fileSizeBytes = outputFile.length()
+            val fileSizeKB = fileSizeBytes / 1024.0
+            val fileSizeMB = fileSizeKB / 1024.0
+            println("Output File : ${outputFile.absolutePath}")
+            println("File Size   : ${String.format("%.2f", fileSizeMB)} MB (${String.format("%.2f", fileSizeKB)} KB)")
+        } else {
+            println("Output File : Not found at expected location (Check: ${outputFile.path})")
+        }
+        println("=========================================\n")
     }
 }
 
@@ -212,7 +256,7 @@ dependencies {
     // Network - 网络请求
     implementation(libs.rxhttp)
 
-//    implementation(libs.rxhttp.coroutines)
+    //    implementation(libs.rxhttp.coroutines)
     ksp(libs.rxhttp.compiler)
     implementation(libs.okhttp)
     // miuix库
@@ -224,7 +268,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     // 导航
     implementation(libs.core)
-    ksp(libs.ksp)
+    ksp(libs.ksp)  // KSP 处理器用于生成导航代码（Compose Destinations）
     // markdown 渲染库
     implementation(libs.compose.markdown)
     // 图片加载库

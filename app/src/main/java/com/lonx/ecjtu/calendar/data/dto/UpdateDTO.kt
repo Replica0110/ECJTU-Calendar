@@ -1,6 +1,6 @@
 package com.lonx.ecjtu.calendar.data.dto
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,16 +14,16 @@ data class UpdateDTO(
 @Serializable
 data class GitHubReleaseDTO(
     val url: String?,
-    @SerializedName("tag_name")
+    @SerialName("tag_name")
     val tagName: String?,
     val name: String?,
     val body: String?,
-    @SerializedName("assets")
+    @SerialName("assets")
     val assetDTOS: List<AssetDTO>?
 ) {
     @Serializable
     data class AssetDTO(
-        @SerializedName("browser_download_url")
+        @SerialName("browser_download_url")
         val browserDownloadUrl: String?,
         val name: String?,
         val url: String?,
@@ -34,7 +34,7 @@ data class GitHubReleaseDTO(
 @Serializable
 data class OutputMetadataDTO(
     val version: Int,
-    @SerializedName("elements")
+    @SerialName("elements")
     val elementsDTO: List<ElementDTO>
 ) {
     @Serializable

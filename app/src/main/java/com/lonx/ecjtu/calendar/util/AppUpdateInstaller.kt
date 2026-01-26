@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import java.io.File
@@ -16,15 +15,15 @@ interface AppUpdateInstaller {
 
 // 具体实现
 class AppUpdateInstallerImpl : AppUpdateInstaller {
-    private val TAG = "AppUpdateInstaller"
+    private val TAG = Logger.Tags.UPDATE
 
     override fun installApk(context: Context, apkFile: File) {
+        Logger.d(TAG, "开始安装 APK: ${apkFile.name}")
         val authority = "${context.packageName}.provider"
         val apkUri: Uri = try {
             FileProvider.getUriForFile(context, authority, apkFile)
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "FileProvider a Uri时出错，请检查provider配置", e)
-
+            Logger.e(TAG, "FileProvider 获取 Uri 时出错，请检查 provider 配置", e)
             return
         }
 
@@ -39,20 +38,20 @@ class AppUpdateInstallerImpl : AppUpdateInstaller {
         try {
             hasInstallPermission = context.packageManager.canRequestPackageInstalls()
         } catch (e: SecurityException) {
-            Log.e(TAG, "检查安装权限时发生安全异常，可能未声明REQUEST_INSTALL_PACKAGES权限", e)
+            Logger.e(TAG, "检查安装权限时发生安全异常，可能未声明REQUEST_INSTALL_PACKAGES权限", e)
             // 直接跳转到设置页面请求权限
             requestInstallPermission(context)
             return
         }
 
         if (!hasInstallPermission) {
-            Log.w(TAG, "没有安装未知应用的权限，正在请求...")
+            Logger.w(TAG, "没有安装未知应用的权限，正在请求...")
             // 跳转到设置页面请求权限
             requestInstallPermission(context)
             return
         }
 
-        Log.i(TAG, "正在启动系统安装程序...")
+        Logger.i(TAG, "正在启动系统安装程序...")
         context.startActivity(intent)
     }
 

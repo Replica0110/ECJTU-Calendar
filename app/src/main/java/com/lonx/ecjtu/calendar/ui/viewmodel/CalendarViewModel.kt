@@ -6,6 +6,8 @@ import com.lonx.ecjtu.calendar.domain.usecase.course.GetCoursesUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarEvent
 import com.lonx.ecjtu.calendar.ui.screen.calendar.CalendarUiState
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,13 +52,16 @@ class CalendarViewModel(
     fun onEvent(event: CalendarEvent) {
         when (event) {
             is CalendarEvent.OnDateChange -> {
+                Logger.logEvent(Tags.CALENDAR, "日期切换: ${event.date}")
                 _uiState.update { it.copy(selectedDate = event.date) }
                 fetchCourses(event.date)
             }
             is CalendarEvent.Refresh -> {
+                Logger.logEvent(Tags.CALENDAR, "刷新课程")
                 fetchCourses(uiState.value.selectedDate)
             }
             is CalendarEvent.GoToTodayAndRefresh -> {
+                Logger.logEvent(Tags.CALENDAR, "回到今天并刷新")
                 val today = LocalDate.now()
                 // 只有当选择的日期不是今天时，才进行状态更新和数据获取
                 if (uiState.value.selectedDate != today) {
@@ -72,10 +77,12 @@ class CalendarViewModel(
     }
 
     private fun fetchCourses(date: LocalDate) {
+        Logger.d(Tags.VIEWMODEL, "获取课程: $date")
         _uiState.update { it.copy(isLoading = true, error = null, courses = emptyList()) }
         viewModelScope.launch {
             val result = getCoursesUseCase(date)
             result.onSuccess { schedulePage ->
+                Logger.d(Tags.VIEWMODEL, "课程获取成功: ${schedulePage.courses.size} 门课程")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -84,7 +91,7 @@ class CalendarViewModel(
                     )
                 }
             }.onFailure { throwable ->
-
+                Logger.e(Tags.VIEWMODEL, "课程获取失败: ${throwable.message}", throwable)
                 _uiState.update {
                     it.copy(isLoading = false, error = throwable.message)
                 }

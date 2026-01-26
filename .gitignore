@@ -14,3 +14,9 @@
 .cxx
 local.properties
 /app/proguardMapping.txt
+
+CLAUDE.md
+AGENTS.md
+/miuix
+/.opencode
+/.claude

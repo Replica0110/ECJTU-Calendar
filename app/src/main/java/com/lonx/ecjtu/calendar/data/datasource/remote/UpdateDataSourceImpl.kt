@@ -1,7 +1,6 @@
 package com.lonx.ecjtu.calendar.data.datasource.remote
 
 import android.content.Context
-import android.util.Log
 import com.lonx.ecjtu.calendar.BuildConfig
 import com.lonx.ecjtu.calendar.R
 import com.lonx.ecjtu.calendar.data.dto.GitHubReleaseDTO
@@ -9,6 +8,8 @@ import com.lonx.ecjtu.calendar.data.dto.OutputMetadataDTO
 import com.lonx.ecjtu.calendar.data.dto.UpdateDTO
 import com.lonx.ecjtu.calendar.data.model.DownloadState
 import com.lonx.ecjtu.calendar.data.model.UpdateCheckResult
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.serialization.SerializationException
@@ -32,9 +33,10 @@ class UpdateDataSourceImpl: UpdateDataSource {
     }
     private val GITHUB_API_URL =
         "https://api.github.com/repos/Replica0110/ECJTU-Calendar/releases/latest"
-    private val TAG = "UpdateDataSourceImpl"
+    private val TAG = Logger.Tags.UPDATE
 
     override suspend fun checkForUpdate(): UpdateCheckResult = withContext(Dispatchers.IO) {
+        Logger.d(TAG, "开始检查更新")
         try {
             val response = RxHttp.get(GITHUB_API_URL)
                 .execute()
@@ -47,7 +49,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             val release: GitHubReleaseDTO? = try {
                 json.decodeFromString<GitHubReleaseDTO>(responseBody)
             } catch (e: SerializationException) {
-                Log.e(TAG, "JSON parsing failed", e)
+                Logger.e(TAG, "JSON 解析失败", e)
                 return@withContext UpdateCheckResult.ParsingError
             }
 
@@ -61,7 +63,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             val releaseNotes = release?.body?.trim()?.ifBlank { "没有提供具体的更新说明。" } ?: "没有提供具体的更新说明。"
 
             if (downloadUrl == null || metadataUrl == null || size == null) {
-                Log.e(TAG, "Required assets (APK or metadata) are missing.")
+                Logger.e(TAG, "缺少必需的资源（APK 或 metadata）")
                 return@withContext UpdateCheckResult.ParsingError
             }
 
@@ -75,7 +77,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             val metadata: OutputMetadataDTO = try {
                 json.decodeFromString<OutputMetadataDTO>(metadataResponse.body.string())
             } catch (e: SerializationException) {
-                Log.e(TAG, "Metadata JSON parsing failed", e)
+                Logger.e(TAG, "Metadata JSON 解析失败", e)
                 return@withContext UpdateCheckResult.ParsingError
             }
 
@@ -83,7 +85,7 @@ class UpdateDataSourceImpl: UpdateDataSource {
             val latestVersionName = metadata.elementsDTO.firstOrNull()?.versionName
 
             if (latestVersionCode == null || latestVersionName == null) {
-                Log.e(TAG, "Version information is missing in metadata.")
+                Logger.e(TAG, "metadata 中缺少版本信息")
                 return@withContext UpdateCheckResult.ParsingError
             }
 
@@ -105,15 +107,15 @@ class UpdateDataSourceImpl: UpdateDataSource {
         } catch (e: Exception) {
             when (e) {
                 is SocketTimeoutException -> {
-                    Log.e(TAG, "Connection timed out", e)
+                    Logger.e(TAG, "连接超时", e)
                     return@withContext UpdateCheckResult.TimeoutError
                 }
                 is IOException -> {
-                    Log.e(TAG, "Network error during update check", e)
+                    Logger.e(TAG, "更新检查时网络错误", e)
                     return@withContext UpdateCheckResult.NetworkError(e)
                 }
                 else -> {
-                    Log.e(TAG, "Unexpected error during update check", e)
+                    Logger.e(TAG, "更新检查时发生意外错误", e)
                     throw e
                 }
             }

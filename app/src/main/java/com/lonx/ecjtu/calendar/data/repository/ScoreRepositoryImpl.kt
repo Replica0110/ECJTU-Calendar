@@ -12,6 +12,8 @@ import com.lonx.ecjtu.calendar.data.repository.utils.requireWeiXinId
 import com.lonx.ecjtu.calendar.data.repository.utils.safeApiCall
 import com.lonx.ecjtu.calendar.domain.model.ScorePage
 import com.lonx.ecjtu.calendar.domain.repository.ScoreRepository
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -26,6 +28,7 @@ class ScoreRepositoryImpl(
 
     override suspend fun getScores(term: String?): Result<ScorePage> = safeApiCall {
         val weiXinId = localDataSource.requireWeiXinId().getOrThrow()
+        Logger.d(Tags.SCORE, "获取成绩: term=${term ?: "null"} (完整刷新)")
 
         val params = mutableMapOf("weiXinID" to weiXinId)
 
@@ -45,8 +48,12 @@ class ScoreRepositoryImpl(
 
             // 并行获取所有可选学期数据
             coroutineScope {
-                domainPage.availableTerms.map { term ->
+                val termsCount = domainPage.availableTerms.size
+                Logger.d(Tags.SCORE, "并行获取 $termsCount 个学期数据")
+
+                domainPage.availableTerms.mapIndexed { index, term ->
                     async {
+                        Logger.d(Tags.SCORE, "获取学期 [$${index + 1}/$termsCount]: $term")
                         val p = params.toMutableMap()
                         p["term"] = term
                         val htmlForTerm = jwxtDataSource.fetchHtml(SCORE_URL, p)
@@ -54,17 +61,20 @@ class ScoreRepositoryImpl(
 
                         if (htmlForTerm == null) {
                             // 获取此学期时网络错误，跳过
+                            Logger.w(Tags.SCORE, "获取学期 $term 时网络错误，跳过")
                             return@async
                         }
 
                         val parsedForTerm = htmlParser.parseScorePage(htmlForTerm)
                         if (parsedForTerm == null || parsedForTerm.error != null) {
                             // 解析错误或服务器端错误：删除该学期数据
+                            Logger.w(Tags.SCORE, "学期 $term 解析失败，删除数据")
                             scoreDao.deleteScoresByTerm(term)
                             return@async
                         }
 
                         val scores = parsedForTerm.toDomain().scores
+                        Logger.d(Tags.SCORE, "学期 $term 获取到 ${scores.size} 门课程")
 
                         if (scores.isEmpty()) {
                             scoreDao.deleteScoresByTerm(term)
@@ -99,6 +109,8 @@ class ScoreRepositoryImpl(
                 else -> ""
             }
 
+            Logger.d(Tags.SCORE, "完整刷新完成，选择学期: $selectedTerm，可用学期: ${dbTerms.size} 个")
+
             val scores =
                 if (selectedTerm.isBlank()) emptyList() else scoreDao.getScoresByTerm(selectedTerm)
                     .first().map { it.toDomain() }
@@ -110,6 +122,7 @@ class ScoreRepositoryImpl(
             )
         } else {
             // 获取单个学期并保存
+            Logger.d(Tags.SCORE, "获取单个学期: $term")
             params["term"] = term
 
             val htmlContent = jwxtDataSource.fetchHtml(SCORE_URL, params)
@@ -125,9 +138,11 @@ class ScoreRepositoryImpl(
             val scores = domainPage.scores
 
             if (scores.isEmpty()) {
+                Logger.d(Tags.SCORE, "学期 $term 无成绩，删除数据")
                 scoreDao.deleteScoresByTerm(term)
                 localDataSource.removeScoreLastRefresh(term)
             } else {
+                Logger.logDbOperation(Tags.SCORE, "保存", scores.size)
                 scoreDao.deleteScoresByTerm(term)
                 val entities = scores.map { s -> s.toEntity(term) }
                 scoreDao.insertScores(entities)
@@ -142,6 +157,8 @@ class ScoreRepositoryImpl(
             val scoresFromDb = if (current.isNotBlank()) scoreDao.getScoresByTerm(current).first()
                 .map { it.toDomain() } else emptyList()
 
+            Logger.d(Tags.SCORE, "学期 $term 获取完成")
+
             ScorePage(
                 scores = scoresFromDb,
                 availableTerms = dbTermsSingle,
@@ -151,6 +168,8 @@ class ScoreRepositoryImpl(
     }
 
     override suspend fun getScoresFromLocal(term: String?): Result<ScorePage> = safeApiCall {
+        Logger.d(Tags.SCORE, "从本地加载成绩: term=${term ?: "null"}")
+
         // 从数据库加载可选学期
         val terms = scoreDao.getAllTerms().first()
 
@@ -161,6 +180,8 @@ class ScoreRepositoryImpl(
         } else {
             scoreDao.getScoresByTerm(currentTerm).first().map { it.toDomain() }
         }
+
+        Logger.d(Tags.SCORE, "本地加载完成: ${scores.size} 门课程")
 
         ScorePage(
             scores = scores,

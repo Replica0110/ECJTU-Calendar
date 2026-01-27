@@ -1,10 +1,11 @@
 package com.lonx.ecjtu.calendar.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lonx.ecjtu.calendar.domain.usecase.calendar.GetAcademicCalendarUseCase
 import com.lonx.ecjtu.calendar.ui.screen.academiccalendar.AcademicCalendarUiState
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,18 +45,18 @@ class AcademicCalendarViewModel(
                 },
                 onFailure = { throwable ->
                     val errorMsg = throwable.message ?: "未知错误"
-                    Log.e("AcademicCalendar", "获取校历图片URL失败: $errorMsg", throwable)
-                    _uiState.update { 
+                    Logger.e(Tags.ACADEMIC_CALENDAR, "获取校历图片URL失败: $errorMsg", throwable)
+                    _uiState.update {
                         it.copy(
                             isLoading = false,
                             error = errorMsg
-                        ) 
+                        )
                     }
                 }
             )
         }
     }
-    
+
     private fun cacheImage(url: String) {
         viewModelScope.launch {
             try {
@@ -64,7 +65,7 @@ class AcademicCalendarViewModel(
                 }
                 _uiState.update { it.copy(imageData = bytes) }
             } catch (e: Exception) {
-                Log.e("AcademicCalendar", "缓存图片失败: ${e.message}", e)
+                Logger.e(Tags.ACADEMIC_CALENDAR, "缓存图片失败: ${e.message}", e)
             }
         }
     }

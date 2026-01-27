@@ -1,7 +1,8 @@
 package com.lonx.ecjtu.calendar.data.repository.utils
 
-import android.util.Log
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -13,9 +14,11 @@ suspend inline fun <T> safeApiCall(
     crossinline block: suspend () -> T
 ): Result<T> {
     return try {
-        Result.success(withContext(Dispatchers.IO) { block() })
+        val result = withContext(Dispatchers.IO) { block() }
+        Logger.d(Tags.REPOSITORY, "API 调用成功")
+        Result.success(result)
     } catch (e: Exception) {
-        Log.e("Repository", "Error during API call: $e", e)
+        Logger.logRequestError(Tags.REPOSITORY, e.message ?: "未知错误", e)
         Result.failure(e)
     }
 }

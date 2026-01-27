@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,6 +26,8 @@ import com.lonx.ecjtu.calendar.ui.component.MessageCard
 import com.lonx.ecjtu.calendar.ui.component.MessageType
 import com.lonx.ecjtu.calendar.ui.component.MiuixToast
 import com.lonx.ecjtu.calendar.ui.viewmodel.AcademicCalendarViewModel
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -256,7 +257,7 @@ private fun downloadImage(
                 }
             }
         } catch (e: Exception) {
-            Log.e("AcademicCalendar", "保存图片失败", e)
+            Logger.e(Tags.ACADEMIC_CALENDAR, "保存图片失败", e)
             viewModel.showToast("保存失败: ${e.message}")
         }
     }
@@ -273,7 +274,7 @@ private fun openUrl(
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             context.startActivity(intent)
         } catch (e: Exception) {
-            Log.e("AcademicCalendar", "打开链接失败", e)
+            Logger.e(Tags.ACADEMIC_CALENDAR, "打开链接失败", e)
             viewModel.showToast("打开链接失败: ${e.message}")
         }
     }

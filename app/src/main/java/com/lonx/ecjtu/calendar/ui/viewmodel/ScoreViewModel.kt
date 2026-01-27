@@ -6,6 +6,8 @@ import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.domain.usecase.score.GetScoreUseCase
 import com.lonx.ecjtu.calendar.domain.usecase.settings.GetUserConfigUseCase
 import com.lonx.ecjtu.calendar.ui.screen.score.ScoreUiState
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,6 +70,8 @@ class ScoreViewModel(
 
 
     fun loadScores(term: String? = null, refresh: Boolean = false, showToast: Boolean = false) {
+        val mode = if (refresh) "网络刷新" else "本地加载"
+        Logger.d(Tags.VIEWMODEL, "加载成绩: term=${term ?: "null"}, mode=$mode")
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -81,6 +85,7 @@ class ScoreViewModel(
             }
 
             result.onSuccess { scorePage ->
+                Logger.d(Tags.VIEWMODEL, "成绩加载成功: ${scorePage.scores.size} 门课程")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -92,6 +97,7 @@ class ScoreViewModel(
                 }
                 // timestamp updates are handled by observeTermRefresh()
             }.onFailure { exception ->
+                Logger.e(Tags.VIEWMODEL, "成绩加载失败: ${exception.message}", exception)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -103,6 +109,7 @@ class ScoreViewModel(
     }
 
     fun onTermSelected(newTerm: String) {
+        Logger.logEvent(Tags.SCORE, "学期切换: $newTerm")
         loadScores(term = newTerm, showToast = true)
     }
 

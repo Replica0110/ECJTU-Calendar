@@ -1,17 +1,19 @@
 package com.lonx.ecjtu.calendar.data.parser
 
-import android.util.Log
 import com.lonx.ecjtu.calendar.data.dto.CourseItemDTO
 import com.lonx.ecjtu.calendar.data.dto.ScheduleDTO
 import com.lonx.ecjtu.calendar.data.dto.ScoreDTO
 import com.lonx.ecjtu.calendar.data.dto.ScorePageData
 import com.lonx.ecjtu.calendar.data.dto.SelectedCourseDTO
 import com.lonx.ecjtu.calendar.data.dto.SelectedCoursePageData
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import org.jsoup.Jsoup
 import java.time.LocalDate
 
 class HtmlParser {
     fun parseSchedulePage(htmlContent: String): ScheduleDTO {
+        Logger.logParseStart(Tags.PARSER, "parseSchedulePage")
         val document = Jsoup.parse(htmlContent)
 
         val title = document.select("title").first()?.text() ?: "未知标题"
@@ -74,6 +76,7 @@ class HtmlParser {
                 continue
             }
         }
+        Logger.logParseSuccess(Tags.PARSER, courseList.size, "门课程")
         return ScheduleDTO(
             title = title,
             dateInfo = Triple(date, weekDay, weekNum),
@@ -85,19 +88,21 @@ class HtmlParser {
      * 解析校历网页，获取图片链接
      */
     fun parseAcademicCalendarImageUrl(htmlContent: String): String? {
+        Logger.logParseStart(Tags.PARSER, "parseAcademicCalendarImageUrl")
         return try {
             val document = Jsoup.parse(htmlContent)
             val imgElement = document.select("img").first()
             val src = imgElement?.attr("src")
-            Log.d("HtmlParser", "从网页中解析到图片链接: $src")
+            Logger.d(Tags.PARSER, "从网页中解析到图片链接: $src")
             src
         } catch (e: Exception) {
-            Log.e("HtmlParser", "解析校历图片链接失败", e)
+            Logger.e(Tags.PARSER, "解析校历图片链接失败", e)
             null
         }
     }
 
     fun parseScorePage(htmlContent: String): ScorePageData? {
+        Logger.logParseStart(Tags.PARSER, "parseScorePage")
         return try {
             val document = Jsoup.parse(htmlContent)
 
@@ -136,9 +141,7 @@ class HtmlParser {
                     val courseName = courseNameRegex.find(courseFullName)?.groupValues?.get(1)?.trim() ?: ""
                     val credit = creditRegex.find(courseFullName)?.groupValues?.get(1)?.toDoubleOrNull() ?: 0.0
 
-                    Log.d("HtmlParser", "Course Code: $courseCode")
-                    Log.d("HtmlParser", "Course Name: $courseName")
-                    Log.d("HtmlParser", "Credit: $credit")
+                    Logger.d(Tags.PARSER, "课程代码: $courseCode, 课程名称: $courseName, 学分: $credit")
                     scoreList.add(
                         ScoreDTO(
                             courseName = courseName,
@@ -151,23 +154,25 @@ class HtmlParser {
                         )
                     )
                 } catch (e: Exception) {
-                    Log.w("HtmlParser", "Failed to parse a single score item.", e)
+                    Logger.logSkipInvalid(Tags.PARSER, "单条成绩解析失败: ${e.message}")
                     continue
                 }
             }
 
+            Logger.logParseSuccess(Tags.PARSER, scoreList.size, "门课程成绩")
             ScorePageData(
                 scores = scoreList,
                 availableTerms = availableTerms,
                 currentTerm = currentTerm
             )
         } catch (e: Exception) {
-            Log.e("HtmlParser", "Failed to parse score page HTML.", e)
+            Logger.e(Tags.PARSER, "解析成绩页面失败", e)
             null
         }
     }
 
     fun parseSelectedCoursePage(htmlContent: String): SelectedCoursePageData? {
+        Logger.logParseStart(Tags.PARSER, "parseSelectedCoursePage")
         return try {
             val document = Jsoup.parse(htmlContent)
 
@@ -247,11 +252,12 @@ class HtmlParser {
 
                     courseList.add(dto)
                 } catch (e: Exception) {
-                    Log.w("HtmlParser", "Failed to parse a single course item.", e)
+                    Logger.logSkipInvalid(Tags.PARSER, "单条选课解析失败: ${e.message}")
                     continue
                 }
             }
 
+            Logger.logParseSuccess(Tags.PARSER, courseList.size, "门已选课程")
             SelectedCoursePageData(
                 courses = courseList,
                 availableTerms = availableTerms,
@@ -259,7 +265,7 @@ class HtmlParser {
             )
 
         } catch (e: Exception) {
-            Log.e("HtmlParser", "Failed to parse selected course page HTML.", e)
+            Logger.e(Tags.PARSER, "解析已选课程页面失败", e)
             null
         }
     }

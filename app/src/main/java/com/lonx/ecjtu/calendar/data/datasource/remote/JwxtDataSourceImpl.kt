@@ -1,12 +1,16 @@
 package com.lonx.ecjtu.calendar.data.datasource.remote
 
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import rxhttp.toAwait
 import rxhttp.wrapper.param.RxHttp
 
 
 class JwxtDataSourceImpl : JwxtDataSource {
 
-    override suspend fun fetchHtml(url: String, params: Map<String, Any>?): Result<String>{
+    override suspend fun fetchHtml(url: String, params: Map<String, Any>?): Result<String> {
+        Logger.logRequestStart(Tags.JWXT_API, url, params?.size ?: 0)
+
         // 使用 RxHttp 创建请求
         val request = RxHttp.get(url)
 
@@ -16,11 +20,13 @@ class JwxtDataSourceImpl : JwxtDataSource {
         }
 
         // 发起请求并等待结果
-        try {
+        return try {
             val response = request.toAwait<String>().await()
-            return Result.success(response)
+            Logger.logRequestSuccess(Tags.JWXT_API, response.length)
+            Result.success(response)
         } catch (e: Exception) {
-            return Result.failure(e)
+            Logger.logRequestError(Tags.JWXT_API, e.message ?: "未知错误", e)
+            Result.failure(e)
         }
     }
 

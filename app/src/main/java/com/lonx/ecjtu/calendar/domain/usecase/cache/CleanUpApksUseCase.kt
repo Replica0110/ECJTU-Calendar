@@ -1,14 +1,15 @@
 package com.lonx.ecjtu.calendar.domain.usecase.cache
 
 import android.content.Context
-import android.util.Log
 import com.lonx.ecjtu.calendar.BuildConfig
 import com.lonx.ecjtu.calendar.R
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CleanUpApksUseCase {
-    private val TAG = "CleanUpApksUseCase"
+    private val TAG = Logger.Tags.SETTINGS
 
     /**
      * - 保留唯一一个版本号最高的、且比当前应用新的APK。
@@ -23,7 +24,7 @@ class CleanUpApksUseCase {
 
             val appName = context.getString(R.string.app_name)
             val currentVersion = BuildConfig.VERSION_NAME
-            Log.i(TAG, "开始清理缓存目录，当前版本: $currentVersion")
+            Logger.i(TAG, "开始清理缓存目录，当前版本: $currentVersion")
 
             val allFiles = cacheDir.listFiles() ?: return@withContext
 
@@ -46,9 +47,9 @@ class CleanUpApksUseCase {
                 ?.first
 
             if (fileToKeep != null) {
-                Log.i(TAG, "决定保留最新版安装包: ${fileToKeep.name}")
+                Logger.i(TAG, "决定保留最新版安装包: ${fileToKeep.name}")
             } else {
-                Log.i(TAG, "没有需要保留的较新版本安装包。")
+                Logger.i(TAG, "没有需要保留的较新版本安装包。")
             }
 
             allFiles.forEach { file ->
@@ -58,14 +59,14 @@ class CleanUpApksUseCase {
 
                 if (file.name.endsWith(".apk") || file.name.endsWith(".apk.tmp")) {
                     if (file.delete()) {
-                        Log.i(TAG, "已清理无效或过时的文件: ${file.name}")
+                        Logger.i(TAG, "已清理无效或过时的文件: ${file.name}")
                     } else {
-                        Log.w(TAG, "清理文件失败: ${file.name}")
+                        Logger.w(TAG, "清理文件失败: ${file.name}")
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "清理旧 APK 时发生意外错误", e)
+            Logger.e(TAG, "清理旧 APK 时发生意外错误", e)
         }
     }
 

@@ -3,7 +3,6 @@ package com.lonx.ecjtu.calendar
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -27,6 +26,8 @@ import com.lonx.ecjtu.calendar.ui.component.UpdateBottomSheet
 import com.lonx.ecjtu.calendar.ui.theme.CalendarTheme
 import com.lonx.ecjtu.calendar.ui.theme.keyColorFor
 import com.lonx.ecjtu.calendar.ui.viewmodel.MainViewModel
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import com.lonx.ecjtu.calendar.util.UpdateManager
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
@@ -47,9 +48,7 @@ class MainActivity: ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val uiState by viewModel.uiState.collectAsState()
-            Log.d("MainActivity", "uiState: $uiState")
-//            val colorMode = remember { mutableIntStateOf(uiState.colorMode) }
-//            Log.d("MainActivity", "colorMode: $colorMode")
+            Logger.d(Tags.APP, "MainActivity uiState: colorMode=${uiState.colorMode}, keyColorIndex=${uiState.keyColorIndex}")
             val darkMode = uiState.colorMode == 2 || uiState.colorMode == 5 ||
                 (isSystemInDarkTheme() && (uiState.colorMode == 0 || uiState.colorMode == 3))
             DisposableEffect(darkMode) {

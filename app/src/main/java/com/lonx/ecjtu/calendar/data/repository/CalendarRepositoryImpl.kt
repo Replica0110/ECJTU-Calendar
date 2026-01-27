@@ -3,12 +3,14 @@ package com.lonx.ecjtu.calendar.data.repository
 import com.lonx.ecjtu.calendar.data.datasource.local.LocalDataSource
 import com.lonx.ecjtu.calendar.data.datasource.remote.JwxtDataSource
 import com.lonx.ecjtu.calendar.data.mapper.toDomain
-import com.lonx.ecjtu.calendar.data.parser.HtmlParser
-import com.lonx.ecjtu.calendar.domain.model.SchedulePage
-import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
 import com.lonx.ecjtu.calendar.data.network.Constants
+import com.lonx.ecjtu.calendar.data.parser.HtmlParser
 import com.lonx.ecjtu.calendar.data.repository.utils.requireWeiXinId
 import com.lonx.ecjtu.calendar.data.repository.utils.safeApiCall
+import com.lonx.ecjtu.calendar.domain.model.SchedulePage
+import com.lonx.ecjtu.calendar.domain.repository.CalendarRepository
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import org.jsoup.Jsoup
 import java.time.LocalDate
 
@@ -19,7 +21,10 @@ class CalendarRepositoryImpl(
 ) : CalendarRepository {
 
     override suspend fun getCourses(date: LocalDate): Result<SchedulePage> = safeApiCall {
+        Logger.d(Tags.CALENDAR, "获取课程: date=$date")
+
         val weiXinId = localDataSource.requireWeiXinId().getOrThrow()
+        Logger.d(Tags.CALENDAR, "WeiXinID: ${Logger.mask(weiXinId)}")
 
         val htmlContent = jwxtDataSource.fetchHtml(
             url = Constants.CALENDAR_URL,
@@ -33,7 +38,9 @@ class CalendarRepositoryImpl(
         val title = document.select("title").first()?.text() ?: "未知标题"
         if (title == "教务处微信平台绑定") throw Exception("WeiXinID无效或未绑定")
 
-        htmlParser.parseSchedulePage(htmlContent).toDomain()
+        val result = htmlParser.parseSchedulePage(htmlContent).toDomain()
+        Logger.logParseSuccess(Tags.CALENDAR, result.courses.size, "门课程")
+        result
     }
 
     override suspend fun saveWeiXinID(weiXinId: String) {

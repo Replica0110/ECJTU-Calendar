@@ -12,6 +12,8 @@ import com.lonx.ecjtu.calendar.data.repository.utils.requireWeiXinId
 import com.lonx.ecjtu.calendar.data.repository.utils.safeApiCall
 import com.lonx.ecjtu.calendar.domain.model.SelectedCoursePage
 import com.lonx.ecjtu.calendar.domain.repository.SelectedCourseRepository
+import com.lonx.ecjtu.calendar.util.Logger
+import com.lonx.ecjtu.calendar.util.Logger.Tags
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -28,6 +30,7 @@ class SelectedCourseRepositoryImpl(
         safeApiCall {
 
             val weiXinId = localDataSource.requireWeiXinId().getOrThrow()
+            Logger.d(Tags.SELECTED_COURSE, "获取已选课程: term=${term ?: "null"} (完整刷新)")
 
             val params = mutableMapOf("weiXinID" to weiXinId)
             // 如果学期参数为空，执行完整刷新：首先不带学期参数获取页面以获得所有可选学期，
@@ -42,21 +45,28 @@ class SelectedCourseRepositoryImpl(
                 val domainPage = parsedDto.toDomain()
 
                 coroutineScope {
-                    domainPage.availableTerms.map { t ->
+                    val termsCount = domainPage.availableTerms.size
+                    Logger.d(Tags.SELECTED_COURSE, "并行获取 $termsCount 个学期数据")
+
+                    domainPage.availableTerms.mapIndexed { index, t ->
                         async {
+                            Logger.d(Tags.SELECTED_COURSE, "获取学期 [$${index + 1}/$termsCount]: $t")
                             val p = params.toMutableMap()
                             p["term"] = t
                             val htmlForTerm =
                                 jwxtDataSource.fetchHtml(SELECTED_COURSE_URL, p).getOrElse { null }
                             if (htmlForTerm == null) {
+                                Logger.w(Tags.SELECTED_COURSE, "获取学期 $t 时网络错误，跳过")
                                 return@async
                             }
                             val parsedDtoForTerm = htmlParser.parseSelectedCoursePage(htmlForTerm)
                             if (parsedDtoForTerm == null || parsedDtoForTerm.error != null) {
+                                Logger.w(Tags.SELECTED_COURSE, "学期 $t 解析失败，删除数据")
                                 selectedCourseDao.deleteSelectedCoursesByTerm(t)
                                 return@async
                             }
                             val selectedCourses = parsedDtoForTerm.toDomain().courses
+                            Logger.d(Tags.SELECTED_COURSE, "学期 $t 获取到 ${selectedCourses.size} 门课程")
                             if (selectedCourses.isEmpty()) {
                                 selectedCourseDao.deleteSelectedCoursesByTerm(t)
                                 localDataSource.removeSelectedCourseLastRefresh(t)
@@ -79,6 +89,8 @@ class SelectedCourseRepositoryImpl(
                     else -> ""
                 }
 
+                Logger.d(Tags.SELECTED_COURSE, "完整刷新完成，选择学期: $selectedTerm，可用学期: ${dbTerms.size} 个")
+
                 val selectedCourses =
                     if (selectedTerm.isBlank()) emptyList() else selectedCourseDao.getSelectedCoursesByTerm(
                         selectedTerm
@@ -92,6 +104,7 @@ class SelectedCourseRepositoryImpl(
 
             } else {
                 // 获取单个学期并保存
+                Logger.d(Tags.SELECTED_COURSE, "获取单个学期: $term")
                 params["term"] = term
 
                 val htmlContent = jwxtDataSource.fetchHtml(SELECTED_COURSE_URL, params)
@@ -107,9 +120,11 @@ class SelectedCourseRepositoryImpl(
                 val courses = domainPage.courses
 
                 if (courses.isEmpty()) {
+                    Logger.d(Tags.SELECTED_COURSE, "学期 $term 无已选课程，删除数据")
                     selectedCourseDao.deleteSelectedCoursesByTerm(term)
                     localDataSource.removeSelectedCourseLastRefresh(term)
                 } else {
+                    Logger.logDbOperation(Tags.SELECTED_COURSE, "保存", courses.size)
                     selectedCourseDao.deleteSelectedCoursesByTerm(term)
                     val entities = courses.map { it.toEntity(term) }
                     selectedCourseDao.insertSelectedCourses(entities)
@@ -126,6 +141,8 @@ class SelectedCourseRepositoryImpl(
                         .first()
                         .map { it.toDomain() } else emptyList()
 
+                Logger.d(Tags.SELECTED_COURSE, "学期 $term 获取完成")
+
                 SelectedCoursePage(
                     courses = coursesFromDb,
                     availableTerms = dbTermsSingle,
@@ -137,6 +154,7 @@ class SelectedCourseRepositoryImpl(
 
     override suspend fun getSelectedCoursesFromLocal(term: String?): Result<SelectedCoursePage> =
         safeApiCall {
+            Logger.d(Tags.SELECTED_COURSE, "从本地加载已选课程: term=${term ?: "null"}")
 
             val terms = selectedCourseDao.getAllTerms().first()
 
@@ -148,6 +166,8 @@ class SelectedCourseRepositoryImpl(
                 selectedCourseDao.getSelectedCoursesByTerm(currentTerm).first()
                     .map { it.toDomain() }
             }
+
+            Logger.d(Tags.SELECTED_COURSE, "本地加载完成: ${courses.size} 门课程")
 
             SelectedCoursePage(
                 courses = courses,
